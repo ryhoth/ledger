@@ -822,6 +822,8 @@ table.t tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0
 .v-today .td-arr:active{background:var(--line)}
 .v-today .td-arr:disabled{color:var(--ink-3);opacity:.5}
 @media (min-width:1100px){ .v-today .td-arr{min-height:36px} }
+.v-today .td-rm{min-height:44px;padding:0 10px;border:1px solid var(--line-2);border-radius:var(--r-ctl);font-size:var(--t-12);font-weight:600;color:var(--stop);margin-left:auto;white-space:nowrap}
+@media (min-width:1100px){ .v-today .td-rm{min-height:36px} }
 
 /* ---- 31-crew.css ---- */
 /* 31-crew: crew week grid, equipment attach, bulk pricing */
@@ -1326,6 +1328,28 @@ table.t tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0
   .v-bal .bl .bl-tot th,.v-bal .bl .bl-tot td{font-size:var(--t-12)}
   .v-bal .bl td:last-child,.v-bal .bl th:last-child{padding-right:8px}
 }
+.v-bal .bl-me{color:var(--info)}
+.v-bal .bl thead th.bl-me{color:var(--info)}
+.v-bal .bl td.bl-me{background:color-mix(in srgb,var(--info-bg) 60%,transparent)}
+.v-bal .bl .bl-leak{box-shadow:inset 3px 0 0 var(--stop)}
+.v-bal .bl .bl-leak > span.c-stop{display:block}
+.v-bal .bl-pf{display:inline-flex;align-items:center;gap:1px;vertical-align:-2px;margin-right:2px;position:relative}
+.v-bal .bl-pf.ok{color:var(--prepaid);text-decoration:none}
+.v-bal .bl-pf.ok::after{content:"";position:absolute;inset:-12px -10px}
+.v-bal .bl-pf.no{color:var(--warn);opacity:.8}
+.v-bal .bl-pf small{font-size:10px;font-weight:700}
+.v-bal .bl .bl-pc{width:52px;min-width:52px;text-align:center;padding-left:6px;padding-right:2px}
+.v-bal .bl td.bl-pc .bl-pf{flex-direction:column;gap:0;margin:0}
+.v-bal .bl td.bl-pc svg{width:18px;height:18px}
+.v-bal .bl td.bl-pc small{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.02em}
+.v-bal .bl-dlv{margin-top:4px;min-height:32px}
+.v-bal .bl-seg{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+@media (max-width:600px){ .v-bal .bl .bl-pc{width:40px;min-width:40px;padding-left:4px} }
+.v-bal .bl .bl-pc{position:sticky;left:0;z-index:1;background:var(--paper)}
+.v-bal .bl thead .bl-pc{background:var(--sunk);z-index:2}
+.v-bal .bl .bl-tot .bl-pc{background:var(--float-bg)}
+.v-bal .bl .bl-d{left:52px}
+@media (max-width:600px){ .v-bal .bl .bl-d{left:40px} }
 
 /* ---- 50-pay.css ---- */
 /* 50-pay.css: Pay view (#pay) and the pay / top-up / why sheets. Every selector is scoped under .v-pay. */
@@ -2431,7 +2455,11 @@ window.SL = window.SL || {};
       const date = c.date || (c.createdAt ? U.ymd(new Date(c.createdAt)) : "");
       const h = U.hal(c.amount);
       u.date = date; u.lastDate = date; u.h = h;
-      u.parts = (D) => (date && date <= D ? [{ date, jobId: u.jobId, h }] : []);
+      // A purchase or service counts as cost once delivered / performed: c.delivered = ISO date, "" = not yet
+      // (paid meanwhile = Prepaid). No field = delivered on its date (everything logged before 2026-09-27).
+      const dlv = kind === "other" || c.delivered === undefined ? date : U.isISO(c.delivered) ? c.delivered : "";
+      u.delivered = dlv; u.pendingDelivery = kind !== "other" && !dlv;
+      u.parts = (D) => (dlv && dlv <= D ? [{ date: dlv, jobId: u.jobId, h }] : []);
       if (kind === "purchase") { u.title = (c.supplier || "Purchase") + (c.doc && c.doc.no ? " #" + c.doc.no : ""); u.payee = c.supplier || c.desc || "Supplier"; }
       else if (kind === "service") { const s = M.SERVICE_SUBS[c.sub] || M.SERVICE_SUBS.other; u.title = (c.desc || s.label) + (c.supplier ? " · " + c.supplier : ""); u.payee = c.supplier || c.desc || s.label; }
       else { u.title = c.desc || "Other cost"; u.payee = c.crewId ? M.crewName(c.crewId) : c.supplier || c.desc || "Other"; }
@@ -4445,7 +4473,7 @@ window.SL = window.SL || {};
       : `<button type="button" class="td-job" id="td-${U.esc(cid)}-job" data-act="tdJob" data-cid="${U.esc(cid)}" data-date="${date}" aria-label="Job for this day">${code ? U.esc(code) : '<span class="c-warn">⊘ no job</span>'} ▾</button>`;
     return `<div class="td-crew${plan ? " plan" : ""}" id="td-crew-${U.esc(cid)}">
       <span class="td-st${plan ? " c-committed" : ""}" title="${plan ? "Planned" : "Confirmed"}">${plan ? "○" : "●"}</span>${nameBtn}<span class="td-amt num">${amt}</span>
-      <div class="td-ctl">${cell("m", X.stepVal(cid, date, "m", rec))}${cell("l", X.stepVal(cid, date, "l", rec))}${foodCtl}${jobCtl}${plan ? '<span class="t12 c-committed td-pw">Planned</span>' : ""}</div></div>`;
+      <div class="td-ctl">${cell("m", X.stepVal(cid, date, "m", rec))}${cell("l", X.stepVal(cid, date, "l", rec))}${foodCtl}${jobCtl}${plan ? '<span class="t12 c-committed td-pw">Planned</span>' : ""}${ro ? "" : `<button type="button" class="td-rm" id="td-${U.esc(cid)}-rm" data-act="tdRemove" data-cid="${U.esc(cid)}" data-date="${date}" aria-label="${plan ? "Remove the plan" : "Didn't come: remove this day"}">✕ ${plan ? "Remove" : "Didn't come"}</button>`}</div></div>`;
   };
 })(window.SL);
 
@@ -4574,6 +4602,16 @@ window.SL = window.SL || {};
     const val = { [f]: n }; if (cur.est) val.est = false;
     const r = await SL.store.setDays(pid, U.weekStart(date), cid, { [date]: val });
     if (!r.ok) { delete X.pend[k]; ui.render(); ui.toast(U.esc(SL.store.errText(r))); }
+  };
+
+  /** ✕ on a Today row: the crew didn't come (or the plan is off). Removes the day; Undo puts it back. */
+  A.tdRemove = async (ds) => {
+    if (X.ro()) return;
+    const pid = ui.pid(), cid = ds.cid, date = ds.date, cur = M.crewDay(pid, cid, date).day;
+    if (!cur) return;
+    const r = await X.write(pid, cid, { [date]: null });
+    if (!r.ok) return;
+    ui.toast(name(cid) + " removed · " + U.esc(U.dShort(date)), { ms: 10000, undo: async () => { await X.write(pid, cid, { [date]: X.full(cur) }); } });
   };
 
   /** Job for one crew day only (job chips). */
@@ -6618,6 +6656,8 @@ window.SL = window.SL || {};
     } else if (st === "noprice") s = '<span class="c-warn">No price · counts 0</span>' + (can("editCost") ? ' <button class="lnk" data-act="editCost" data-id="' + U.esc(u.id) + '">Set</button>' : "");
     else if (st === "planned") s = '<span class="c-committed">(' + ui.m(U.sum(u.days.filter((d) => d.plan), (d) => d.h)) + ") Planned · not counted</span>";
     else s = '<span class="zero">–</span> <span class="muted">nothing counted yet</span>';
+    if (u.pendingDelivery) s += ' · <span class="c-warn">not ' + (u.kind === "service" ? "performed" : "delivered") + " yet</span>";
+    else if (u.kind === "purchase" || u.kind === "service") s += ' · <span class="muted">' + (u.kind === "service" ? "performed " : "delivered ") + U.esc(U.dShort(u.delivered)) + "</span>";
     if (u.est) s += ' · <span class="est">~' + ui.m(r.inc) + "</span> est.";
     return '<div class="lg-status t13">' + s + "</div>";
   };
@@ -6736,6 +6776,8 @@ window.SL = window.SL || {};
       if (can("editCrew")) b.push('<button class="btn sm ghost" data-act="editCrew" data-id="' + U.esc(u.crewId) + '">Edit crew</button>');
       return b.length ? '<div class="btns lg-acts">' + b.join("") + "</div>" : "";
     }
+    if (u.pendingDelivery && can("markDelivered")) b.unshift('<button class="btn sm" data-act="markDelivered" data-id="' + id + '">' + (u.kind === "service" ? "Performed" : "Delivered") + "</button>");
+    else if ((u.kind === "purchase" || u.kind === "service") && u.delivered && can("markDelivered")) b.push('<button class="btn sm ghost" data-act="markUndelivered" data-id="' + id + '">Not ' + (u.kind === "service" ? "performed" : "delivered") + "</button>");
     if (u.kind === "rental" && u.in && u.onSite(D) && !u.out && can("returnRental")) b.push('<button class="btn sm sec" data-act="returnRental" data-id="' + id + '">Return</button>');
     if (can("editCost")) b.push('<button class="btn sm sec" data-act="editCost" data-id="' + id + '">Edit</button>');
     if (can("addPhotoTo")) b.push('<button class="btn sm ghost" data-act="addPhotoTo" data-id="' + id + '">Add photo</button>');
@@ -7467,7 +7509,7 @@ window.SL = window.SL || {};
 })(window.SL);
 
 /* ---- 43-balances.js ---- */
-/* 43-balances: the Balances view (#balances[.open]). One row per cost unit or cash movement, with what it did to each
+/* 43-balances: the Balances view (#balances[.open]). One row per money event (work done, delivery, payment, cash), with what it did to each
  * party: Me (Ryan's pocket), Sayed (the float), Trades (crews), Suppliers (purchases, services, other) and Equipment.
  *   Me / Sayed        = cash in (+) or out (−) of that pocket
  *   Trades / Suppliers / Equipment = + what they were paid, − what they earned or delivered and are still owed
@@ -7483,54 +7525,74 @@ window.SL = window.SL || {};
   /** Which pocket a payment came out of: "me" or "sayed" (any float wallet). */
   X.pocket = (wid) => (X.isOwner(wid) ? "me" : "sayed");
   X.PARTIES = ["T", "P", "E"];
-  /** Pockets are a signed amount; parties are {paid, owed, prepaid} (h). */
-  X.blank = () => ({ me: 0, sayed: 0, T: { paid: 0, owed: 0, prepaid: 0 }, P: { paid: 0, owed: 0, prepaid: 0 }, E: { paid: 0, owed: 0, prepaid: 0 } });
+  X.blank = () => ({ me: 0, sayed: 0, T: 0, P: 0, E: 0 });
 
-  /** Rows for a project as of D: {key?, cashId?, date, title, meta, fx:{me,sayed,T,P,E} (h), cost (h), touched:Set, unk} */
+  /** Event rows for a project as of D, newest first. An event is one thing that happened:
+   *   work done / goods delivered (a crew day, a delivery, a service, a rental on site) → the party −amount (earned, owed)
+   *   a payment → the pocket −amount, the party +amount (paid)
+   *   cash to / from Sayed, capital → Me / Sayed
+   *  Also sets X.parties (owed / prepaid per party, from the units) and X.unpriced. */
   X.rows = (pid, D) => {
     const rows = [];
+    X.unpriced = 0; X.parties = { T: { owed: 0, prepaid: 0 }, P: { owed: 0, prepaid: 0 }, E: { owed: 0, prepaid: 0 } };
     for (const u of M.unitsFor(pid)) {
       if (u.archived) continue;
-      const r = M.calc(u, D), fx = X.blank(), touched = new Set();
-      for (const p of u.payments) if (!p.void && p.date && p.date <= D) { fx[X.pocket(p.walletId)] -= p.h; touched.add(X.pocket(p.walletId)); }
-      const party = PARTY[u.cat] || "P";
-      fx[party] = { paid: r.paid, owed: r.owed, prepaid: r.prepaid };
-      const unk = !!(u.noPrice && !r.paid);
-      if (!touched.size && !unk) continue; // planned-only crew weeks, future-dated costs
-      const date = u.kind === "crew" ? u.lastDate || u.weekStart : u.date || "";
-      let meta = M.unitMeta(u).map((x) => U.t(x));
-      if (u.kind === "crew") { const s = M.crewStats(u, D); if (s.days) meta.push(s.mDays + "M " + s.lDays + "L days"); }
-      rows.push({ key: u.key, date, title: U.t(u.title), meta: meta.join(" · "), fx, cost: r.inc, touched, unk, cat: u.cat });
+      const r = M.calc(u, D), party = PARTY[u.cat] || "P", open = !!(r.owed || r.prepaid);
+      X.parties[party].owed += r.owed; X.parties[party].prepaid += r.prepaid;
+      if (u.noPrice && !r.paid && !r.inc) X.unpriced++;
+      const base = { key: u.key, cat: u.cat, open, files: u.kind === "crew" ? [] : (u.doc.files || []).slice() };
+      if (u.kind === "crew") {
+        for (const d of u.days) {
+          if (d.plan || d.date > D || !d.h) continue;
+          const fx = X.blank(); fx[party] = -d.h;
+          rows.push(Object.assign({}, base, { date: d.date, seq: 0, fx, title: U.t(u.title) + " came",
+            meta: [U.dShort(d.date), d.m + "M " + d.l + "L" + (d.food ? " +food" : ""), M.jobCode(d.job)].filter(Boolean).join(" · ") }));
+        }
+      } else if (u.pendingDelivery) {
+        const w = u.kind === "service" ? "performed" : "delivered";
+        rows.push(Object.assign({}, base, { date: u.date, seq: 0, fx: X.blank(), pending: u.kind === "service" ? "Performed" : "Delivered", title: U.t(u.title) + " · not " + w + " yet",
+          meta: [U.dShort(u.date), M.jobCode(u.jobId), r.paid ? "paid ahead: Prepaid until " + w : "not paid either"].filter(Boolean).join(" · ") }));
+      } else if (r.inc) {
+        const fx = X.blank(); fx[party] = -r.inc;
+        let title = U.t(u.title), meta = M.unitMeta(u).map((x) => U.t(x));
+        if (u.kind === "rental") { const n = r.parts.length; title += " on site"; meta = ["in " + U.dShort(u.in) + (u.out ? " → " + U.dShort(u.out) : ""), n + " day" + (n > 1 ? "s" : "") + " × " + U.mw(u.daily / 100), M.jobCode(u.jobId)].filter(Boolean); }
+        else if (u.kind === "purchase") title += " delivered";
+        else if (u.kind === "service") title += " performed";
+        rows.push(Object.assign({}, base, { date: u.kind === "rental" ? u.in : u.delivered || u.date, seq: 0, fx, title, meta: meta.join(" · ") }));
+      }
+      for (const p of u.payments) {
+        if (p.void || !p.date || p.date > D) continue;
+        const fx = X.blank(), pk = X.pocket(p.walletId); fx[pk] = -p.h; fx[party] = p.h;
+        const who = pk === "me" ? "You" : U.esc(M.walletName(p.walletId));
+        const note = p.note && !/^migrated from v1/i.test(p.note) && !ui.readOnlyUI() ? U.t(p.note) : "";
+        rows.push(Object.assign({}, base, { date: p.date, seq: 1, at: p.at || 0, fx, title: who + " paid " + U.t(u.kind === "crew" ? M.crewName(u.crewId) : u.payee),
+          meta: [U.dShort(p.date), u.kind === "crew" ? "wk " + U.dDM(u.weekStart) : U.t(u.title), note].filter(Boolean).join(" · ") }));
+      }
     }
+    const sayedName = (wid) => U.esc(M.walletName(wid));
     for (const c of M.cash()) {
       if (!c.date || c.date > D || (c.projectId && c.projectId !== pid)) continue;
-      const h = U.hal(c.amount), fx = X.blank(), touched = new Set();
+      const h = U.hal(c.amount), fx = X.blank();
       let title;
-      if (c.type === "topup") { fx.me = -h; fx.sayed = h; title = "Cash to " + U.esc(M.walletName(c.walletId)); }
-      else if (c.type === "return") { fx.me = h; fx.sayed = -h; title = "Returned by " + U.esc(M.walletName(c.walletId)); }
+      if (c.type === "topup") { fx.me = -h; fx.sayed = h; title = "You gave " + sayedName(c.walletId) + " cash"; }
+      else if (c.type === "return") { fx.me = h; fx.sayed = -h; title = sayedName(c.walletId) + " gave cash back"; }
       else if (c.type === "adjust") { fx.sayed = h; title = "Float adjustment"; }
       else if (c.type === "capital") { fx.me = h; title = (c.capitalKind === "loan" ? "Loan from " : "Capital from ") + U.t(c.investor || "investor"); }
       else continue;
-      ["me", "sayed"].forEach((k) => fx[k] && touched.add(k));
       const meta = [U.dShort(c.date)]; if (c.note && !ui.readOnlyUI()) meta.push(U.t(c.note));
-      rows.push({ cashId: c.id, date: c.date, title, meta: meta.join(" · "), fx, cost: 0, touched, unk: false, at: c.createdAt || 0 });
+      rows.push({ files: (c.files || []).slice(), capital: c.type === "capital", cashId: c.id, date: c.date, seq: 1, at: c.createdAt || 0, title, meta: meta.join(" · "), fx, open: false });
     }
-    return rows.sort((a, b) => (a.date === b.date ? (b.at || 0) - (a.at || 0) : a.date > b.date ? -1 : 1));
+    // newest first; on one day a cost's payment sits right above its delivery
+    const k = (r) => r.key || r.cashId || "";
+    return rows.sort((a, b) => (a.date !== b.date ? (a.date > b.date ? -1 : 1) : k(a) !== k(b) ? (k(a) < k(b) ? -1 : 1) : b.seq - a.seq || (b.at || 0) - (a.at || 0)));
   };
-  X.sum = (rows) => {
-    const t = X.blank(); let cost = 0;
-    for (const r of rows) {
-      t.me += r.fx.me; t.sayed += r.fx.sayed; cost += r.cost;
-      for (const k of X.PARTIES) for (const f of ["paid", "owed", "prepaid"]) t[k][f] += r.fx[k][f];
-    }
-    t.cost = cost; return t;
-  };
+  X.sum = (rows) => { const t = X.blank(); for (const r of rows) for (const k in t) t[k] += r.fx[k]; return t; };
   /** Bottom summary: what Ryan paid, what the float still holds, and payables / prepaid per party. */
   X.summary = (rows, t, sayed) => {
     let out = 0, back = 0; const owe = {}, pre = {};
     for (const r of rows) if (r.fx.me < 0) out -= r.fx.me; else back += r.fx.me;
-    for (const k of X.PARTIES) { owe[k] = t[k].owed; pre[k] = t[k].prepaid; }
-    const unk = rows.filter((r) => r.unk).length;
+    for (const k of X.PARTIES) { owe[k] = X.parties[k].owed; pre[k] = X.parties[k].prepaid; }
+    const unk = X.unpriced;
     const line = (label, h, cls, sub) => `<span>${label}${sub ? '<small class="muted">' + sub + "</small>" : ""}</span><span class="v num${cls ? " " + cls : ""}">${h ? U.m(h / 100) : '<span class="zero">–</span>'}</span>`;
     const pay = (k, label) => line("Owed to " + label, owe[k], owe[k] ? "c-owed" : "", pre[k] ? "prepaid " + U.mw(pre[k] / 100) + " ahead" : "");
     const totalOwed = owe.T + owe.P + owe.E;
@@ -7539,20 +7601,24 @@ window.SL = window.SL || {};
       line(U.esc(sayed) + " has left", t.sayed, t.sayed < 0 ? "c-stop" : "", "cash he should be holding") +
       pay("T", "tradesmen") + pay("P", "suppliers") + pay("E", "equipment renters") +
       line("<b>Total payables</b>", totalOwed, totalOwed ? "c-owed" : "", t.sayed >= totalOwed ? U.esc(sayed) + "'s cash covers it" : "short by " + U.mw((totalOwed - t.sayed) / 100) + " after " + U.esc(sayed) + "'s cash") +
-      `</div>${unk ? '<p class="t12 c-warn">? ' + unk + " rental" + (unk > 1 ? "s" : "") + " with no price, not counted in equipment</p>" : ""}</div>`;
+      `</div>${unk ? '<p class="t12 c-warn">? ' + unk + " rental" + (unk > 1 ? "s" : "") + " with no price yet: no money has moved, so they are not listed. Set their rates in Pay › Set</p>" : ""}</div>`;
   };
+  /** Proof icon: a filled document (tap to open the file) when a paper backs the event, a dashed empty one when not. */
+  const DOC = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M9.5 1.5V5H13M6 8.5h5M6 11h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  const NODOC = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-dasharray="2 1.6" stroke-linejoin="round"/></svg>';
+  X.proof = (files) => files && files.length
+    ? `<a class="bl-pf ok" href="${U.esc(U.assetUrl(files[0]))}" target="_blank" rel="noopener" title="Backed by a document · open it" aria-label="Open the document">${DOC}<small>${files.length > 1 ? files.length + " docs" : "doc"}</small></a>`
+    : `<span class="bl-pf no" title="No document backs this" aria-label="No document">${NODOC}<small>none</small></span>`;
+  /** Money created outside Me: pockets + what parties were paid must net to 0 (capital is new money into Me). */
+  X.leak = (r) => { if (r.capital) return 0; const n = r.fx.me + r.fx.sayed + X.PARTIES.reduce((s, k) => s + Math.max(0, r.fx[k]), 0); return Math.abs(n) > 1 ? n : 0; };
   /** A row still open: some party is owed or prepaid. */
-  X.isOpen = (r) => X.PARTIES.some((k) => r.fx[k].owed || r.fx[k].prepaid) || r.unk;
+  X.isOpen = (r) => r.open;
 
   /** A pocket cell: signed cash in / out. A party cell: +paid (green) and/or −still owed (orange). */
   X.cell = (v, k, touched, unk) => {
     const dot = '<span class="zero">·</span>';
-    if (k === "me" || k === "sayed") return `<td class="r num">${v ? (v > 0 ? "+" : "") + U.mw(v / 100) : dot}</td>`;
-    const bits = [];
-    if (v.paid) bits.push(`<span class="c-prepaid">+${U.mw(v.paid / 100)}</span>`);
-    if (v.owed) bits.push(`<span class="c-owed">−${U.mw(v.owed / 100)}</span>`);
-    if (!bits.length && unk && k === "E") bits.push('<span class="unk">?</span>');
-    return `<td class="r num">${bits.length ? bits.join("<br>") : dot}</td>`;
+    if (k === "me" || k === "sayed") return `<td class="r num${k === "me" ? " bl-me" : ""}">${v ? (v > 0 ? "+" : "") + U.mw(v / 100) : dot}</td>`;
+    return `<td class="r num">${v ? `<span class="${v > 0 ? "c-prepaid" : "c-owed"}">${v > 0 ? "+" : ""}${U.mw(v / 100)}</span>` : dot}</td>`;
   };
 
   SL.views.balances = {
@@ -7560,27 +7626,49 @@ window.SL = window.SL || {};
     asOf: true,
     render(route, pid) {
       const D = ui.D(), onlyOpen = (route.args || [])[0] === "open";
-      const all = X.rows(pid, D), rows = onlyOpen ? all.filter(X.isOpen) : all, t = X.sum(all);
+      const f = (route.args || [])[0] || "all", all = X.rows(pid, D), t = X.sum(all);
+      const noProof = (r) => !(r.files && r.files.length), rows = f === "open" ? all.filter(X.isOpen) : f === "noproof" ? all.filter(noProof) : all;
+      const nDoc = all.length - all.filter(noProof).length;
       const sayed = (M.wallet(M.defaultWallet(pid)) || {}).holder || "Sayed";
-      const head = X.COLS.map(([k, l]) => `<th class="r" scope="col">${U.esc(k === "sayed" ? sayed : l)}</th>`).join("");
+      const head = X.COLS.map(([k, l]) => `<th class="r${k === "me" ? " bl-me" : ""}" scope="col">${U.esc(k === "sayed" ? sayed : l)}</th>`).join("");
       let h = '<div class="v-bal"><div class="hrow bl-top"><h2 class="t20">Balances</h2><span class="spacer"></span>' + ui.asOfChip() + "</div>";
-      h += '<p class="t12 muted bl-help">Me and ' + U.esc(sayed) + ': cash in <b>+</b> / out <b>−</b>. Trades, suppliers and equipment: <b class="c-prepaid">+</b> what we paid them, <b class="c-owed">−</b> what they earned or delivered and we still owe.</p>';
-      h += '<div class="bl-seg">' + ui.seg("", [["all", "All " + all.length], ["open", "Open " + all.filter(X.isOpen).length]], onlyOpen ? "open" : "all", { act: "balFilter", label: "Show" }) + "</div>";
+      h += '<p class="t12 muted bl-help">Money starts with <b class="bl-me">Me</b> and moves right: Me → ' + U.esc(sayed) + ' → whoever was paid, so every row balances. Me and ' + U.esc(sayed) + ': cash in <b>+</b> / out <b>−</b>. Trades, suppliers and equipment: <b class="c-owed">−</b> when they work or deliver (we owe them), <b class="c-prepaid">+</b> when they are paid. Their balance: <b class="c-owed">−</b> we still owe, <b class="c-prepaid">+</b> paid ahead. Proof: <b>doc</b> = a document backs it (tap to open) · <b>none</b> = nothing on paper.</p>';
+      h += '<div class="bl-seg">' + ui.seg("", [["all", "All " + all.length], ["open", "Open " + all.filter(X.isOpen).length], ["noproof", "No proof " + all.filter(noProof).length]], f, { act: "balFilter", label: "Show" }) +
+        `<span class="t12 muted bl-pcount">${X.proof(["x"]).replace(/<a[^>]*>/, '<span class="bl-pf ok">').replace("</a>", "</span>")} ${nDoc} of ${all.length} events backed by a document</span></div>`;
       if (!all.length) return h + '<div class="empty">Nothing logged yet.</div></div>';
-      h += '<div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-d">Description</th>' + head + "</tr></thead><tbody>";
+      h += '<div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-pc">Proof</th><th scope="col" class="bl-d">Description</th>' + head + "</tr></thead><tbody>";
       for (const r of rows) {
         const act = r.key ? ` class="tap" data-act="openUnit" data-key="${U.esc(r.key)}" role="button" tabindex="0"` : "";
-        h += `<tr${act}><th scope="row" class="bl-d"><span class="bl-t">${r.cat ? ui.mono(r.cat) + " " : ""}${r.title}</span><span class="t11 muted">${r.meta}</span></th>` +
-          X.COLS.map(([k]) => X.cell(r.fx[k], k, r.touched, r.unk)).join("") + "</tr>";
+        const bad = X.leak(r);
+        h += `<tr${act}${bad ? ' data-leak="1"' : ""}><td class="bl-pc">${X.proof(r.files)}</td><th scope="row" class="bl-d${bad ? " bl-leak" : ""}"><span class="bl-t">${r.title}</span><span class="t11 muted">${r.meta}</span>${r.pending && !ui.readOnlyUI() && !ui.isPast() ? `<button type="button" class="btn sm bl-dlv" data-act="markDelivered" data-id="${U.esc(r.key.slice(2))}">✓ ${r.pending}</button>` : ""}${bad ? '<span class="t11 c-stop">▲ doesn\'t balance by ' + U.mw(bad / 100) + ": money from nowhere</span>" : ""}</th>` +
+          X.COLS.map(([k]) => X.cell(r.fx[k], k)).join("") + "</tr>";
       }
-      if (!rows.length) h += `<tr><td colspan="${X.COLS.length + 1}" class="muted t13">Everything is settled.</td></tr>`;
-      h += '</tbody><tfoot><tr class="bl-tot"><th scope="row" class="bl-d">Balance' + (ui.isPast() ? '<span class="t11 muted">as of ' + U.esc(U.dShort(D)) + "</span>" : "") + "</th>" +
+      if (!rows.length) h += `<tr><td colspan="${X.COLS.length + 2}" class="muted t13">Everything is settled.</td></tr>`;
+      h += '</tbody><tfoot><tr class="bl-tot"><td class="bl-pc"></td><th scope="row" class="bl-d">Balance' + (ui.isPast() ? '<span class="t11 muted">as of ' + U.esc(U.dShort(D)) + "</span>" : "") + "</th>" +
         X.COLS.map(([k]) => X.cell(t[k], k)).join("") + "</tr></tfoot></table></div>";
       h += X.summary(all, t, sayed);
       return h + "</div>";
     },
   };
-  A.balFilter = (d) => ui.go("balances", d.val === "open" ? "open" : "");
+  A.balFilter = (d) => ui.go("balances", d.val === "open" || d.val === "noproof" ? d.val : "");
+
+  /** Delivered / performed: from now on it counts as cost (dated the invoice day, never later than today). Undo reverts. */
+  A.markDelivered = async (d) => {
+    if (ui.readOnlyUI()) return;
+    const c = (SL.S.costs || {})[d.id]; if (!c) return;
+    const when = c.date && c.date <= U.today() ? c.date : U.today(), before = c.delivered === undefined ? "" : c.delivered;
+    const r = await SL.store.patch("costs", d.id, { delivered: when });
+    if (!r.ok) return ui.toast(U.esc(SL.store.errText(r)));
+    ui.toast((c.type === "service" ? "Performed · " : "Delivered · ") + U.t(c.supplier || c.desc || "cost") + " · " + U.esc(U.dShort(when)), { ms: 10000, undo: () => SL.store.patch("costs", d.id, { delivered: before }) });
+  };
+  A.markUndelivered = async (d) => {
+    if (ui.readOnlyUI()) return;
+    const c = (SL.S.costs || {})[d.id]; if (!c) return;
+    const before = c.delivered === undefined ? c.date || "" : c.delivered;
+    const r = await SL.store.patch("costs", d.id, { delivered: "" });
+    if (!r.ok) return ui.toast(U.esc(SL.store.errText(r)));
+    ui.toast("Not delivered yet · " + U.t(c.supplier || c.desc || "cost"), { ms: 10000, undo: () => SL.store.patch("costs", d.id, { delivered: before }) });
+  };
 })(window.SL);
 
 /* ---- 50-pay.js ---- */
@@ -9195,6 +9283,7 @@ window.SL = window.SL || {};
       const u = M.unitById && M.unitById(st.id);
       h += `<div class="fld"><span class="lbl">Paid</span><div class="t13">${u ? ui.stateWords(u, ui.D()) : "–"}</div><span class="hint">Payments are changed from Pay.</span></div>`;
     }
+    if (!st.id && !st.quote && st.type !== "other") h += `<div class="fld"><span class="lbl">${st.type === "service" ? "Performed" : "Delivered"}</span>${ui.seg("delivered", [["no", "Not yet"], ["yes", st.type === "service" ? "Performed" : "Delivered"]], st.delivered || "no", { full: true, label: "Delivered" })}<span class="hint">It counts as cost once delivered; paid before that = Prepaid.</span></div>`;
     if (!st.quote) h += `<div class="fld"><span class="lbl">Paper original</span>${ui.seg("paper", [["ryan", "With me"], ["sayed", "With Sayed"], ["none", "None"]], st.paper, { full: true, label: "Paper original" })}</div>`;
     h += `<div class="fld"><span class="lbl">Photo</span><div class="hrow v-dc-files">` +
       (st.files || []).map((id, i) => `${ui.photo(id)}<button type="button" class="lnk" id="dc-unfile-${i}" data-act="unFile" data-i="${i}" aria-label="Remove photo ${i + 1}">remove</button>`).join(" · ") +
@@ -9433,6 +9522,7 @@ window.SL = window.SL || {};
     const payH = st.walletId && !X.past() ? (st.part ? X.H(st.partAmt) : X.costH(st)) : 0;   // as-of past: saved unpaid
     doc.payments = payH > 0 ? { p1: { date: st.date, amount: U.sar(payH), walletId: st.walletId, at: Date.now() } } : {};
     doc.acks = {};
+    if (st.type !== "other") doc.delivered = st.delivered === "yes" ? (st.date > U.today() ? U.today() : st.date) : "";
     doc.review = { by: "app", reviewed: true };
     const r = await SL.store.add("costs", doc, "cost");
     if (!r || !r.ok) { sh.busy(false); return sh.error(SL.store.errText(r)); }
@@ -10366,7 +10456,7 @@ window.SL = window.SL || {};
       data = { type: w.type === "service" ? "service" : "purchase", projectId: s.pid, date: w.date, jobId: w.jobId || "", supplier: w.supplier.trim(), supplierVat: w.supplierVat || "",
         doc: { kind: w.kind, no: w.docNo || "", date: w.date, billedTo: { name: w.billedTo.name || "", vat: w.billedTo.vat || "" }, cues: w.cues || [], confidence: w.conf || 0, hash: "" },
         lines, subtotal: sub, discount: U.round2(U.num(w.discount) || 0), vat, amount: total, files, payments, paper: w.paper || "", note: "", acks: {},
-        review: { by: "app", reviewed: true }, createdAt: now };
+        review: { by: "app", reviewed: true }, delivered: "", createdAt: now };
       if (w.supplierId) data.supplierId = w.supplierId;
       if (data.type === "service") {
         const l0 = lines[0] || {};
