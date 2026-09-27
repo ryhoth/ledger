@@ -1350,6 +1350,249 @@ table.t tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0
 .v-bal .bl .bl-tot .bl-pc{background:var(--float-bg)}
 .v-bal .bl .bl-d{left:52px}
 @media (max-width:600px){ .v-bal .bl .bl-d{left:40px} }
+/* headline tiles (tap = filter), party chips, search, day headers, running float */
+.v-bal .bl-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.v-bal .bl-tile{display:flex;flex-direction:column;align-items:flex-start;min-width:0;min-height:60px;padding:7px 8px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);color:var(--ink-2);text-align:left}
+.v-bal .bl-tile span{font-size:var(--t-11);font-weight:700;text-transform:uppercase;letter-spacing:.03em;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.v-bal .bl-tile b{font-size:var(--t-20);font-stretch:80%;line-height:1.15;color:var(--ink)}
+.v-bal .bl-tile small{font-size:var(--t-11);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.v-bal .bl-tile.me b{color:var(--info)} .v-bal .bl-tile.owed b{color:var(--owed)} .v-bal .bl-tile.pre b{color:var(--prepaid)} .v-bal .bl-tile.stop b{color:var(--stop)}
+.v-bal .bl-tile.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.v-bal .bl-chips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 -2px;padding:0 2px}
+.v-bal .bl-chips::-webkit-scrollbar{display:none}
+.v-bal .bl-chips .chip{flex:none;min-height:36px}
+.v-bal .bl-chips .chip small{font-weight:500}
+.v-bal .bl-chips .chip.on small{color:inherit;opacity:.75}
+.v-bal .bl-tools{display:flex;align-items:center;gap:10px}
+.v-bal .bl-tools .inp{flex:1;min-width:0;min-height:40px}
+.v-bal .bl-hlp{flex:none;min-height:40px;white-space:nowrap}
+.v-bal .bl tr.bl-day td{padding:5px 8px 4px;background:var(--sunk);border-bottom:1px solid var(--line);font-size:var(--t-11);font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-2)}
+.v-bal .bl tr.bl-day td span{position:sticky;left:8px}
+.v-bal .bl .bl-run{display:block;font-size:10px;font-weight:500;color:var(--ink-3);margin-top:1px}
+.v-bal .bl tr.bl-pend .bl-d{box-shadow:inset 3px 0 0 var(--warn),1px 0 0 var(--line)}
+.v-bal .bl tr.tap:focus-visible{outline:2px solid var(--info);outline-offset:-2px}
+@media (max-width:600px){
+  .v-bal .bl-tiles{gap:4px}
+  .v-bal .bl-tile{padding:6px;min-height:56px}
+  .v-bal .bl-tile span{font-size:10px;letter-spacing:0}
+  .v-bal .bl-tile b{font-size:var(--t-16)}
+  .v-bal .bl-tile small{font-size:10px}
+  .v-bal .bl tr.bl-day td{padding-left:6px}
+}
+@media (min-width:900px){ .v-bal .bl .bl-d{min-width:220px;max-width:340px} .v-bal .bl{font-size:var(--t-14)} }
+.v-bal .bl tr.bl-day th,.v-bal .bl tr.bl-day td{padding:5px 8px 4px;background:var(--sunk);border-bottom:1px solid var(--line);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-3);white-space:nowrap}
+.v-bal .bl tr.bl-day th.bl-d{color:var(--ink-2);font-size:var(--t-11);background:var(--sunk)}
+.v-bal .bl tr.bl-day td.bl-pc{background:var(--sunk)}
+.v-bal .bl tr.bl-day td.bl-me{color:var(--info);background:var(--sunk)}
+.v-bal .bl-dlv{white-space:normal;max-width:100%;height:auto;padding-top:4px;padding-bottom:4px;line-height:1.2}
+.v-bal .bl-box{position:relative}
+.v-bal .bl-box::after{content:"";position:absolute;top:1px;right:1px;bottom:1px;width:22px;border-radius:0 var(--r-ctl) var(--r-ctl) 0;background:linear-gradient(to right,transparent,var(--paper));pointer-events:none;opacity:0;transition:opacity .15s}
+.v-bal .bl-box.more::after{opacity:1}
+.v-bal .bl-hid{margin:0}
+@media (max-width:600px){ .v-bal .bl tr.bl-day th,.v-bal .bl tr.bl-day td{padding:5px 4px 4px;letter-spacing:0} .v-bal .bl tr.bl-day th.bl-d{padding-left:6px} }
+.v-bal .bl .bl-sm{display:none}
+@media (max-width:600px){
+  .v-bal .bl .bl-lg{display:none} .v-bal .bl .bl-sm{display:inline}
+  .v-bal .bl .bl-d{min-width:88px;max-width:98px}
+  .v-bal .bl th,.v-bal .bl td{padding-left:3px;padding-right:3px}
+  .v-bal .bl .bl-d{padding-left:6px}
+}
+
+/* ---- 44-audit.css ---- */
+/* 44-audit: Crews — the crew-day Gantt and the day editor. Tokens only (plus the job colours below). */
+.v-audit{--lab:124px;--dw:44px;display:flex;flex-direction:column;gap:var(--s3);min-width:0}
+.v-audit,.sheet .au-sheet{--j0:var(--ink-3);--j1:#3E6FA8;--j2:#A86A1F;--j3:#3F8452;--j4:#7E57A0;--j5:#2B8585;--j6:#8A7A3A}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .v-audit,:root:not([data-theme="light"]) .sheet .au-sheet{--j0:#7A858C;--j1:#5B8FCC;--j2:#C98A3A;--j3:#5BA56E;--j4:#9C78C0;--j5:#3FA3A3;--j6:#A89850}}
+:root[data-theme="dark"] .v-audit,:root[data-theme="dark"] .sheet .au-sheet{--j0:#7A858C;--j1:#5B8FCC;--j2:#C98A3A;--j3:#5BA56E;--j4:#9C78C0;--j5:#3FA3A3;--j6:#A89850}
+.v-audit .au-top{align-items:center}
+.v-audit .au-nav{align-items:center;gap:4px}
+.v-audit .au-range{font-weight:600;min-width:9rem;text-align:center}
+.v-audit .au-todo{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.v-audit .au-todo .btn{min-height:40px}
+
+/* the grid: one CSS grid, label column sticky, one column per day */
+.v-audit .au-sc{overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);overscroll-behavior-x:contain}
+.v-audit .au-g{position:relative;display:grid;grid-template-columns:var(--lab) repeat(var(--n),var(--dw));width:max-content;min-width:100%}
+.v-audit .au-lab{position:sticky;left:0;z-index:3;display:flex;flex-direction:column;justify-content:center;min-height:48px;padding:4px 8px;background:var(--paper);border-bottom:1px solid var(--line);box-shadow:1px 0 0 var(--line-2);text-align:left;min-width:0;color:var(--ink)}
+.v-audit button.au-lab:hover{background:var(--sunk)}
+.v-audit .au-nm{font-weight:600;font-size:var(--t-13);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v-audit .au-sub{font-size:var(--t-11);color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v-audit .au-hd,.v-audit .au-dh{min-height:44px;background:var(--sunk);border-bottom:1px solid var(--line-2)}
+.v-audit .au-hd{z-index:4}
+.v-audit .au-dh{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.1;font-size:var(--t-11);color:var(--ink-2);position:relative}
+.v-audit .au-dh b{position:relative;z-index:3;font-size:var(--t-13);color:var(--ink);font-stretch:80%;background:var(--sunk);padding:0 2px}
+.v-audit .au-dh>span{position:relative;z-index:3;background:var(--sunk);padding:0 2px}
+.v-audit .au-dh small{position:absolute;top:1px;left:3px;font-size:9px;font-weight:700;text-transform:uppercase;color:var(--ink-2)}
+.v-audit .au-dh.wk,.v-audit .au-c.wk{box-shadow:inset 1px 0 0 var(--line-2)}
+.v-audit .au-dh.now,.v-audit .au-dh.now b{color:var(--stop);font-weight:700}
+.v-audit .off-day{background:repeating-linear-gradient(135deg,transparent 0 5px,color-mix(in srgb,var(--sunk) 70%,transparent) 5px 7px)}
+.v-audit .au-dh.off-day{background-color:var(--sunk)}
+
+/* day cells: subtle columns, a bar when people came (colour = job) */
+.v-audit .au-c{position:relative;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0;border:0;border-bottom:1px solid var(--line);box-shadow:inset -1px 0 0 color-mix(in srgb,var(--line) 55%,transparent);background:transparent;color:var(--ink-3);font-size:var(--t-12);cursor:pointer}
+.v-audit span.au-c{cursor:default}
+.v-audit button.au-c:hover{background:color-mix(in srgb,var(--sunk) 70%,transparent)}
+.v-audit button.au-c:hover:empty::after{content:"+";color:var(--ink-3);font-size:var(--t-16)}
+.v-audit .au-c.st-came,.v-audit .au-c.st-plan{color:#fff}
+.v-audit .au-c.st-came::before,.v-audit .au-c.st-plan::before{content:"";position:absolute;inset:9px 2px;border-radius:6px;background:var(--jc);z-index:0}
+.v-audit .au-c.st-plan::before{background:transparent;border:1.5px dotted var(--jc)}
+.v-audit .au-c.st-plan{color:var(--jc)}
+.v-audit .au-c.cl::before{left:0;border-top-left-radius:0;border-bottom-left-radius:0}
+.v-audit .au-c.cr::before{right:0;border-top-right-radius:0;border-bottom-right-radius:0}
+.v-audit .au-c.st-plan.cl::before{border-left-width:0}
+.v-audit .au-c.st-plan.cr::before{border-right-width:0}
+/* the red line runs between the bar and the digits: glyphs sit above it on a patch of their own background */
+.v-audit .au-c b{position:relative;z-index:3;font-weight:700;font-stretch:78%;font-size:var(--t-13);padding:0 2px;border-radius:3px}
+.v-audit .au-c.st-came b{background:var(--jc)}
+.v-audit .au-c.st-plan b,.v-audit .au-c.st-off b{background:var(--paper)}
+.v-audit .au-c.st-miss b{background:var(--warn-bg)}
+.v-audit .au-food{position:absolute;z-index:3;right:5px;top:11px;width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.85}
+.v-audit .au-c.st-off{color:var(--ink-3);font-weight:700}
+.v-audit .au-c.st-miss{color:var(--warn);font-weight:800;font-size:var(--t-16)}
+.v-audit .au-c.st-miss::before{content:"";position:absolute;inset:9px 3px;border:1.5px dashed var(--warn);border-radius:6px;background:var(--warn-bg);z-index:0}
+.v-audit .au-c.elsewhere small{font-size:10px;color:var(--ink-3);font-weight:700}
+.j0{--jc:var(--j0)} .j1{--jc:var(--j1)} .j2{--jc:var(--j2)} .j3{--jc:var(--j3)} .j4{--jc:var(--j4)} .j5{--jc:var(--j5)} .j6{--jc:var(--j6)}
+
+/* by-job group header rows */
+.v-audit .au-grp{min-height:32px;background:var(--sunk);box-shadow:inset 3px 0 0 var(--jc),1px 0 0 var(--line-2)}
+.v-audit .au-grp .au-nm{font-size:var(--t-12);text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2)}
+.v-audit .au-gc{display:flex;align-items:center;justify-content:center;min-height:32px;background:var(--sunk);border-bottom:1px solid var(--line);font-size:var(--t-11);font-weight:700;color:var(--ink-2)}
+
+/* footer */
+.v-audit .au-ft{min-height:30px;background:var(--sunk)}
+.v-audit .au-fc{display:flex;align-items:center;justify-content:center;min-height:30px;background:var(--sunk);border-bottom:1px solid var(--line);font-size:var(--t-11);font-weight:700;font-variant-numeric:tabular-nums;font-stretch:80%;flex-wrap:wrap;line-height:1}
+
+/* the red today line */
+.v-audit .au-now{position:absolute;top:0;bottom:0;left:calc(var(--lab) + var(--i) * var(--dw) + var(--dw) / 2 - 1px);width:2px;background:var(--stop);z-index:2;pointer-events:none;box-shadow:0 0 0 1px color-mix(in srgb,var(--stop) 25%,transparent)}
+.v-audit .au-empty{grid-column:1/-1;padding:16px;color:var(--ink-2)}
+
+/* legend */
+.v-audit .au-leg{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;color:var(--ink-2)}
+.v-audit .au-leg>span{display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.v-audit .au-sw{display:inline-block;width:16px;height:10px;border-radius:3px;background:var(--jc)}
+.v-audit .au-sw.plan{background:transparent;border:1.5px dotted var(--j0)}
+.v-audit .au-sw.nowl{width:2px;height:12px;border-radius:0;background:var(--stop)}
+.v-audit .au-k{font-weight:800;color:var(--ink-3)}
+.v-audit .au-k.miss{color:var(--warn)}
+.v-audit .au-help{margin:0}
+
+/* the day editor */
+.sheet .au-sheet{display:flex;flex-direction:column;gap:12px}
+.sheet .au-dnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sheet .au-today{display:inline-block;padding:0 6px;border-radius:var(--r-pill);background:var(--stop);color:#fff;font-size:var(--t-11);font-weight:700;text-transform:uppercase;vertical-align:2px}
+.sheet .au-st{height:48px}
+.sheet .au-st button{font-size:var(--t-14)}
+.sheet .au-rows{display:flex;flex-direction:column;gap:8px}
+.sheet .au-row{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 8px}
+.sheet .au-row .chip{justify-self:end;min-height:44px}
+.sheet .au-rate{grid-column:1/-1;display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.sheet .au-rate>.muted{font-size:var(--t-12)}
+.sheet .au-rl{font-weight:600;font-size:var(--t-14)}
+.sheet .au-rl small{display:block;font-size:var(--t-11);font-weight:400;color:var(--ink-3)}
+.sheet .au-def{flex-basis:100%;text-align:right;font-size:var(--t-11);color:var(--warn);margin-top:-4px}
+.sheet .au-step{display:inline-flex;align-items:stretch}
+.sheet .au-arr{min-width:44px;min-height:48px;border:1px solid var(--line-2);background:var(--sunk);color:var(--ink);font-size:var(--t-14);display:inline-flex;align-items:center;justify-content:center}
+.sheet .au-arr:first-child{border-radius:var(--r-ctl) 0 0 var(--r-ctl)}
+.sheet .au-arr:last-child{border-radius:0 var(--r-ctl) var(--r-ctl) 0}
+.sheet .au-arr:active{background:var(--line)}
+.sheet .au-arr:disabled{opacity:.4}
+.sheet .au-v{min-width:50px;display:inline-flex;align-items:center;justify-content:center;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);background:var(--paper);font-size:var(--t-20);font-weight:700;font-stretch:80%}
+.sheet .au-total{display:flex;align-items:baseline;justify-content:space-between;border-top:1px solid var(--line);padding-top:8px}
+.sheet .au-undo,.sheet .au-alloff{min-height:44px}
+.sheet .au-q{margin:0}
+@media (min-width:1100px){
+  .v-audit{--lab:220px;--dw:48px}
+  .v-audit .au-lab,.v-audit .au-c{min-height:44px}
+  .v-audit .au-c.st-came::before,.v-audit .au-c.st-plan::before,.v-audit .au-c.st-miss::before{inset:8px 2px}
+}
+@media (max-width:399px){ .v-audit{--lab:104px} .v-audit .au-tr{display:none} }
+@media (min-width:640px){ .sheet .au-row{grid-template-columns:minmax(0,1fr) auto auto} .sheet .au-rate{grid-column:auto} .sheet .au-def{flex-basis:auto} }
+
+/* audit switch (Crews · Equipment · Invoices) */
+.v-audit .au-switch{margin-top:4px}
+.v-audit .au-switch button{font-size:var(--t-13)}
+/* a plan the red line has passed: dotted bar with a ? badge */
+.v-audit .au-due{position:absolute;z-index:4;top:3px;right:2px;font-style:normal;font-weight:800;font-size:10px;line-height:14px;min-width:14px;height:14px;border-radius:7px;background:var(--warn);color:var(--paper);text-align:center}
+.v-audit .au-c.st-due::before{border-color:var(--warn)}
+.v-audit .au-q{display:inline-block;margin-right:4px;padding:0 5px;border-radius:8px;background:var(--warn);color:var(--paper);font-size:var(--t-11);line-height:16px;vertical-align:1px}
+.v-audit .au-left{margin-left:4px;font-size:var(--t-11);font-weight:600;color:var(--ink-3);text-transform:uppercase}
+.v-audit .au-todo .btns{gap:6px}
+.sheet .au-left-btn{min-height:44px;color:var(--ink-2)}
+
+/* ---- 45-equip.css ---- */
+/* 45-equip: Equipment Gantt (reuses the .v-audit grid from 44-audit.css) and the rental editor. */
+.v-eqa .au-c.eq-idle::before{background:repeating-linear-gradient(135deg,var(--jc) 0 4px,color-mix(in srgb,var(--jc) 45%,transparent) 4px 8px)}
+.v-eqa .au-c.eq-np::before{background:repeating-linear-gradient(135deg,var(--warn) 0 3px,var(--warn-bg) 3px 7px)}
+.v-eqa .au-c.eq-np b{color:var(--warn);background:var(--warn-bg);padding:0 4px;border-radius:3px}
+.v-eqa .au-c.st-came b{font-size:var(--t-12)}
+.v-eqa .au-sw.eq-idle-sw{background:repeating-linear-gradient(135deg,var(--j1) 0 3px,color-mix(in srgb,var(--j1) 45%,transparent) 3px 6px)}
+.v-eqa .au-sw.eq-np-sw{background:repeating-linear-gradient(135deg,var(--warn) 0 2px,var(--warn-bg) 2px 5px)}
+.v-eqa .au-todo .btns{gap:6px}
+
+.sheet .eq-sheet .eq-date{display:grid;grid-template-columns:minmax(72px,auto) 1fr;gap:4px 8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.sheet .eq-sheet .eq-date .chips{grid-column:1/-1}
+.sheet .eq-sheet .eq-date .chip{min-height:44px}
+.sheet .eq-sheet .eq-dv{font-size:var(--t-16)}
+.sheet .eq-sheet .au-row .seg{height:44px}
+.sheet .eq-sheet .eq-rate-in{grid-column:2/-1;max-width:10rem;min-height:44px}
+.v-eqa .eq-grp{grid-column:1/-1;display:flex;align-items:center;min-height:30px;padding:0 8px;background:var(--sunk);border-bottom:1px solid var(--line);box-shadow:inset 3px 0 0 var(--jc)}
+.v-eqa .eq-grp .au-nm{position:sticky;left:8px;font-size:var(--t-12);text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);overflow:visible}
+
+/* ---- 46-invoices.css ---- */
+/* 46-invoices: Invoices audit — tiles, invoice cards, price watch. */
+.v-inva .ia-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.v-inva .ia-tile{display:flex;flex-direction:column;align-items:flex-start;gap:0;min-height:64px;padding:8px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);text-align:left;color:var(--ink-2);min-width:0}
+.v-inva .ia-tile b{font-size:var(--t-20);font-stretch:80%;color:var(--ink);line-height:1.1}
+.v-inva .ia-tile span{font-size:var(--t-11);font-weight:600;text-transform:uppercase;letter-spacing:.03em;line-height:1.2}
+.v-inva .ia-tile small{font-size:var(--t-12);font-weight:600}
+.v-inva .ia-tile.warn b{color:var(--warn)} .v-inva .ia-tile.owed b{color:var(--owed)} .v-inva .ia-tile.stop b{color:var(--stop)}
+.v-inva .ia-tile.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.v-inva .ia-f{margin-top:2px}
+.v-inva .ia-day{margin:8px 0 0}
+.v-inva .ia-card{border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);padding:0 10px 8px}
+.v-inva .ia-card.up{box-shadow:inset 3px 0 0 var(--stop)}
+.v-inva .ia-head{display:grid;grid-template-columns:minmax(0,1fr) auto 16px;column-gap:8px;row-gap:1px;width:100%;padding:10px 0 4px;text-align:left;color:var(--ink);background:none;border:0;min-height:44px;align-items:baseline}
+.v-inva .ia-t{grid-column:1;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.v-inva .ia-amt{grid-column:2;font-weight:700}
+.v-inva .ia-car{grid-column:3;grid-row:1/3;align-self:center;color:var(--ink-3)}
+.v-inva .ia-m{grid-column:1/3;font-size:var(--t-12);color:var(--ink-2)}
+.v-inva .ia-chips{display:flex;flex-wrap:wrap;gap:4px}
+.v-inva .ia-chip{display:inline-flex;align-items:center;gap:3px;min-height:26px;padding:0 8px;border-radius:13px;font-size:var(--t-12);font-weight:600;border:1px solid var(--line-2);color:var(--ink-2);background:var(--bg);text-decoration:none;white-space:nowrap}
+.v-inva .ia-chip.ok{color:var(--prepaid);border-color:color-mix(in srgb,var(--prepaid) 40%,var(--line))}
+.v-inva .ia-chip.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,var(--line));background:var(--warn-bg)}
+.v-inva .ia-chip.owed{color:var(--owed);border-color:color-mix(in srgb,var(--owed) 45%,var(--line))}
+.v-inva .ia-chip.stop{color:var(--stop);border-color:color-mix(in srgb,var(--stop) 45%,var(--line));background:var(--stop-bg)}
+.v-inva .ia-chip.info{color:var(--info);border-color:color-mix(in srgb,var(--info) 40%,var(--line))}
+.v-inva .ia-chip.act{color:var(--paper);background:var(--ink);border-color:var(--ink);min-height:34px;position:relative}
+.v-inva .ia-chip.act::after{content:"";position:absolute;inset:-5px -2px}
+.v-inva .ia-body{display:flex;flex-direction:column;gap:6px;padding-top:8px}
+.v-inva .ia-body .lnk{min-height:40px;align-self:flex-start}
+.v-inva .ia-lines td{vertical-align:top}
+.v-inva .ia-lines .ia-it small{display:block;color:var(--ink-2)}
+.v-inva .ia-lines .ia-d{white-space:nowrap}
+.v-inva .ia-lines .ia-d small{display:block;font-size:10px;color:var(--ink-3)}
+.v-inva .ia-lines tr.tap{cursor:pointer}
+.v-inva .ia-watch{margin-top:12px}
+.v-inva .ia-wl{display:flex;flex-direction:column}
+.v-inva .ia-w{display:grid;grid-template-columns:minmax(0,1fr) 64px 58px 64px;gap:8px;align-items:center;min-height:52px;padding:6px 0;border-bottom:1px solid var(--line);text-align:left;color:var(--ink);background:none;border-left:0;border-right:0;border-top:0}
+.v-inva .ia-wn{font-weight:600;font-size:var(--t-13);min-width:0;overflow:hidden}
+.v-inva .ia-wn small{display:block;font-weight:400;font-size:var(--t-11);color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.v-inva .ia-wd{display:flex;flex-direction:column;align-items:flex-end;font-weight:700;font-size:var(--t-13);font-variant-numeric:tabular-nums}
+.v-inva .ia-wd small{font-size:10px;font-weight:500;color:var(--ink-3);white-space:nowrap}
+.v-inva .ia-strip{position:relative;height:14px;border-top:1px solid var(--line-2);margin-top:7px}
+.v-inva .ia-strip i{position:absolute;top:-4px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--ink-3)}
+.v-inva .ia-strip i.last{width:8px;height:8px;top:-5px;margin-left:-4px;border-radius:1px;transform:rotate(45deg);background:var(--ink)}
+.v-inva .ia-strip b{position:absolute;top:-7px;width:2px;height:12px;margin-left:-1px;background:var(--info)}
+@media (max-width:420px){ .v-inva .ia-tiles{grid-template-columns:repeat(2,minmax(0,1fr))} .v-inva .ia-w{grid-template-columns:minmax(0,1fr) 44px 52px 56px;gap:6px} }
+@media (min-width:1100px){ .v-inva .ia-w{grid-template-columns:minmax(0,1fr) 160px 90px 90px} }
+.v-inva .ia-f{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.v-inva .ia-f::-webkit-scrollbar{display:none}
+.v-inva .ia-f .chip{flex:none}
+.v-inva .ia-lines .ia-cmp{display:block;white-space:nowrap}
+.v-inva .ia-lines .ia-cmp + .ia-cmp{margin-top:4px}
+.v-inva .ia-chip.doc{position:relative}
+.v-inva .ia-chip.doc::after{content:"";position:absolute;inset:-8px -4px}
+.v-inva .ia-watch > .lnk{min-height:40px}
 
 /* ---- 50-pay.css ---- */
 /* 50-pay.css: Pay view (#pay) and the pay / top-up / why sheets. Every selector is scoped under .v-pay. */
@@ -1843,6 +2086,15 @@ table.t tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0
 /* quotes status chips (wrap on phone) */
 .v-docs .dv-qseg{margin:0 0 var(--s5)}
 .v-docs .dv-qseg .chip{min-height:44px}
+.v-docs .dv-src{margin:0 0 var(--s2);padding-left:1.1em;font-size:var(--t-12);line-height:1.5}
+.v-docs .dv-src a{overflow-wrap:anywhere}
+.v-docs .dv-mkd{margin:0 0 var(--s2)}
+.v-docs .dv-mkd summary{min-height:40px;display:flex;align-items:center;cursor:pointer;color:var(--info);font-weight:600}
+.v-docs .dv-mkd[open] summary{margin-bottom:4px}
+.v-docs .dv-mkd summary{list-style:none}
+.v-docs .dv-mkd summary::-webkit-details-marker{display:none}
+.v-docs .dv-mkd summary::before{content:"▸";margin-right:6px}
+.v-docs .dv-mkd[open] summary::before{content:"▾"}
 
 /* ---- 70-admin.css ---- */
 /* 70-admin — projects, report, settings */
@@ -2471,7 +2723,8 @@ window.SL = window.SL || {};
   /** Every unit across all projects (voided costs excluded). */
   M.units = () => memo("units", () => {
     const out = [];
-    for (const ts of Object.values(S().timesheets || {})) for (const [cid, b] of Object.entries(ts.crews || {})) if (b) out.push(crewUnit(ts, cid, b));
+    // a week block holding only "didn't come" marks (day.off) or cleared days is not a money line
+    for (const ts of Object.values(S().timesheets || {})) for (const [cid, b] of Object.entries(ts.crews || {})) if (b) { const u = crewUnit(ts, cid, b); if (u.days.length || u.payments.some((p) => !p.void)) out.push(u); }
     for (const c of Object.values(S().costs || {})) if (!c.void) out.push(costUnit(c));
     for (const a of Object.values(S().archive || {})) for (const [id, c] of Object.entries(a.costs || {})) if (!c.void) out.push(costUnit(Object.assign({ id }, c), true));
     return out;
@@ -2837,8 +3090,12 @@ window.SL = window.SL || {};
       if (!conf.length) continue;
       const date = conf.map(([d]) => d).sort()[0], who = M.crewName(cid);
       const n = (f) => U.sum(conf, ([, d]) => U.num(d[f]));
-      if (n("m")) push("rate:m", { date, supplier: who, price: U.num(r.m), unit: "day", qty: n("m"), reviewed: true, crewId: cid, projectId: M.pidOf(ts) });
-      if (n("l")) push("rate:l", { date, supplier: who, price: U.num(r.l), unit: "day", qty: n("l"), reviewed: true, crewId: cid, projectId: M.pidOf(ts) });
+      // one observation per rate actually paid: a day's own rate (rm / rl) overrides the week's
+      for (const [f, rf] of [["m", "rm"], ["l", "rl"]]) {
+        const by = {};
+        for (const [, d] of conf) { const q = U.num(d[f]); if (!q) continue; const p = d[rf] != null ? U.num(d[rf]) : U.num(r[f]); by[p] = (by[p] || 0) + q; }
+        for (const [p, q] of Object.entries(by)) push("rate:" + f, { date, supplier: who, price: U.num(p), unit: "day", qty: q, reviewed: true, crewId: cid, projectId: M.pidOf(ts) });
+      }
       const foodDays = conf.filter(([, d]) => U.num(d.food) > 0);
       if (foodDays.length) push("rate:food", { date, supplier: who, price: U.median(foodDays.map(([, d]) => U.num(d.food))), unit: "day", qty: foodDays.length, reviewed: true, crewId: cid, projectId: M.pidOf(ts) });
     }
@@ -3688,8 +3945,8 @@ window.SL = window.SL || {};
 
   /* ================= routing ================= */
   const TAB_OF = {
-    today: "today", week: "today", crew: "today",
-    project: "project", job: "project", timeline: "project", ledger: "project", balances: "balances", entry: "project",
+    today: "audit", week: "audit", crew: "audit",
+    project: "project", job: "project", timeline: "project", ledger: "project", balances: "balances", audit: "audit", eqaudit: "audit", invaudit: "audit", entry: "project",
     pay: "pay", float: "pay", statement: "pay", capital: "pay",
     inbox: "docs", invoices: "docs", quotes: "docs", prices: "docs", item: "docs", quote: "docs", review: "docs", docs: "docs",
     report: "report", flags: "flags", settings: "settings", projects: "projects",
@@ -3729,6 +3986,7 @@ window.SL = window.SL || {};
     if (!SL.views[r.name] && r.name !== "today") r.name = "today";
     ui.route = r;
     const pid = ui.pid();
+    if (["audit", "eqaudit", "invaudit"].includes(r.name)) U.lsSet("sl.lastAudit", r.name);
     if (pid) { U.lsSet("sl.lastProject", pid); if (TAB_OF[r.name] && ["today", "project", "pay", "docs"].includes(TAB_OF[r.name])) U.lsSet("sl.lastTab." + pid, r.name); }
     const now = r.name + "." + r.args.join(".");
     render();
@@ -3854,14 +4112,14 @@ window.SL = window.SL || {};
     if (M.identityFailures && M.identityFailures.length) h += '<div class="strip full">Totals don\'t reconcile (X2). Tell Claude Code: "check Site Ledger identities".</div>';
     return h;
   }
-  const TABS = [["balances", "Home", "⌂"], ["today", "Today", "◷"], ["project", "Project", "▤"], ["+", "", ""], ["pay", "Pay", "◈"], ["docs", "Docs", "▦"]];
+  const TABS = [["balances", "Home", "⌂"], ["audit", "Audit", "☷"], ["project", "Project", "▤"], ["+", "", ""], ["pay", "Pay", "◈"], ["docs", "Docs", "▦"]];
   const RO_TABS = [["report", "Report", "▤"], ["project", "Jobs", "☰"], ["timeline", "Timeline", "▭"], ["ledger", "Ledger", "≡"]];
   function tabs(name) {
     const tab = TAB_OF[name] || "";
     if (ui.readOnlyUI()) return RO_TABS.map(([k, l, ic]) => `<button class="${(k === name || (k === "project" && tab === "project" && name !== "timeline" && name !== "ledger")) ? "on" : ""}" data-go="${ui.href(k)}"><span class="ic">${ic}</span>${l}</button>`).join("");
     const inbox = inboxCount();
     return TABS.map(([k, l, ic]) => k === "+" ? '<button class="plus" data-act="add" aria-label="Add">+</button>' :
-      `<button class="${tab === k ? "on" : ""}" data-go="${ui.href(k === "docs" ? "inbox" : k)}"><span class="ic">${ic}</span>${l}${k === "docs" && inbox ? '<span class="badge">' + inbox + "</span>" : ""}</button>`).join("");
+      `<button class="${tab === k ? "on" : ""}" data-go="${ui.href(k === "docs" ? "inbox" : k === "audit" ? U.lsGet("sl.lastAudit", "audit") : k)}"><span class="ic">${ic}</span>${l}${k === "docs" && inbox ? '<span class="badge">' + inbox + "</span>" : ""}</button>`).join("");
   }
   function inboxCount() {
     const pid = ui.pid();
@@ -3871,7 +4129,7 @@ window.SL = window.SL || {};
     if (window.innerWidth < 1100) return "";
     const ro = ui.readOnlyUI();
     const items = ro ? [["report", "Report"], ["project", "Jobs"], ["timeline", "Timeline"], ["ledger", "Ledger"]] :
-      [["balances", "Balances"], ["today", "Today"], ["week", "Week"], ["project", "Project"], ["timeline", "Timeline"], ["ledger", "Ledger"], ["pay", "Pay"], ["inbox", "Docs"], ["report", "Report"], ["flags", "Flags"], ["settings", "Settings"]];
+      [["balances", "Balances"], ["audit", "Crews"], ["eqaudit", "Equipment"], ["invaudit", "Invoices"], ["today", "Today"], ["week", "Week"], ["project", "Project"], ["timeline", "Timeline"], ["ledger", "Ledger"], ["pay", "Pay"], ["inbox", "Docs"], ["report", "Report"], ["flags", "Flags"], ["settings", "Settings"]];
     let h = '<div class="lbl" style="padding:4px 10px 8px">Site Ledger</div>';
     // general above specific: All projects, then each project
     h += `<button class="${name === "projects" ? "on" : ""}" data-go="#projects"><span>All projects</span></button>`;
@@ -4005,6 +4263,8 @@ window.SL = window.SL || {};
   document.addEventListener("click", async (ev) => {
     if (ev.target.closest && ev.target.closest("select[data-pickseg],select[data-pickact]")) return; // acts on change
     const el = actOf(ev.target); if (!el) return;
+    // a real link inside a tappable row (e.g. the receipt icon on Balances) opens the link, not the row
+    const link = ev.target.closest("a[href]"); if (link && link !== el && el.contains(link)) return;
     const sh = ui.sheets.find((s) => s.el.contains(el));
     if (el.dataset.go) { ev.preventDefault(); if (sh) ui.closeAll(); ui.go(el.dataset.go); return; }
     if (el.dataset.seg && sh) {
@@ -4065,7 +4325,7 @@ window.SL = window.SL || {};
   };
   A.menu = () => {
     const ro = ui.readOnlyUI(), real = S().canWrite !== false;
-    const items = [["balances", "Balances (who owes whom)"], ["report", "Report (investor view)"], ["capital", "Capital & sources"], ["ledger", "Ledger (every cost)"], ["timeline", "Timeline (Gantt)"], ["flags", "Flags"], ["settings", "Settings"]].filter(([k]) => !ro || ["report", "ledger", "timeline"].includes(k));
+    const items = [["balances", "Balances (who owes whom)"], ["audit", "Crews (who came, day by day)"], ["eqaudit", "Equipment (what is on site)"], ["invaudit", "Invoices (received, paid, prices)"], ["today", "Today (crews, rentals, bought today)"], ["report", "Report (investor view)"], ["capital", "Capital & sources"], ["ledger", "Ledger (every cost)"], ["timeline", "Timeline (Gantt)"], ["flags", "Flags"], ["settings", "Settings"]].filter(([k]) => !ro || ["report", "ledger", "timeline"].includes(k));
     ui.sheet({
       title: "More",
       body: () => '<div class="menu">' + items.map(([k, l]) => `<button data-go="${ui.href(k)}">${l}</button>`).join("") +
@@ -4609,9 +4869,12 @@ window.SL = window.SL || {};
     if (X.ro()) return;
     const pid = ui.pid(), cid = ds.cid, date = ds.date, cur = M.crewDay(pid, cid, date).day;
     if (!cur) return;
-    const r = await X.write(pid, cid, { [date]: null });
-    if (!r.ok) return;
-    ui.toast(name(cid) + " removed · " + U.esc(U.dShort(date)), { ms: 10000, undo: async () => { await X.write(pid, cid, { [date]: X.full(cur) }); } });
+    // up to today it is a fact ("didn't come", day.off, costs nothing); a future plan is just removed
+    const val = date <= U.today() ? { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false } : null;
+    const r = await SL.store.setDays(pid, U.weekStart(date), cid, { [date]: val });
+    if (!r.ok) { ui.toast(U.esc(SL.store.errText(r))); return; }
+    const back = Object.assign({ m: 0, l: 0, food: 0, plan: false, off: false, job: "", rm: null, rl: null, est: false }, U.clone(cur));
+    ui.toast(name(cid) + (val ? " didn't come · " : " plan removed · ") + U.esc(U.dShort(date)), { ms: 10000, undo: () => SL.store.setDays(pid, U.weekStart(date), cid, { [date]: back }) });
   };
 
   /** Job for one crew day only (job chips). */
@@ -4661,6 +4924,7 @@ window.SL = window.SL || {};
   /** "+ day": Today if crews are planned today, else a crew picker → the crew grid. */
   A.addCrewDay = (ds) => {
     const pid = ui.pid(), today = U.today();
+    if (SL.views.audit) return ui.go("audit"); // the Crews screen: every crew, every day, one tap each
     if (X.plansOn(pid, today).length) return ui.go("today");
     const ids = U.uniq([...X.crewsFor(pid, today).withRec, ...X.crewsFor(pid, today).active, ...M.projectCrewIds(pid)]).filter((c) => M.crew(c) && M.crew(c).active !== false);
     ui.sheet({
@@ -4755,7 +5019,8 @@ window.SL = window.SL || {};
       for (const [d0, rec] of Object.entries(b.days || {})) {
         if (!rec || !(X.heads(rec) > 0)) continue;
         const d = U.addDays(d0, 7);
-        if (d < today || X.day(pid, cid, d)) continue;
+        const stored = M.crewDay(pid, cid, d).day;
+        if (d < today || X.day(pid, cid, d) || (stored && stored.off)) continue; // never plan over a recorded day or a "didn't come"
         const r = { m: U.num(rec.m), l: U.num(rec.l), food: U.num(rec.food), plan: true };
         if (rec.job && rec.job !== (b.job || "")) r.job = rec.job; // untagged days follow the week job (a new block starts on last week's)
         (out[cid] = out[cid] || {})[d] = r;
@@ -4916,7 +5181,13 @@ window.SL = window.SL || {};
         csBigSet: (d, el, ev, sh) => { const v = U.num(sh.state.bigVal); if (!(v >= 0)) return; return C.setVal(sh, v); },
         csFood: (d, el, ev, sh) => C.toggleFood(sh),
         csWalk: (d, el, ev, sh) => C.goDay(sh, U.addDays(sh.state.date, U.num(d.dir) < 0 ? -1 : 1), "m"),
-        csNone: (d, el, ev, sh) => C.save(sh, null),
+        // up to today "Didn't come" is a fact (day.off, costs nothing, the Crews screen stops asking); a future plan is just removed
+        csNone: (d, el, ev, sh) => {
+          const s = sh.state;
+          if (s.date > U.today()) return C.save(sh, null);
+          s.recs[s.date] = null; sh.err = ""; sh.refresh();
+          return SL.store.setDays(s.pid, U.weekStart(s.date), s.cid, { [s.date]: { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false } }).then((r) => { if (!r.ok && ui.sheets.includes(sh)) sh.error("Not saved · " + SL.store.errText(r)); });
+        },
       },
       onKey: (sh, ev) => {
         if (ev.target && ev.target.tagName === "INPUT") { if (ev.key === "Enter" && ev.target.id === "cs-big") { ev.preventDefault(); C.setVal(sh, U.num(sh.state.bigVal)); } return; }
@@ -5134,7 +5405,8 @@ window.SL = window.SL || {};
     const from = X.lastWorked(pid, sat, cid);
     if (!from) return { from: "", dates: [] };
     const thu = U.addDays(sat, 5);
-    const dates = U.weekDays(sat).filter((d) => d > from && d <= thu && !U.isFri(d) && M.isWorkDay(pid, d) && !X.isConf(X.rawDay(pid, sat, cid, d)) && !X.isPlan(X.rawDay(pid, sat, cid, d)));
+    const offOn = (d) => { const b = X.block(pid, sat, cid), x = b && b.days && b.days[d]; return !!(x && x.off); };
+    const dates = U.weekDays(sat).filter((d) => d > from && d <= thu && !U.isFri(d) && M.isWorkDay(pid, d) && !X.isConf(X.rawDay(pid, sat, cid, d)) && !X.isPlan(X.rawDay(pid, sat, cid, d)) && !offOn(d));
     return { from, dates };
   };
 
@@ -5297,11 +5569,12 @@ window.SL = window.SL || {};
 
   A.crewTick = async (d) => {
     const pid = ui.pid(), { cid, sat, date } = d, T = U.today();
-    const raw = X.rawDay(pid, sat, cid, date), old = X.full(raw);
+    const raw = X.rawDay(pid, sat, cid, date), stored = X.block(pid, sat, cid) && X.block(pid, sat, cid).days ? X.block(pid, sat, cid).days[date] : null;
+    const old = stored ? Object.assign({ m: 0, l: 0, food: 0, plan: false, off: false, job: "", est: false }, U.clone(stored)) : null; // Undo puts back exactly what was there (a "didn't come" too)
     let val, msg;
     if (!raw) {
       const us = X.usual(cid), r = X.rates(pid, sat, cid), fut = date > T;
-      val = { m: us.m, l: us.l, food: U.num(r.food), plan: fut };
+      val = { m: us.m, l: us.l, food: U.num(r.food), plan: fut, off: false };
       msg = `${X.cname(cid)} ${fut ? "planned" : "came"} ${U.esc(U.dShort(date))} · ${us.m} M · ${us.l} L`;
     } else if (raw.plan) {
       if (date <= T) { val = { plan: false }; msg = `Confirmed ${X.cname(cid)} · ${U.esc(U.dShort(date))}`; }
@@ -5511,7 +5784,8 @@ window.SL = window.SL || {};
     for (const [dt, pd] of Object.entries(prev.days || {})) {
       if (!X.isConf(pd)) continue;
       const nd = U.addDays(dt, 7), cur = X.rawDay(pid, sat, cid, nd);
-      if (X.isConf(cur)) continue; // never over a recorded day
+      const stored = X.block(pid, sat, cid) && (X.block(pid, sat, cid).days || {})[nd];
+      if (X.isConf(cur) || (stored && stored.off)) continue; // never over a recorded day or a "didn't come"
       days[nd] = { m: U.num(pd.m), l: U.num(pd.l), food: U.num(pd.food), job: pd.job || "", plan: true };
       undo[nd] = X.full(cur);
     }
@@ -6749,13 +7023,14 @@ window.SL = window.SL || {};
     const rows = u.days.map((d) => {
       const fut = d.date > D, pl = d.plan;
       const amt = pl ? '<span class="c-committed">(' + ui.m(d.h) + ")</span>" : fut ? '<span class="faint">' + ui.m(d.h) + "</span>" : (d.est ? '<span class="est">~' + ui.m(d.h) + "</span>" : ui.m(d.h));
-      return '<tr class="' + (pl ? "lg-plan" : "") + '"><td>' + U.esc(U.dShort(d.date)) + (pl ? ' <span class="t12 c-committed">plan</span>' : "") + '</td><td class="r">' + (d.m || '<span class="zero">–</span>') + '</td><td class="r">' + (d.l || '<span class="zero">–</span>') +
+      return '<tr class="' + (pl ? "lg-plan" : "") + '"><td>' + U.esc(U.dShort(d.date)) + (pl ? ' <span class="t12 c-committed">plan</span>' : "") + '</td><td class="r">' + (d.m ? d.m + (d.rm != null ? '<small class="c-warn"> ×' + U.mw(U.num(d.rm)) + "</small>" : "") : '<span class="zero">–</span>') + '</td><td class="r">' + (d.l ? d.l + (d.rl != null ? '<small class="c-warn"> ×' + U.mw(U.num(d.rl)) + "</small>" : "") : '<span class="zero">–</span>') +
         '</td><td class="r">' + (d.food ? U.m(d.food) : '<span class="zero">–</span>') + "</td><td>" + U.esc(M.jobCode(d.job || u.jobId) || "–") + '</td><td class="r">' + amt + "</td></tr>";
     }).join("");
     const r = M.calc(u, D), s = M.crewStats ? M.crewStats(u, D) : null;
     const foot = '<tr><td>Cost to date</td><td class="r">' + (s ? s.mDays : "") + '</td><td class="r">' + (s ? s.lDays : "") + '</td><td class="r"></td><td></td><td class="r">' + ui.m(r.inc) + "</td></tr>";
     const rates = u.rates || {};
-    return '<div class="t12 muted">Rates: M ' + U.esc(U.mw(U.num(rates.m))) + " · L " + U.esc(U.mw(U.num(rates.l))) + " per day</div>" +
+    const own = u.days.some((d) => d.rm != null || d.rl != null);
+    return '<div class="t12 muted">Rates: M ' + U.esc(U.mw(U.num(rates.m))) + " · L " + U.esc(U.mw(U.num(rates.l))) + " per day" + (own ? ' · <span class="c-warn">×n = that day\'s own rate</span>' : "") + "</div>" +
       '<div class="tscroll lg-days"><table class="t"><thead><tr><th>Day</th><th class="r">M ' + U.t("معلمين") + '</th><th class="r">L ' + U.t("عمال") + '</th><th class="r">Food</th><th>Job</th><th class="r">Amount</th></tr></thead><tbody>' + rows + "</tbody><tfoot>" + foot + "</tfoot></table></div>" +
       '<button class="lnk lg-go" data-go="' + U.esc(ui.href("crew", u.crewId, u.weekStart)) + '">Open ' + U.t(u.title) + " · week of " + U.esc(U.dDM(u.weekStart)) + " ›</button>";
   };
@@ -7540,33 +7815,39 @@ window.SL = window.SL || {};
       const r = M.calc(u, D), party = PARTY[u.cat] || "P", open = !!(r.owed || r.prepaid);
       X.parties[party].owed += r.owed; X.parties[party].prepaid += r.prepaid;
       if (u.noPrice && !r.paid && !r.inc) X.unpriced++;
-      const base = { key: u.key, cat: u.cat, open, files: u.kind === "crew" ? [] : (u.doc.files || []).slice() };
+      const base = { key: u.key, cat: u.cat, party, open, files: u.kind === "crew" ? [] : (u.doc.files || []).slice() };
       if (u.kind === "crew") {
         for (const d of u.days) {
           if (d.plan || d.date > D || !d.h) continue;
           const fx = X.blank(); fx[party] = -d.h;
           rows.push(Object.assign({}, base, { date: d.date, seq: 0, fx, title: U.t(u.title) + " came",
-            meta: [U.dShort(d.date), d.m + "M " + d.l + "L" + (d.food ? " +food" : ""), M.jobCode(d.job)].filter(Boolean).join(" · ") }));
+            meta: [d.m + "M " + d.l + "L" + (d.food ? " +food" : ""), U.esc(M.jobCode(d.job))].filter(Boolean).join(" · ") }));
         }
       } else if (u.pendingDelivery) {
+        if (u.date && u.date > D) continue;
         const w = u.kind === "service" ? "performed" : "delivered";
         rows.push(Object.assign({}, base, { date: u.date, seq: 0, fx: X.blank(), pending: u.kind === "service" ? "Performed" : "Delivered", title: U.t(u.title) + " · not " + w + " yet",
-          meta: [U.dShort(u.date), M.jobCode(u.jobId), r.paid ? "paid ahead: Prepaid until " + w : "not paid either"].filter(Boolean).join(" · ") }));
+          meta: [U.esc(M.jobCode(u.jobId)), r.paid ? "paid ahead: Prepaid until " + w : "not paid either"].filter(Boolean).join(" · ") }));
       } else if (r.inc) {
         const fx = X.blank(); fx[party] = -r.inc;
-        let title = U.t(u.title), meta = M.unitMeta(u).map((x) => U.t(x));
-        if (u.kind === "rental") { const n = r.parts.length; title += " on site"; meta = ["in " + U.dShort(u.in) + (u.out ? " → " + U.dShort(u.out) : ""), n + " day" + (n > 1 ? "s" : "") + " × " + U.mw(u.daily / 100), M.jobCode(u.jobId)].filter(Boolean); }
+        const at = u.kind === "rental" ? u.in : u.delivered || u.date;
+        let title = U.t(u.title), meta = M.unitMeta(u).slice(1).map((x) => U.t(x));
+        if (u.kind !== "rental" && u.date && u.date !== at) meta.unshift("dated " + U.esc(U.dShort(u.date)));
+        if (u.kind === "rental") { const n = r.parts.length; title += " on site"; meta = ["in " + U.esc(U.dShort(u.in)) + (u.out ? " → " + U.esc(U.dShort(u.out)) : ""), n + " day" + (n > 1 ? "s" : "") + " × " + U.mw(u.daily / 100), U.esc(M.jobCode(u.jobId))].filter(Boolean); }
         else if (u.kind === "purchase") title += " delivered";
         else if (u.kind === "service") title += " performed";
-        rows.push(Object.assign({}, base, { date: u.kind === "rental" ? u.in : u.delivered || u.date, seq: 0, fx, title, meta: meta.join(" · ") }));
+        rows.push(Object.assign({}, base, { date: at, seq: 0, fx, title, meta: meta.join(" · ") }));
       }
       for (const p of u.payments) {
         if (p.void || !p.date || p.date > D) continue;
         const fx = X.blank(), pk = X.pocket(p.walletId); fx[pk] = -p.h; fx[party] = p.h;
         const who = pk === "me" ? "You" : U.esc(M.walletName(p.walletId));
         const note = p.note && !/^migrated from v1/i.test(p.note) && !ui.readOnlyUI() ? U.t(p.note) : "";
-        rows.push(Object.assign({}, base, { date: p.date, seq: 1, at: p.at || 0, fx, title: who + " paid " + U.t(u.kind === "crew" ? M.crewName(u.crewId) : u.payee),
-          meta: [U.dShort(p.date), u.kind === "crew" ? "wk " + U.dDM(u.weekStart) : U.t(u.title), note].filter(Boolean).join(" · ") }));
+        const payee = String((u.kind === "crew" ? M.crewName(u.crewId) : u.payee) || ""), title = String(u.title || "");
+        // "Sayed paid Noura" + "#293", not "Noura … #293" again
+        const what = u.kind === "crew" ? "wk " + U.dDM(u.weekStart) : payee && title.startsWith(payee) ? title.slice(payee.length).replace(/^[\s·:,–-]+/, "") : title;
+        rows.push(Object.assign({}, base, { date: p.date, seq: 1, at: p.at || 0, payId: p.id, wid: p.walletId, fx, title: who + " paid " + U.t(payee),
+          meta: [U.t(what), note].filter(Boolean).join(" · ") }));
       }
     }
     const sayedName = (wid) => U.esc(M.walletName(wid));
@@ -7579,16 +7860,30 @@ window.SL = window.SL || {};
       else if (c.type === "adjust") { fx.sayed = h; title = "Float adjustment"; }
       else if (c.type === "capital") { fx.me = h; title = (c.capitalKind === "loan" ? "Loan from " : "Capital from ") + U.t(c.investor || "investor"); }
       else continue;
-      const meta = [U.dShort(c.date)]; if (c.note && !ui.readOnlyUI()) meta.push(U.t(c.note));
-      rows.push({ files: (c.files || []).slice(), capital: c.type === "capital", cashId: c.id, date: c.date, seq: 1, at: c.createdAt || 0, title, meta: meta.join(" · "), fx, open: false });
+      const meta = []; if (c.note && !ui.readOnlyUI()) meta.push(U.t(c.note));
+      rows.push({ files: (c.files || []).slice(), capital: c.type === "capital", cashId: c.id, wid: c.walletId || "", date: c.date, seq: 1, at: c.createdAt || 0, title, meta: meta.join(" · "), fx, open: false });
     }
-    // newest first; on one day a cost's payment sits right above its delivery
-    const k = (r) => r.key || r.cashId || "";
-    return rows.sort((a, b) => (a.date !== b.date ? (a.date > b.date ? -1 : 1) : k(a) !== k(b) ? (k(a) < k(b) ? -1 : 1) : b.seq - a.seq || (b.at || 0) - (a.at || 0)));
+    // newest first. Within a day: cash handed to Sayed goes at the bottom (it comes first, as on the Float page), then
+    // the latest group on top; a cost's payment sits right above its delivery
+    const k = (r) => r.key || r.cashId || "", cin = (r) => (r.cashId && r.fx.sayed > 0 ? 1 : 0);
+    const gat = new Map(); for (const r of rows) { const g = r.date + "|" + k(r); gat.set(g, Math.max(gat.get(g) || 0, r.at || 0)); }
+    const ga = (r) => gat.get(r.date + "|" + k(r)) || 0;
+    rows.sort((a, b) => (a.date !== b.date ? (a.date > b.date ? -1 : 1) : cin(a) - cin(b) || ga(b) - ga(a) || (k(a) !== k(b) ? (k(a) < k(b) ? -1 : 1) : b.seq - a.seq || (b.at || 0) - (a.at || 0))));
+    // what the float should hold right after each event: taken from the float's own ledger (time order, every project),
+    // so it matches the Float page and Sayed's count
+    // each day starts from what the float held at the end of the day before (every project), then follows the rows
+    const fl = {}, startOf = (wid, date) => { let b = 0; for (const f of (fl[wid] = fl[wid] || M.floatLedger(wid, D))) { if (f.date >= date) break; b = f.bal; } return b; };
+    const run = {};
+    for (let i = rows.length - 1; i >= 0; i--) {
+      const r = rows[i]; if (!r.fx.sayed || !r.wid) continue;
+      const cur = run[r.wid]; if (!cur || cur.date !== r.date) run[r.wid] = { date: r.date, bal: startOf(r.wid, r.date) };
+      run[r.wid].bal += r.fx.sayed; r.sayedAfter = run[r.wid].bal;
+    }
+    return rows;
   };
   X.sum = (rows) => { const t = X.blank(); for (const r of rows) for (const k in t) t[k] += r.fx[k]; return t; };
   /** Bottom summary: what Ryan paid, what the float still holds, and payables / prepaid per party. */
-  X.summary = (rows, t, sayed) => {
+  X.summary = (rows, t, sayed, holds) => {
     let out = 0, back = 0; const owe = {}, pre = {};
     for (const r of rows) if (r.fx.me < 0) out -= r.fx.me; else back += r.fx.me;
     for (const k of X.PARTIES) { owe[k] = X.parties[k].owed; pre[k] = X.parties[k].prepaid; }
@@ -7598,9 +7893,9 @@ window.SL = window.SL || {};
     const totalOwed = owe.T + owe.P + owe.E;
     return `<div class="card bl-sum"><div class="kv">` +
       line("You paid", out, "", back ? U.mw(back / 100) + " came back (returns, capital)" : "cash to " + U.esc(sayed) + " + paid direct") +
-      line(U.esc(sayed) + " has left", t.sayed, t.sayed < 0 ? "c-stop" : "", "cash he should be holding") +
+      line(U.esc(sayed) + " has left", holds, holds < 0 ? "c-stop" : "", "cash he should be holding") +
       pay("T", "tradesmen") + pay("P", "suppliers") + pay("E", "equipment renters") +
-      line("<b>Total payables</b>", totalOwed, totalOwed ? "c-owed" : "", t.sayed >= totalOwed ? U.esc(sayed) + "'s cash covers it" : "short by " + U.mw((totalOwed - t.sayed) / 100) + " after " + U.esc(sayed) + "'s cash") +
+      line("<b>Total payables</b>", totalOwed, totalOwed ? "c-owed" : "", holds >= totalOwed ? U.esc(sayed) + "'s cash covers it" : "short by " + U.mw((totalOwed - holds) / 100) + " after " + U.esc(sayed) + "'s cash") +
       `</div>${unk ? '<p class="t12 c-warn">? ' + unk + " rental" + (unk > 1 ? "s" : "") + " with no price yet: no money has moved, so they are not listed. Set their rates in Pay › Set</p>" : ""}</div>`;
   };
   /** Proof icon: a filled document (tap to open the file) when a paper backs the event, a dashed empty one when not. */
@@ -7614,43 +7909,114 @@ window.SL = window.SL || {};
   /** A row still open: some party is owed or prepaid. */
   X.isOpen = (r) => r.open;
 
-  /** A pocket cell: signed cash in / out. A party cell: +paid (green) and/or −still owed (orange). */
-  X.cell = (v, k, touched, unk) => {
+  /** A pocket cell: signed cash in / out (Sayed's also shows what he holds after it). A party cell: +paid (green) / −earned, still owed (orange). */
+  X.cell = (v, k, after) => {
     const dot = '<span class="zero">·</span>';
-    if (k === "me" || k === "sayed") return `<td class="r num${k === "me" ? " bl-me" : ""}">${v ? (v > 0 ? "+" : "") + U.mw(v / 100) : dot}</td>`;
+    if (k === "me" || k === "sayed") {
+      const run = k === "sayed" && v && after != null ? `<small class="bl-run${after < 0 ? " c-stop" : ""}" title="What he should hold after this">= ${U.mw(after / 100)}</small>` : "";
+      return `<td class="r num${k === "me" ? " bl-me" : ""}">${v ? (v > 0 ? "+" : "") + U.mw(v / 100) : dot}${run}</td>`;
+    }
     return `<td class="r num">${v ? `<span class="${v > 0 ? "c-prepaid" : "c-owed"}">${v > 0 ? "+" : ""}${U.mw(v / 100)}</span>` : dot}</td>`;
+  };
+
+  /** Filters: [route arg, chip label, test]. "me" / "sayed" = every row that moved that pocket. */
+  X.FILTERS = [
+    ["all", "All", () => true],
+    ["open", "Open", (r) => r.open],
+    ["noproof", "No proof", (r) => !(r.files && r.files.length)],
+    ["me", "Me", (r) => !!r.fx.me],
+    ["sayed", "Sayed", (r) => !!r.fx.sayed],
+    ["trades", "Trades", (r) => r.party === "T"],
+    ["suppliers", "Suppliers", (r) => r.party === "P"],
+    ["equip", "Equipment", (r) => r.party === "E"],
+  ];
+  X.q = "";
+  const plain = (html) => String(html || "").replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+  /** Search text of a row: title, meta, day and every amount (so "5000" or "5,000" finds it). */
+  X.qText = (r) => {
+    const amts = Object.values(r.fx).filter(Boolean).map((v) => { const w = U.mw(Math.abs(v) / 100); return w + " " + w.replace(/,/g, ""); });
+    return (plain(r.title) + " " + plain(r.meta) + " " + U.dShort(r.date) + " " + amts.join(" ")).toLowerCase();
+  };
+  X.dayLabel = (d, T) => (d === T ? "Today · " : d === U.addDays(T, -1) ? "Yesterday · " : "") + U.dShort(d);
+  /** Headline tiles: what Ryan paid, what Sayed holds, what we owe, what is paid ahead. Each opens its filter. */
+  X.tiles = (all, t, sayed, f, holds) => {
+    let out = 0; for (const r of all) if (r.fx.me < 0) out -= r.fx.me;
+    const owe = X.PARTIES.reduce((a, k) => a + X.parties[k].owed, 0), pre = X.PARTIES.reduce((a, k) => a + X.parties[k].prepaid, 0);
+    const tile = (k, label, h, cls, sub) => `<button type="button" class="bl-tile${cls ? " " + cls : ""}${f === k ? " on" : ""}" data-act="balFilter" data-val="${f === k ? "all" : k}" aria-pressed="${f === k}"><span>${label}</span><b class="num">${h ? U.mw(h / 100) : "0"}</b><small>${sub}</small></button>`;
+    return '<div class="bl-tiles">' +
+      tile("me", "You paid", out, "me", "cash + direct") +
+      tile("sayed", U.esc(sayed) + " has", holds, holds < 0 ? "stop" : "", "cash left") +
+      tile("open", "You owe", owe, owe ? "owed" : "", X.unpriced ? "+" + X.unpriced + " unpriced" : owe ? "not paid yet" : "all settled") +
+      tile("open", "Paid ahead", pre, pre ? "pre" : "", pre ? "not delivered yet" : "nothing ahead") + "</div>";
   };
 
   SL.views.balances = {
     tab: "project",
     asOf: true,
     render(route, pid) {
-      const D = ui.D(), onlyOpen = (route.args || [])[0] === "open";
-      const f = (route.args || [])[0] || "all", all = X.rows(pid, D), t = X.sum(all);
-      const noProof = (r) => !(r.files && r.files.length), rows = f === "open" ? all.filter(X.isOpen) : f === "noproof" ? all.filter(noProof) : all;
-      const nDoc = all.length - all.filter(noProof).length;
-      const sayed = (M.wallet(M.defaultWallet(pid)) || {}).holder || "Sayed";
-      const head = X.COLS.map(([k, l]) => `<th class="r${k === "me" ? " bl-me" : ""}" scope="col">${U.esc(k === "sayed" ? sayed : l)}</th>`).join("");
+      const D = ui.D(), T = U.today(), arg = (route.args || [])[0] || "all";
+      const F = X.FILTERS.find(([k]) => k === arg) || X.FILTERS[0], f = F[0];
+      const all = X.rows(pid, D), t = X.sum(all), rows = all.filter(F[2]);
+      const fw = M.defaultWallet(pid), sayed = (M.wallet(fw) || {}).holder || "Sayed", holds = fw ? M.walletCalc(fw, D).holds : t.sayed;
+      const nDoc = all.filter((r) => r.files && r.files.length).length;
+      // a party column with nothing in it (e.g. Equip. while no rental has a price) is left out: room for the others on a phone
+      const PF = { trades: "T", suppliers: "P", equip: "E" }, cols = X.COLS.filter(([k]) => k === "me" || k === "sayed" || PF[f] === k || rows.some((r) => r.fx[k]) || t[k]);
+      const SHORT = { P: "Suppl.", E: "Equip" }, lab = (k, l) => U.esc(k === "sayed" ? sayed : l);
+      const labH = (k, l) => (SHORT[k] ? `<span class="bl-lg">${lab(k, l)}</span><span class="bl-sm" aria-hidden="true">${SHORT[k]}</span>` : lab(k, l));
+      const head = cols.map(([k, l]) => `<th class="r${k === "me" ? " bl-me" : ""}" scope="col">${labH(k, l)}</th>`).join("");
       let h = '<div class="v-bal"><div class="hrow bl-top"><h2 class="t20">Balances</h2><span class="spacer"></span>' + ui.asOfChip() + "</div>";
-      h += '<p class="t12 muted bl-help">Money starts with <b class="bl-me">Me</b> and moves right: Me → ' + U.esc(sayed) + ' → whoever was paid, so every row balances. Me and ' + U.esc(sayed) + ': cash in <b>+</b> / out <b>−</b>. Trades, suppliers and equipment: <b class="c-owed">−</b> when they work or deliver (we owe them), <b class="c-prepaid">+</b> when they are paid. Their balance: <b class="c-owed">−</b> we still owe, <b class="c-prepaid">+</b> paid ahead. Proof: <b>doc</b> = a document backs it (tap to open) · <b>none</b> = nothing on paper.</p>';
-      h += '<div class="bl-seg">' + ui.seg("", [["all", "All " + all.length], ["open", "Open " + all.filter(X.isOpen).length], ["noproof", "No proof " + all.filter(noProof).length]], f, { act: "balFilter", label: "Show" }) +
-        `<span class="t12 muted bl-pcount">${X.proof(["x"]).replace(/<a[^>]*>/, '<span class="bl-pf ok">').replace("</a>", "</span>")} ${nDoc} of ${all.length} events backed by a document</span></div>`;
       if (!all.length) return h + '<div class="empty">Nothing logged yet.</div></div>';
-      h += '<div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-pc">Proof</th><th scope="col" class="bl-d">Description</th>' + head + "</tr></thead><tbody>";
+      h += X.tiles(all, t, sayed, f, holds);
+      h += '<div class="chips bl-chips" role="group" aria-label="Show">' + X.FILTERS.map(([k, l, fn]) => { const n = all.filter(fn).length; return `<button type="button" class="chip${k === f ? " on" : ""}" data-act="balFilter" data-val="${k}" aria-pressed="${k === f}">${U.esc(k === "sayed" ? sayed : l)} <small class="muted">${n}</small></button>`; }).join("") + "</div>";
+      const help = ui.isOpen("bl.help", false);
+      h += `<div class="bl-tools"><input id="bl-q" class="inp" type="search" placeholder="Search: supplier, crew, job, amount" aria-label="Search events" value="${U.esc(X.q)}" autocomplete="off"><button type="button" class="lnk bl-hlp" data-act="toggle" data-k="bl.help" aria-expanded="${help}">${help ? "Hide help" : "How to read"}</button></div>`;
+      if (help) h += '<p class="t12 muted bl-help">Money starts with <b class="bl-me">Me</b> and moves right: Me → ' + U.esc(sayed) + ' → whoever was paid, so every row balances. Me and ' + U.esc(sayed) + ': cash in <b>+</b> / out <b>−</b>; the small <b>= n</b> under ' + U.esc(sayed) + "'s amounts is what he should hold after it. Trades, suppliers and equipment: <b class=\"c-owed\">−</b> when they work or deliver (we owe them), <b class=\"c-prepaid\">+</b> when they are paid. Their balance: <b class=\"c-owed\">−</b> we still owe, <b class=\"c-prepaid\">+</b> paid ahead. Proof: <b>doc</b> = a document backs it (tap to open) · <b>none</b> = nothing on paper (" + nDoc + " of " + all.length + " events have one).</p>";
+      h += '<div class="bl-box"><div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-pc">Proof</th><th scope="col" class="bl-d">Description</th>' + head + "</tr></thead><tbody>";
+      let day = null;
       for (const r of rows) {
-        const act = r.key ? ` class="tap" data-act="openUnit" data-key="${U.esc(r.key)}" role="button" tabindex="0"` : "";
+        if (r.date !== day) {
+          // each day repeats the column names (the table head scrolls away on a long phone list)
+          const first = day === null; day = r.date;
+          h += `<tr class="bl-day" data-day="${U.esc(day)}"><td class="bl-pc"></td><th scope="rowgroup" class="bl-d">${U.esc(X.dayLabel(day, T))}</th>${cols.map(([k, l]) => `<td class="r${k === "me" ? " bl-me" : ""}">${first ? "" : labH(k, l)}</td>`).join("")}</tr>`;
+        }
+        const act = r.key ? ` class="tap${r.pending ? " bl-pend" : ""}" data-act="openUnit" data-key="${U.esc(r.key)}" role="button" tabindex="0"`
+          : r.cashId ? ` class="tap" data-go="${U.esc(r.capital ? ui.href("capital") : ui.href("float", r.wid || M.defaultWallet(pid)))}" role="link" tabindex="0"` : "";
         const bad = X.leak(r);
-        h += `<tr${act}${bad ? ' data-leak="1"' : ""}><td class="bl-pc">${X.proof(r.files)}</td><th scope="row" class="bl-d${bad ? " bl-leak" : ""}"><span class="bl-t">${r.title}</span><span class="t11 muted">${r.meta}</span>${r.pending && !ui.readOnlyUI() && !ui.isPast() ? `<button type="button" class="btn sm bl-dlv" data-act="markDelivered" data-id="${U.esc(r.key.slice(2))}">✓ ${r.pending}</button>` : ""}${bad ? '<span class="t11 c-stop">▲ doesn\'t balance by ' + U.mw(bad / 100) + ": money from nowhere</span>" : ""}</th>` +
-          X.COLS.map(([k]) => X.cell(r.fx[k], k)).join("") + "</tr>";
+        h += `<tr${act} data-d="${U.esc(r.date)}" data-q="${U.esc(X.qText(r))}"${bad ? ' data-leak="1"' : ""}><td class="bl-pc">${X.proof(r.files)}</td><th scope="row" class="bl-d${bad ? " bl-leak" : ""}"><span class="bl-t">${r.title}</span>${r.meta ? '<span class="t11 muted">' + r.meta + "</span>" : ""}${r.pending && !ui.readOnlyUI() && !ui.isPast() ? `<button type="button" class="btn sm bl-dlv" data-act="markDelivered" data-id="${U.esc(r.key.slice(2))}">✓ ${r.pending}</button>` : ""}${bad ? '<span class="t11 c-stop">▲ doesn\'t balance by ' + U.mw(bad / 100) + ": money from nowhere</span>" : ""}</th>` +
+          cols.map(([k]) => X.cell(r.fx[k], k, r.sayedAfter)).join("") + "</tr>";
       }
-      if (!rows.length) h += `<tr><td colspan="${X.COLS.length + 2}" class="muted t13">Everything is settled.</td></tr>`;
-      h += '</tbody><tfoot><tr class="bl-tot"><td class="bl-pc"></td><th scope="row" class="bl-d">Balance' + (ui.isPast() ? '<span class="t11 muted">as of ' + U.esc(U.dShort(D)) + "</span>" : "") + "</th>" +
-        X.COLS.map(([k]) => X.cell(t[k], k)).join("") + "</tr></tfoot></table></div>";
-      h += X.summary(all, t, sayed);
+      h += `<tr class="bl-none"${rows.length ? " hidden" : ""}><td colspan="${cols.length + 2}" class="muted t13">${rows.length ? "No event matches the search · " : f === "open" ? "Everything is settled. " : "Nothing here. "}<button type="button" class="lnk" data-act="balClear">Show all</button></td></tr>`;
+      h += '</tbody><tfoot><tr class="bl-tot"><td class="bl-pc"></td><th scope="row" class="bl-d">Balance<span class="t11 muted">' + (f === "all" ? "all events" : "all events, not just these") + (ui.isPast() ? " · as of " + U.esc(U.dShort(D)) : "") + "</span></th>" +
+        cols.map(([k]) => X.cell(t[k], k)).join("") + "</tr></tfoot></table></div></div>";
+      if (cols.length < X.COLS.length) h += `<p class="t12 muted bl-hid">Not shown (nothing in them): ${X.COLS.filter((c) => !cols.includes(c)).map(([k, l]) => lab(k, l).replace(/\.$/, "")).join(", ")}.</p>`;
+      h += X.summary(all, t, sayed, holds);
       return h + "</div>";
     },
+    after(el) {
+      const inp = el.querySelector("#bl-q");
+      const apply = () => {
+        const qs = (X.q || "").trim().toLowerCase().split(/\s+/).filter(Boolean);
+        const seen = new Set();
+        let shown = 0;
+        el.querySelectorAll(".bl tbody tr[data-q]").forEach((tr) => { const hay = tr.getAttribute("data-q") || "", ok = qs.every((q) => hay.includes(q)); tr.hidden = !ok; if (ok) { shown++; seen.add(tr.getAttribute("data-d")); } });
+        el.querySelectorAll(".bl tbody tr.bl-day").forEach((tr) => { tr.hidden = !seen.has(tr.getAttribute("data-day")); });
+        const none = el.querySelector(".bl tbody tr.bl-none"); if (none) none.hidden = shown > 0;
+      };
+      if (inp) {
+        inp.addEventListener("input", () => { X.q = inp.value.slice(0, 80); apply(); });
+        inp.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && inp.value) { ev.preventDefault(); inp.value = ""; X.q = ""; apply(); } });
+      }
+      if (X.q) apply();
+      // a fade on the right edge while more columns are off to the side
+      const box = el.querySelector(".bl-box"), wrap = el.querySelector(".bl-wrap");
+      if (box && wrap) { const upd = () => box.classList.toggle("more", wrap.scrollLeft + wrap.clientWidth < wrap.scrollWidth - 4); wrap.addEventListener("scroll", upd, { passive: true }); upd(); }
+      // keep the chosen chip in view (the chip row scrolls sideways on a phone)
+      const chips = el.querySelector(".bl-chips"), on = chips && chips.querySelector(".chip.on");
+      if (on && on.offsetLeft + on.offsetWidth > chips.clientWidth) chips.scrollLeft = on.offsetLeft - 12;
+    },
   };
-  A.balFilter = (d) => ui.go("balances", d.val === "open" || d.val === "noproof" ? d.val : "");
+  A.balFilter = (d) => ui.go("balances", d.val && d.val !== "all" && X.FILTERS.some(([k]) => k === d.val) ? d.val : "");
+  A.balClear = () => { X.q = ""; ui.go("balances", ""); ui.render(); };
 
   /** Delivered / performed: from now on it counts as cost (dated the invoice day, never later than today). Undo reverts. */
   A.markDelivered = async (d) => {
@@ -7668,6 +8034,908 @@ window.SL = window.SL || {};
     const r = await SL.store.patch("costs", d.id, { delivered: "" });
     if (!r.ok) return ui.toast(U.esc(SL.store.errText(r)));
     ui.toast("Not delivered yet · " + U.t(c.supplier || c.desc || "cost"), { ms: 10000, undo: () => SL.store.patch("costs", d.id, { delivered: before }) });
+  };
+})(window.SL);
+
+/* ---- 44-audit.js ---- */
+/* 44-audit: Crews (#audit[.jobs][.<sat>]) — a Gantt of crew days to audit and fill in.
+ *   rows = crews (By trade) or crews grouped under the job they worked (By job); columns = days; red line = today.
+ *   Tap a day: came / planned / didn't come, masters and laborers ▼▲, day rates (default = the crew week's rates,
+ *   200 / 150), food, job. Every change saves at once and can be changed back (Undo in the sheet and on the toast).
+ *   A work day up to today with nothing logged for a crew that has started shows "?" until it is filled or marked
+ *   "didn't come" (day.off = true, which costs nothing). It all writes timesheets, so Balances follows at once. */
+
+/* ---- chunk 1: data helpers ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = (SL._audit = SL._audit || {});
+
+  X.DAYS = 21; // three weeks: last week, this week, next week
+  X.LOOKBACK = 60; // days back that can show as "to fill"
+  X.GRACE = 6; // work days after a crew's last day before the screen stops asking about it (it left the site)
+  /** Route → {mode:"trade"|"jobs", from (a Saturday), days[]} */
+  X.where = (route) => {
+    const a = ((route && route.args) || []).slice();
+    const mode = a[0] === "jobs" ? "jobs" : "trade";
+    if (a[0] === "jobs" || a[0] === "trade") a.shift();
+    const from = U.isISO(a[0] || "") ? U.weekStart(a[0]) : U.addDays(U.weekStart(U.today()), -7);
+    return { mode, from, days: Array.from({ length: X.DAYS }, (_, k) => U.addDays(from, k)) };
+  };
+  X.href = (mode, from) => ui.href("audit", mode === "jobs" ? "jobs" : "", from || "");
+  /** Crews · Equipment · Invoices switch shown at the top of each audit screen (the phone's one Audit tab). */
+  X.switcher = (on) => '<div class="seg full au-switch" role="navigation" aria-label="Audit">' +
+    [["audit", "Crews"], ["eqaudit", "Equipment"], ["invaudit", "Invoices"]].filter(([k]) => SL.views[k]).map(([k, l]) => `<button type="button" class="${k === on ? "on" : ""}"${k === on ? ' aria-current="page"' : ""} data-go="${U.esc(ui.href(k))}">${l}</button>`).join("") + "</div>";
+
+  X.block = (pid, cid, date) => { const ts = (SL.S.timesheets || {})[SL.store.tsId(pid, U.weekStart(date))]; return (ts && ts.crews && ts.crews[cid]) || null; };
+  X.raw = (pid, cid, date) => { const b = X.block(pid, cid, date), d = b && b.days && b.days[date]; return d || null; };
+  X.heads = (d) => (d ? U.num(d.m) + U.num(d.l) : 0);
+  /** Stored answer: "came" | "plan" | "off" | "" (nothing). People or food win over an old off mark; a confirmed
+   *  0 masters · 0 laborers (the digit sheet) also means nobody came. A {job}-only record is still nothing. */
+  X.state = (d) => {
+    if (!d) return "";
+    if (X.heads(d) > 0 || U.num(d.food) > 0) return d.plan ? "plan" : "came";
+    if (d.off) return "off";
+    return d.m !== undefined && d.l !== undefined && !d.plan ? "off" : "";
+  };
+  /** State as of today T: a confirmed future day is still a plan; a plan the red line has passed is "due" (did they come?). */
+  X.st = (d, date, T) => { const s = X.state(d); return s === "came" && date > T ? "plan" : s === "plan" && date <= T ? "due" : s; };
+  X.counts = (st) => st === "came"; // what the model counts as cost (as of today)
+  /** The crew week's rates (frozen on the week) → config defaults when a block has none (the model's rule);
+   *  no block yet → the crew's rates (what a new week will get). */
+  X.rates = (pid, cid, date) => { const b = X.block(pid, cid, date); return b ? b.rates || SL.S.config.defaults : SL.store.newBlock(cid).rates; };
+  X.blockJob = (pid, cid, date) => { const b = X.block(pid, cid, date); return b ? b.job || "" : SL.store.newBlock(cid).job || ""; };
+  X.dayJob = (pid, cid, date, d) => (d && d.job) || X.blockJob(pid, cid, date);
+  X.rm = (d, r) => (d && d.rm != null ? U.num(d.rm) : U.num(r.m));
+  X.rl = (d, r) => (d && d.rl != null ? U.num(d.rl) : U.num(r.l));
+  /** Halalas for a day with people (mirrors the model): m × master rate + l × laborer rate + food. */
+  X.dayH = (d, r) => (!d || !(X.heads(d) > 0 || U.num(d.food) > 0) ? 0 : U.hal(U.num(d.m) * X.rm(d, r)) + U.hal(U.num(d.l) * X.rl(d, r)) + U.hal(d.food));
+  X.usual = (cid) => { const c = M.crew(cid) || {}, u = c.usual || {}; const m = U.num(u.m), l = U.num(u.l); return m + l > 0 ? { m, l } : { m: 1, l: 0 }; };
+  X.name = (cid) => { const c = M.crew(cid); return c ? c.name || cid : cid; };
+
+  /** When a crew is expected: from its first day (worked or planned) to GRACE work days after its last one.
+   *  Past that it has left the site and the screen stops asking. → {start, end} or null. */
+  X.window = (pid, cid, T) => {
+    const c = M.crew(cid); if (c && c.active === false) return null;
+    let first = "", last = "";
+    for (const u of M.unitsFor(pid)) if (u.kind === "crew" && u.crewId === cid) for (const d of u.days) if (!d.plan || d.date <= T) { first = U.minDate(first, d.date); last = U.maxDate(last, d.date); }
+    if (!first) return null;
+    let end = last, n = 0;
+    while (n < X.GRACE) { end = U.addDays(end, 1); if (M.isWorkDay(pid, end)) n++; }
+    return { start: first, end };
+  };
+  /** Crews to show: every crew with days in the project, plus active crews of the project. */
+  X.crews = (pid) => M.projectCrewIds(pid);
+  /** A work day up to today, inside the crew's window, with no answer yet (nothing logged, or a plan that passed). */
+  X.isMissing = (pid, cid, date, T, win) => {
+    if (date > T || !M.isWorkDay(pid, date)) return false;
+    const w = win !== undefined ? win : X.window(pid, cid, T);
+    if (!w || date < w.start || date > w.end || date < U.addDays(T, -X.LOOKBACK)) return false;
+    const st = X.st(X.raw(pid, cid, date), date, T);
+    return !st || st === "due";
+  };
+  /** Every day to answer, oldest first: [{cid, date, due}] (optionally one crew). */
+  X.missingList = (pid, T, onlyCid) => {
+    const out = [];
+    for (const cid of X.crews(pid)) {
+      if (onlyCid && cid !== onlyCid) continue;
+      const w = X.window(pid, cid, T); if (!w) continue;
+      for (let d = U.maxDate(w.start, U.addDays(T, -X.LOOKBACK)); d <= T && d <= w.end; d = U.addDays(d, 1)) if (X.isMissing(pid, cid, d, T, w)) out.push({ cid, date: d, due: X.st(X.raw(pid, cid, d), d, T) === "due" });
+    }
+    return out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : X.name(a.cid).localeCompare(X.name(b.cid))));
+  };
+  /** Job colour slot 1..6 by the job's place in the project ("" or unknown → 0). */
+  X.jc = (pid, jid) => { if (!jid) return 0; const i = M.jobs(pid).findIndex((j) => j.id === jid); return i < 0 ? 0 : (i % 6) + 1; };
+  X.ro = () => !!(ui.readOnlyUI && ui.readOnlyUI());
+})(window.SL);
+
+/* ---- chunk 2: the Gantt grid ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = SL._audit;
+  const busy = (st) => st === "came" || st === "plan" || st === "due";
+
+  /** One day cell of a crew row. ctx: {onlyJob (By-job group), win (the crew's window)}. */
+  X.cell = (pid, cid, date, T, ctx) => {
+    const d = X.raw(pid, cid, date), st = X.st(d, date, T), r = X.rates(pid, cid, date), jid = X.dayJob(pid, cid, date, d);
+    const cls = ["au-c"];
+    if (!M.isWorkDay(pid, date)) cls.push("off-day");
+    if (date === T) cls.push("now");
+    if (U.dow(date) === 6) cls.push("wk");
+    let inner = "", label = X.name(cid) + " " + U.dShort(date) + ": ";
+    const inJob = (x, dd) => ctx.onlyJob === undefined || (X.dayJob(pid, cid, dd, x) || "") === ctx.onlyJob;
+    if (busy(st) && !inJob(d, date)) { cls.push("elsewhere"); inner = "<small>" + U.esc(M.jobCode(jid) || "–") + "</small>"; label += "on " + (M.jobCode(jid) || "no job"); }
+    else if (busy(st)) {
+      cls.push(st === "came" ? "st-came" : "st-plan", "j" + X.jc(pid, jid));
+      if (st === "due") cls.push("st-due");
+      const same = (dd) => { const x = X.raw(pid, cid, dd); return busy(X.st(x, dd, T)) && inJob(x, dd); };
+      if (same(U.addDays(date, -1))) cls.push("cl");
+      if (same(U.addDays(date, 1))) cls.push("cr");
+      inner = '<b class="num">' + U.num(d.m) + "·" + U.num(d.l) + "</b>" + (U.num(d.food) > 0 ? '<i class="au-food" aria-hidden="true"></i>' : "") + (st === "due" ? '<em class="au-due" aria-hidden="true">?</em>' : "");
+      label += (st === "came" ? "came " : st === "due" ? "planned, did they come? " : "planned ") + U.num(d.m) + " masters " + U.num(d.l) + " laborers" + (jid ? " on " + M.jobCode(jid) : "") + " · " + U.mw(X.dayH(d, r) / 100) + " SAR";
+    } else if (st === "off") { cls.push("st-off"); inner = "<b>✕</b>"; label += "didn't come"; }
+    else if ((ctx.onlyJob === undefined || (X.blockJob(pid, cid, date) || "") === ctx.onlyJob) && X.isMissing(pid, cid, date, T, ctx.win)) { cls.push("st-miss"); inner = "<b>?</b>"; label += "nothing logged, tap to fill"; }
+    else label += date > T ? "tap to plan" : "nothing logged";
+    const tag = X.ro() ? "span" : "button";
+    const act = X.ro() ? "" : ` type="button" data-act="auDay" data-cid="${U.esc(cid)}" data-date="${date}"${ctx.onlyJob !== undefined ? ` data-job="${U.esc(ctx.onlyJob)}"` : ""}`;
+    return `<${tag} class="${cls.join(" ")}"${act} aria-label="${U.esc(label)}">${inner}</${tag}>`;
+  };
+
+  /** Row label: name (+ "? n" to answer), then trade · M-days · L-days · cost counted in the visible range. */
+  X.label = (pid, cid, days, T, onlyJob, win) => {
+    const c = M.crew(cid) || {}, tr = M.trade(c.masterTrade);
+    let md = 0, ld = 0, h = 0, miss = 0;
+    for (const date of days) {
+      const d = X.raw(pid, cid, date), st = X.st(d, date, T);
+      if (X.counts(st) && (onlyJob === undefined || (X.dayJob(pid, cid, date, d) || "") === onlyJob)) { md += U.num(d.m); ld += U.num(d.l); h += X.dayH(d, X.rates(pid, cid, date)); }
+      if ((onlyJob === undefined || (X.blockJob(pid, cid, date) || "") === onlyJob) && X.isMissing(pid, cid, date, T, win)) miss++;
+    }
+    const left = c.active === false ? '<span class="au-left">left</span>' : "";
+    return `<button type="button" class="au-lab" data-go="${U.esc(ui.href("crew", cid))}"><span class="au-nm">${miss ? '<b class="au-q">?' + miss + "</b>" : ""}${U.t(c.name || cid)}${left}</span>` +
+      `<span class="au-sub">${tr.name ? '<span class="au-tr">' + U.t(tr.name) + " · </span>" : ""}${md + ld ? md + "M " + ld + "L · " + U.mw(h / 100) : "nothing yet"}</span></button>`;
+  };
+
+  X.head = (pid, days, T, first) => {
+    let lastMon = "";
+    return `<div class="au-lab au-hd"><span class="lbl">${first || "Crew"}</span></div>` + days.map((d) => {
+      const p = U.parse(d), mon = p.toLocaleString("en-GB", { month: "short" });
+      const showMon = mon !== lastMon; lastMon = mon;
+      return `<div class="au-dh${d === T ? " now" : ""}${M.isWorkDay(pid, d) ? "" : " off-day"}${U.dow(d) === 6 ? " wk" : ""}"><span>${U.esc(U.wd2(d))}</span><b>${p.getDate()}</b>${showMon ? "<small>" + U.esc(mon) + "</small>" : ""}</div>`;
+    }).join("");
+  };
+
+  /** Footer: heads and SAR per day (counted as of today; planned and future in parentheses). */
+  X.foot = (pid, cids, days, T) => {
+    const t = days.map(() => ({ n: 0, p: 0, h: 0, ph: 0 }));
+    for (const cid of cids) days.forEach((date, i) => {
+      const d = X.raw(pid, cid, date), st = X.st(d, date, T), h = X.dayH(d, X.rates(pid, cid, date));
+      if (X.counts(st)) { t[i].n += X.heads(d); t[i].h += h; } else if (st === "plan" || st === "due") { t[i].p += X.heads(d); t[i].ph += h; }
+    });
+    const row = (lab, f) => `<div class="au-lab au-ft"><span class="lbl">${lab}</span></div>` + t.map((x, i) => `<div class="au-fc${days[i] === T ? " now" : ""}${U.dow(days[i]) === 6 ? " wk" : ""}">${f(x) || '<span class="zero">·</span>'}</div>`).join("");
+    return row("Heads", (x) => (x.n ? "<b>" + x.n + "</b>" : "") + (x.p ? '<span class="c-committed">(' + x.p + ")</span>" : "")) +
+      row("SAR / day", (x) => (x.h ? "<b>" + U.mk(x.h / 100) + "</b>" : "") + (x.ph ? '<span class="c-committed">(' + U.mk(x.ph / 100) + ")</span>" : ""));
+  };
+
+  /** The whole chart. mode "trade": one row per crew. mode "jobs": a header per job, then the crews on it. */
+  X.chart = (pid, w, T) => {
+    const cids = X.crews(pid), days = w.days, ti = days.indexOf(T);
+    const wins = Object.fromEntries(cids.map((cid) => [cid, X.window(pid, cid, T)]));
+    let body = "";
+    if (w.mode === "jobs") {
+      // every job a visible day is on (known jobs first, then unknown ids, then no job)
+      const onDay = (cid, date) => { const d = X.raw(pid, cid, date); return busy(X.st(d, date, T)) ? X.dayJob(pid, cid, date, d) || "" : null; };
+      const ids = M.jobs(pid).map((j) => j.id);
+      for (const cid of cids) for (const date of days) { const j = onDay(cid, date); if (j && !ids.includes(j)) ids.push(j); }
+      ids.push("");
+      for (const jid of ids) {
+        const members = cids.filter((cid) => days.some((date) => onDay(cid, date) === jid) ||
+          days.some((date) => (X.blockJob(pid, cid, date) || "") === jid && X.isMissing(pid, cid, date, T, wins[cid])) ||
+          (!days.some((date) => onDay(cid, date) !== null) && (X.blockJob(pid, cid, T) || "") === jid && (M.crew(cid) || {}).active !== false));
+        if (!members.length) continue;
+        const j = M.job(jid), name = jid ? (j ? U.t(j.name) : U.esc(jid)) : "No job";
+        body += `<div class="au-lab au-grp j${X.jc(pid, jid)}"><span class="au-nm">${jid ? "<b>" + U.esc(M.jobCode(jid) || "?") + "</b> " : ""}${name}</span></div>` +
+          days.map((date) => { let n = 0; for (const cid of members) { const d = X.raw(pid, cid, date); if (X.counts(X.st(d, date, T)) && (X.dayJob(pid, cid, date, d) || "") === jid) n += X.heads(d); } return `<div class="au-gc${date === T ? " now" : ""}">${n || ""}</div>`; }).join("");
+        for (const cid of members) body += X.label(pid, cid, days, T, jid, wins[cid]) + days.map((date) => X.cell(pid, cid, date, T, { onlyJob: jid, win: wins[cid] })).join("");
+      }
+    } else {
+      for (const cid of cids) body += X.label(pid, cid, days, T, undefined, wins[cid]) + days.map((date) => X.cell(pid, cid, date, T, { win: wins[cid] })).join("");
+    }
+    if (!cids.length) body = `<div class="au-empty">No crews yet${X.ro() ? "" : ' · <button type="button" class="lnk" data-act="newCrew">+ Crew</button>'}</div>`;
+    const line = ti >= 0 ? `<i class="au-now" style="--i:${ti}" aria-hidden="true" title="Today"></i>` : "";
+    return `<div class="au-sc" id="au-scroll" data-ti="${ti}"><div class="au-g" style="--n:${days.length}" role="grid" aria-label="Crew days">${X.head(pid, days, T)}${body}${cids.length ? X.foot(pid, cids, days, T) : ""}${line}</div></div>`;
+  };
+})(window.SL);
+
+/* ---- chunk 3: the view ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = SL._audit;
+
+  X.legend = (pid) => {
+    const jobs = M.jobs(pid).filter((j) => M.jobStatus(j) !== "done").slice(0, 6);
+    return '<div class="au-leg t12">' + jobs.map((j) => `<span><i class="au-sw j${X.jc(pid, j.id)}"></i>${U.esc(M.jobCode(j.id))}</span>`).join("") +
+      '<span><i class="au-sw plan"></i>planned</span><span><b class="au-k miss">?</b>to answer</span><span><b class="au-k">✕</b>didn\'t come</span><span><i class="au-sw nowl"></i>today</span><span class="muted">3·2 = masters·laborers · • food</span></div>';
+  };
+
+  SL.views.audit = {
+    tab: "audit",
+    render(route, pid) {
+      const w = X.where(route), T = U.today(), ro = X.ro();
+      const miss = X.missingList(pid, T), due = miss.filter((x) => x.due), blank = miss.length - due.length;
+      const seg = ui.seg("", [["trade", "By trade"], ["jobs", "By job"]], w.mode, { act: "auMode", label: "Rows" });
+      const range = U.dDM(w.days[0]) + " – " + U.dDM(w.days[w.days.length - 1]);
+      let h = '<div class="v-audit">' + X.switcher("audit") + '<div class="hrow au-top"><h2 class="t20">Crews</h2><span class="spacer"></span>' + seg + "</div>";
+      h += `<div class="hrow au-nav"><button type="button" class="td-nav" data-go="${U.esc(X.href(w.mode, U.addDays(w.from, -7)))}" aria-label="A week earlier">‹</button>` +
+        `<span class="au-range t13">${U.esc(range)}</span><button type="button" class="td-nav" data-go="${U.esc(X.href(w.mode, U.addDays(w.from, 7)))}" aria-label="A week later">›</button>` +
+        (w.days.includes(T) ? "" : `<button type="button" class="chip" data-go="${U.esc(X.href(w.mode, ""))}">Today</button>`) + "</div>";
+      if (miss.length && !ro) {
+        const words = [blank ? blank + " day" + (blank > 1 ? "s" : "") + " not logged" : "", due.length ? due.length + " planned day" + (due.length > 1 ? "s" : "") + " to confirm" : ""].filter(Boolean).join(" · ");
+        h += `<div class="notice au-todo"><span>△ ${words}</span><span class="btns">` +
+          (due.length ? `<button type="button" class="btn sm" data-act="auAllPlanned">✓ All ${due.length} planned came</button>` : "") +
+          `<button type="button" class="btn sm${due.length ? " sec" : ""}" data-act="auDay" data-cid="${U.esc(miss[0].cid)}" data-date="${miss[0].date}">Answer one by one ›</button></span></div>`;
+      }
+      h += X.chart(pid, w, T) + X.legend(pid);
+      h += '<p class="t12 muted au-help">Tap a day to say who came: masters and laborers ▼▲, their day rates, food and the job. Changes save at once; tap the day again to change or undo. Every crew day shows in Balances.</p>';
+      if (!ro) h += '<div class="btns"><button type="button" class="btn sec sm" data-act="newCrew">+ Crew</button></div>';
+      return h + "</div>";
+    },
+    /** Keep the scroll where it was on the same screen; otherwise (or if today would be out of view) centre on today. */
+    after(el, route, pid) {
+      const sc = el.querySelector("#au-scroll"); if (!sc) return;
+      const key = pid + "|" + route.name + "|" + route.args.join(".") + "|" + window.innerWidth;
+      const now = sc.querySelector(".au-dh.now"), lab = sc.querySelector(".au-hd");
+      const centre = () => { if (now && lab) sc.scrollLeft = Math.max(0, now.offsetLeft - lab.offsetWidth - (sc.clientWidth - lab.offsetWidth) * 0.5); };
+      if (X.mem && X.mem.key === key) {
+        sc.scrollLeft = X.mem.left;
+        if (now && lab && (now.offsetLeft < sc.scrollLeft + lab.offsetWidth || now.offsetLeft + now.offsetWidth > sc.scrollLeft + sc.clientWidth) && X.mem.auto) centre();
+      } else centre();
+      X.mem = { key, left: sc.scrollLeft, auto: true };
+      sc.addEventListener("scroll", () => { if (sc.isConnected) X.mem = { key, left: sc.scrollLeft, auto: false }; }, { passive: true });
+    },
+  };
+  SL.actions.auMode = (d) => { const w = X.where(ui.route); ui.go("audit", d.val === "jobs" ? "jobs" : "", w.from === U.addDays(U.weekStart(U.today()), -7) ? "" : w.from); };
+  /** Confirm every planned day the red line has passed, as planned (one write per crew week, one Undo). */
+  SL.actions.auAllPlanned = async () => {
+    if (X.ro()) return;
+    const pid = ui.pid(), T = U.today(), due = X.missingList(pid, T).filter((x) => x.due), groups = {};
+    for (const x of due) { const k = x.cid + "|" + U.weekStart(x.date); (groups[k] = groups[k] || { cid: x.cid, sat: U.weekStart(x.date), days: {}, undo: {} }); groups[k].days[x.date] = { plan: false }; groups[k].undo[x.date] = { plan: true }; }
+    const done = [];
+    for (const g of Object.values(groups)) { const r = await SL.store.setDays(pid, g.sat, g.cid, g.days); if (!r.ok) { ui.toast("Not saved · " + U.esc(SL.store.errText(r))); break; } done.push(g); }
+    if (!done.length) return;
+    const n = U.sum(done, (g) => Object.keys(g.days).length);
+    ui.toast("Confirmed " + n + " planned day" + (n > 1 ? "s" : "") + " as came", { ms: 10000, undo: async () => { const out = []; for (const g of done) out.push(await SL.store.setDays(pid, g.sat, g.cid, g.undo)); return out; } });
+  };
+})(window.SL);
+
+/* ---- chunk 4: the day editor (sheet) ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._audit;
+  const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
+
+  /** A stored day as a complete record, so writing it back restores it exactly (maps merge in the db). */
+  X.full = (d) => (d ? Object.assign({ m: 0, l: 0, food: 0, plan: false, off: false, job: "", rm: null, rl: null, est: false }, U.clone(d)) : null);
+  X.offRec = () => ({ m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false });
+  X.key = (s) => s.cid + "|" + s.date;
+  /** The sheet's current record for its crew / date: what it just wrote, else the db. */
+  X.cur = (sh) => { const s = sh.state, k = X.key(s); return has(s.recs, k) ? s.recs[k] : X.full(X.raw(s.pid, s.cid, s.date)); };
+
+  /** Save one day at once → true when saved. The first change to a day remembers how it was, for Undo.
+   *  Every write is tracked, so the close toast only claims what really saved, and a late failure still shows. */
+  X.put = (sh, rec) => {
+    const s = sh.state, k = X.key(s), cid = s.cid, date = s.date;
+    if (!has(s.orig, k)) s.orig[k] = X.full(X.raw(s.pid, cid, date));
+    s.recs[k] = rec; sh.err = ""; sh.refresh();
+    const c = M.crew(cid);
+    if (rec && X.heads(rec) > 0 && c && c.active === false) SL.store.catalogPut("crews", cid, { active: true }); // back on site
+    const p = SL.store.setDays(s.pid, U.weekStart(date), cid, { [date]: rec }).then((r) => {
+      if (r.ok) { s.saved[k] = true; return true; }
+      delete s.recs[k];
+      const msg = "Not saved · " + X.name(cid) + " " + U.dShort(date) + " · " + SL.store.errText(r).replace(/^Not saved: /, "");
+      if (ui.sheets.includes(sh)) sh.error(msg); else ui.toast(U.esc(msg), { ms: 10000 });
+      return false;
+    });
+    s.pending.push(p);
+    return p;
+  };
+  /** A day with the crew's usual team and food, on the job picked (By-job group), else a job already picked for
+   *  that empty day (crew grid), else the week's job. */
+  X.usualRec = (s, plan) => {
+    const us = X.usual(s.cid), r = X.rates(s.pid, s.cid, s.date), bj = X.blockJob(s.pid, s.cid, s.date), raw = X.raw(s.pid, s.cid, s.date);
+    const want = s.job !== undefined ? s.job : (raw && raw.job) || "";
+    return { m: us.m, l: us.l, food: U.num(r.food), plan: !!plan, off: false, job: want && want !== bj ? want : "", rm: null, rl: null, est: false };
+  };
+
+  const step = (f, v, label, txt, canDown) => `<span class="au-step" role="group" aria-label="${U.esc(label)}"><button type="button" class="au-arr" data-act="auStep" data-f="${f}" data-dir="-1" aria-label="${U.esc(label)} down"${canDown ? "" : " disabled"}>▼</button>` +
+    `<span class="au-v num">${txt}</span><button type="button" class="au-arr" data-act="auStep" data-f="${f}" data-dir="1" aria-label="${U.esc(label)} up">▲</button></span>`;
+
+  X.sheetBody = (sh) => {
+    const s = sh.state, T = U.today(), d = X.cur(sh), st = X.st(d, s.date, T), r = X.rates(s.pid, s.cid, s.date), fut = s.date > T;
+    const fri = !M.isWorkDay(s.pid, s.date), c = M.crew(s.cid) || {};
+    let h = `<div class="v-audit au-sheet"><div class="au-dnav"><button type="button" class="td-nav" data-act="auWalk" data-dir="-1" aria-label="Day before">‹</button>` +
+      `<span class="t16"><b>${U.esc(U.dShort(s.date))}</b>${s.date === T ? ' <span class="au-today">today</span>' : ""}${fri ? ' <span class="muted t12">day off</span>' : ""}</span>` +
+      `<button type="button" class="td-nav" data-act="auWalk" data-dir="1" aria-label="Day after">›</button></div>`;
+    const opts = fut ? [["plan", "Planned"], ["none", "Not planned"]] : [["came", st === "due" ? "Came as planned ✓" : "Came ✓"], ["off", "Didn't come ✕"]];
+    const val = fut ? (st === "plan" ? "plan" : "none") : st === "due" ? "" : st;
+    h += '<div class="seg full au-st" role="group" aria-label="Did they come?">' + opts.map(([v, l]) => `<button type="button" class="${v === val ? "on" : ""}" aria-pressed="${v === val}" data-act="auSt" data-val="${v}">${l}</button>`).join("") + "</div>";
+    if (!st && !fut) h += `<p class="t13 c-warn au-q">Nothing logged for ${U.t(X.name(s.cid))} on this day yet.</p>`;
+    if (st === "due") h += `<p class="t13 c-warn au-q">Planned ${U.num(d.m)} masters · ${U.num(d.l)} laborers. Did they come? Adjust below, then tap Came.</p>`;
+    const people = st === "came" || st === "plan" || st === "due" || (has(s.recs, X.key(s)) && d && !d.off && st === "off");
+    if (people) {
+      const rm = X.rm(d, r), rl = X.rl(d, r), dh = X.dayH(d, r);
+      h += '<div class="au-rows">' +
+        `<div class="au-row"><span class="au-rl">Masters<small>${U.t("معلمين")}</small></span>${step("m", U.num(d.m), "Masters", U.num(d.m), U.num(d.m) > 0)}` +
+        `<span class="au-rate"><span class="muted">× SAR</span>${step("rm", rm, "Master day rate", U.mw(rm), rm > 0)}${rm !== U.num(r.m) ? '<small class="au-def">usual ' + U.mw(r.m) + "</small>" : ""}</span></div>` +
+        `<div class="au-row"><span class="au-rl">Laborers<small>${U.t("عمال")}</small></span>${step("l", U.num(d.l), "Laborers", U.num(d.l), U.num(d.l) > 0)}` +
+        `<span class="au-rate"><span class="muted">× SAR</span>${step("rl", rl, "Laborer day rate", U.mw(rl), rl > 0)}${rl !== U.num(r.l) ? '<small class="au-def">usual ' + U.mw(r.l) + "</small>" : ""}</span></div>` +
+        `<div class="au-row"><span class="au-rl">Food</span><button type="button" class="chip${U.num(d.food) > 0 ? " on" : ""}" data-act="auFood" aria-pressed="${U.num(d.food) > 0}">+food ${U.mw(U.num(d.food) || U.num(r.food))}</button></div>` +
+        "</div>" +
+        `<div class="au-total"><span>${st === "came" ? "Day total" : "Planned (not counted until they come)"}</span><b class="num t20${st !== "came" ? " c-committed" : ""}">${U.m(dh / 100)}</b></div>`;
+      if (!X.heads(d)) h += '<p class="t12 c-warn">Nobody on this day: ▲ someone, or tap Didn\'t come.</p>';
+      const jid = X.dayJob(s.pid, s.cid, s.date, d), bj = X.blockJob(s.pid, s.cid, s.date);
+      h += `<div class="fld"><span class="lbl">Job <span class="muted">optional · ${bj ? "week job " + U.esc(M.jobCode(bj)) + " · tap again to go back to it" : "no week job · tap again to clear"}</span></span>${ui.jobChips(s.pid, jid, { act: "auJob", add: false })}</div>`;
+    }
+    const k = X.key(s);
+    if (has(s.orig, k) && JSON.stringify(s.orig[k]) !== JSON.stringify(X.cur(sh))) h += `<button type="button" class="btn sec block au-undo" data-act="auUndo">↶ Undo my changes to ${U.esc(U.dShort(s.date))}</button>`;
+    const mine = X.todo(sh).filter((x) => x.cid === s.cid && !x.due);
+    if (!st && !fut && mine.length > 1) h += `<button type="button" class="btn ghost block au-alloff" data-act="auAllOff">Didn't come on all ${mine.length} unlogged days of ${U.t(X.name(s.cid))}</button>`;
+    if (!fut && c.active !== false && (!st || st === "off")) h += `<button type="button" class="btn ghost block au-left-btn" data-act="auLeft">${U.t(X.name(s.cid))} left the site · stop asking</button>`;
+    else if (c.active === false) h += '<p class="t12 muted">This crew is marked as left the site. Logging a day with people puts it back.</p>';
+    return h + "</div>";
+  };
+  /** Days still to answer, minus what this sheet has just answered (the db echo can lag a moment). */
+  X.todo = (sh) => { const s = sh.state; return X.missingList(s.pid, U.today()).filter((x) => { const k = x.cid + "|" + x.date; if (!has(s.recs, k)) return true; const st = X.st(s.recs[k], x.date, U.today()); return !st || st === "due"; }); };
+  X.sheetFoot = (sh) => {
+    const s = sh.state, next = X.todo(sh).filter((x) => !(x.cid === s.cid && x.date === s.date));
+    return (next.length ? `<button type="button" class="btn sec" data-act="auNext">Next to answer (${next.length}) ›</button>` : "") + '<button type="button" class="btn" data-act="close">Done</button>';
+  };
+
+  X.acts = {
+    auWalk: (d, el, ev, sh) => { sh.state.date = U.addDays(sh.state.date, U.num(d.dir) < 0 ? -1 : 1); sh.err = ""; sh.refresh(); },
+    auNext: (d, el, ev, sh) => {
+      const s = sh.state, list = X.todo(sh).filter((x) => !(x.cid === s.cid && x.date === s.date));
+      const after = list.find((x) => x.date > s.date || (x.date === s.date && X.name(x.cid) > X.name(s.cid))) || list[0];
+      if (after) { s.cid = after.cid; s.date = after.date; s.job = undefined; sh.err = ""; sh.refresh(); }
+    },
+    auSt: (d, el, ev, sh) => {
+      const s = sh.state, cur = X.cur(sh), T = U.today(), st = X.st(cur, s.date, T), v = d.val;
+      if (v === "off") return st === "off" && cur && cur.off ? null : X.put(sh, X.offRec());
+      if (v === "none") return cur ? X.put(sh, null) : null;
+      if (v === "came") { if (st === "came") return; return X.put(sh, st === "due" || (cur && X.heads(cur) > 0) ? Object.assign({}, cur, { plan: false, off: false }) : X.usualRec(s, false)); }
+      if (v === "plan") { if (st === "plan") return; return X.put(sh, cur && X.heads(cur) > 0 ? Object.assign({}, cur, { plan: true, off: false }) : X.usualRec(s, true)); }
+    },
+    auStep: (d, el, ev, sh) => {
+      const s = sh.state, cur = X.cur(sh); if (!cur) return;
+      const r = X.rates(s.pid, s.cid, s.date), dir = U.num(d.dir) < 0 ? -1 : 1, rec = Object.assign({}, cur, { est: false, off: false });
+      if (d.f === "m" || d.f === "l") {
+        rec[d.f] = Math.max(0, U.num(cur[d.f]) + dir);
+        if (!X.heads(rec)) rec.food = 0; // nobody came: no food either
+        else if (!X.heads(cur) && !(U.num(cur.food) > 0)) rec.food = U.num(r.food);
+      } else {
+        const base = d.f === "rm" ? U.num(r.m) : U.num(r.l), now = d.f === "rm" ? X.rm(cur, r) : X.rl(cur, r);
+        let n = Math.max(0, (dir > 0 ? Math.floor(now / 10) + 1 : Math.ceil(now / 10) - 1) * 10);
+        if ((now < base && n > base) || (now > base && n < base)) n = base; // a step that crosses the week's rate lands on it
+        rec[d.f] = n === base ? null : n; // the week's rate: no override stored
+      }
+      return X.put(sh, rec);
+    },
+    auFood: (d, el, ev, sh) => { const s = sh.state, cur = X.cur(sh); if (!cur) return; const on = U.num(cur.food) > 0; return X.put(sh, Object.assign({}, cur, { food: on ? 0 : U.num(X.rates(s.pid, s.cid, s.date).food), est: false })); },
+    auJob: (d, el, ev, sh) => {
+      const s = sh.state, cur = X.cur(sh); if (!cur) return;
+      const bj = X.blockJob(s.pid, s.cid, s.date), jid = d.job || "", now = X.dayJob(s.pid, s.cid, s.date, cur);
+      const next = jid === now ? "" : jid === bj ? "" : jid; // tapping the selected job again goes back to the week job (or none)
+      if (next) s.jobsUsed.push(next);
+      return X.put(sh, Object.assign({}, cur, { job: next }));
+    },
+    auUndo: async (d, el, ev, sh) => { const s = sh.state, k = X.key(s); if (!has(s.orig, k)) return; const ok = await X.put(sh, s.orig[k]); if (ok) { delete s.orig[k]; delete s.recs[k]; sh.refresh(); } },
+    auAllOff: async (d, el, ev, sh) => {
+      const s = sh.state, mine = X.todo(sh).filter((x) => x.cid === s.cid && !x.due), byWeek = {};
+      for (const x of mine) (byWeek[U.weekStart(x.date)] = byWeek[U.weekStart(x.date)] || []).push(x.date);
+      for (const [sat, dates] of Object.entries(byWeek)) {
+        const before = {}; for (const dt of dates) before[dt] = X.full(X.raw(s.pid, s.cid, dt));
+        const days = Object.fromEntries(dates.map((dt) => [dt, X.offRec()]));
+        for (const dt of dates) s.recs[s.cid + "|" + dt] = X.offRec();
+        sh.refresh();
+        const r = await SL.store.setDays(s.pid, sat, s.cid, days);
+        if (!r.ok) { for (const dt of dates) delete s.recs[s.cid + "|" + dt]; return sh.error("Not saved · " + SL.store.errText(r)); }
+        for (const dt of dates) { const k = s.cid + "|" + dt; if (!has(s.orig, k)) s.orig[k] = before[dt]; s.saved[k] = true; }
+      }
+      sh.refresh();
+    },
+    auLeft: async (d, el, ev, sh) => {
+      const s = sh.state, cid = s.cid, r = await SL.store.catalogPut("crews", cid, { active: false });
+      if (!r.ok) return sh.error("Not saved · " + SL.store.errText(r));
+      ui.toast(U.esc(X.name(cid)) + " left the site · no more questions about it", { ms: 10000, undo: () => SL.store.catalogPut("crews", cid, { active: true }) });
+      sh.refresh();
+    },
+  };
+
+  /** Open the day editor. d: {cid, date, job?} (job = the By-job group the day was tapped in). */
+  A.auDay = (d) => {
+    if (X.ro()) return;
+    const pid = ui.pid(), cid = d.cid, date = U.isISO(d.date) ? d.date : U.today();
+    if (!cid) return;
+    ui.sheet({
+      title: (sh) => U.t(X.name(sh.state.cid)) + (M.crew(sh.state.cid) && M.crew(sh.state.cid).ar ? ' <span class="muted">' + U.t(M.crew(sh.state.cid).ar) + "</span>" : ""),
+      state: { pid, cid, date, job: d.job !== undefined && d.job !== null && d.job !== "" ? d.job : undefined, recs: {}, orig: {}, saved: {}, pending: [], jobsUsed: [] },
+      live: true,
+      body: X.sheetBody,
+      foot: X.sheetFoot,
+      acts: X.acts,
+      onKey: (sh, ev) => { if (ev.target && ev.target.tagName === "INPUT") return; if (ev.key === "ArrowLeft") X.acts.auWalk({ dir: -1 }, null, ev, sh); else if (ev.key === "ArrowRight") X.acts.auWalk({ dir: 1 }, null, ev, sh); },
+      onClose: (sh) => {
+        const s = sh.state;
+        for (const j of s.jobsUsed) ui.rememberJob(pid, j); // chip order stays put while the sheet is open
+        // wait for every write, then only claim (and offer to undo) what really saved
+        Promise.all(s.pending).then(() => {
+          const keys = Object.keys(s.orig).filter((k) => s.saved[k] && JSON.stringify(s.orig[k]) !== JSON.stringify(X.full(X.raw(pid, k.split("|")[0], k.split("|")[1]))));
+          if (!keys.length) return;
+          const orig = keys.map((k) => ({ cid: k.split("|")[0], date: k.split("|")[1], rec: s.orig[k] }));
+          const who = U.uniq(orig.map((o) => X.name(o.cid)));
+          ui.toast(U.esc(who.length === 1 ? who[0] : who.length + " crews") + " · " + keys.length + " day" + (keys.length > 1 ? "s" : "") + " saved", {
+            ms: 10000,
+            undo: async () => {
+              const groups = {};
+              for (const o of orig) { const g = o.cid + "|" + U.weekStart(o.date); (groups[g] = groups[g] || { cid: o.cid, sat: U.weekStart(o.date), days: {} }).days[o.date] = o.rec; }
+              const out = [];
+              for (const g of Object.values(groups)) out.push(await SL.store.setDays(pid, g.sat, g.cid, g.days));
+              return out;
+            },
+          });
+        });
+      },
+    });
+  };
+})(window.SL);
+
+/* ---- 45-equip.js ---- */
+/* 45-equip: Equipment (#eqaudit[.jobs][.<sat>]) — a Gantt of rentals on site, like Crews.
+ *   rows = rental lines grouped by crew (or by job); columns = days; red line = today.
+ *   A bar runs from the day it came (in) to the day it went back (out), coloured by job. Striped = on site while its
+ *   crew didn't work (rent still running). "?" = no price or no in-date yet: it counts 0 until set.
+ *   Tap a line or a day: arrived / returned on that day, qty ▼▲, rate ▼▲ (per day / month), job, supplier.
+ *   Every change saves at once and has Undo. Rentals feed Balances ("… on site", Equipment −). */
+
+/* ---- chunk 1: data + grid ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = (SL._eqa = SL._eqa || {});
+  const AU = () => SL._audit;
+
+  X.where = (route) => {
+    const a = ((route && route.args) || []).slice();
+    const mode = a[0] === "jobs" ? "jobs" : "crews";
+    if (a[0] === "jobs" || a[0] === "crews") a.shift();
+    const from = U.isISO(a[0] || "") ? U.weekStart(a[0]) : U.addDays(U.weekStart(U.today()), -7);
+    return { mode, from, days: Array.from({ length: AU().DAYS }, (_, k) => U.addDays(from, k)) };
+  };
+  X.href = (mode, from) => ui.href("eqaudit", mode === "jobs" ? "jobs" : "", from || "");
+  X.rentals = (pid) => U.sortBy(M.unitsFor(pid).filter((u) => u.kind === "rental" && !u.archived), (u) => (u.out ? "1" : "0") + (u.in || "9999") + (u.title || ""));
+  /** What needs Ryan: no rate or no in-date (counts 0 until set). */
+  X.todo = (pid) => X.rentals(pid).filter((u) => u.noPrice);
+  /** Day state of a rental: "site" (on site that day), "ahead" (still out, a future day), "" (not here). */
+  X.dayState = (u, date, T) => {
+    if (!U.isISO(u.in) || date < u.in) return "";
+    if (u.out && date > u.out) return "";
+    return date > T ? (u.out ? "site" : "ahead") : "site";
+  };
+  /** On site while its crew had nobody there (a work day up to today): rent still running for nothing. */
+  X.idle = (pid, u, date, T) => {
+    if (!u.crewId || date > T || !M.isWorkDay(pid, date)) return false;
+    const st = AU().state(AU().raw(pid, u.crewId, date));
+    return st !== "came";
+  };
+  X.name = (u) => (u.qty > 1 ? u.qty + " × " : "") + (u.doc.equipmentId && M.equipment()[u.doc.equipmentId] ? M.equipment()[u.doc.equipmentId].name : (u.doc.desc || "Equipment").replace(/\s*\(.*\)\s*$/, ""));
+  X.ar = (u) => { const e = u.doc.equipmentId && M.equipment()[u.doc.equipmentId]; return (e && e.ar) || ((/\(([^)]*)\)\s*$/.exec(u.doc.desc || "") || [])[1] || ""); };
+  X.rateTxt = (u) => (u.rate > 0 ? U.mw(u.rate) + "/" + (u.doc.rateUnit === "month" ? "mo" : "day") : "");
+
+  X.cell = (pid, u, date, T, jcls) => {
+    const st = X.dayState(u, date, T), cls = ["au-c"];
+    if (!M.isWorkDay(pid, date)) cls.push("off-day");
+    if (date === T) cls.push("now");
+    let inner = "", label = X.name(u) + " " + U.dShort(date) + ": ";
+    if (st) {
+      const prev = X.dayState(u, U.addDays(date, -1), T), next = X.dayState(u, U.addDays(date, 1), T);
+      cls.push(st === "ahead" ? "st-plan" : "st-came", jcls);
+      if (prev) cls.push("cl");
+      if (next) cls.push("cr");
+      if (u.noPrice) cls.push("eq-np");
+      else if (st === "site" && X.idle(pid, u, date, T)) cls.push("eq-idle");
+      if (!prev) inner = '<b class="num">' + (u.noPrice ? "?" : U.mw(u.daily / 100)) + "</b>";
+      label += (st === "ahead" ? "still out" : "on site") + (u.noPrice ? ", no price" : ", " + U.mw(u.daily / 100) + " SAR a day") + (cls.includes("eq-idle") ? ", crew not working" : "");
+    } else if (!U.isISO(u.in) && date === T) { cls.push("st-miss"); inner = "<b>?</b>"; label += "when did it arrive? tap to set"; }
+    else label += U.isISO(u.in) && date < u.in ? "not here yet" : u.out && date > u.out ? "returned" : "tap to set";
+    const tag = AU().ro() ? "span" : "button";
+    const act = AU().ro() ? "" : ` type="button" data-act="eqDay" data-id="${U.esc(u.id)}" data-date="${date}"`;
+    return `<${tag} class="${cls.join(" ")}"${act} aria-label="${U.esc(label)}">${inner}</${tag}>`;
+  };
+
+  X.label = (pid, u, T) => {
+    const r = M.calc(u, T), days = u.noPrice ? 0 : r.parts.length;
+    const sub = u.noPrice
+      ? '<b class="c-warn">? ' + (u.rate > 0 ? "no in-date" : "no price") + "</b>" + (u.in ? " · since " + U.esc(U.dDM(u.in)) : "")
+      : "<b>" + U.mw(r.inc / 100) + "</b> · " + days + "d · " + U.esc(X.rateTxt(u)) + (u.out ? " · back " + U.esc(U.dDM(u.out)) : "");
+    const act = AU().ro() ? "" : ` data-act="eqDay" data-id="${U.esc(u.id)}"`;
+    const full = X.name(u) + (X.ar(u) ? " " + X.ar(u) : "") + (u.noPrice ? " · no price yet" : " · " + U.mw(r.inc / 100) + " SAR so far · " + days + " days · " + X.rateTxt(u));
+    return `<${AU().ro() ? "div" : "button type=\"button\""} class="au-lab" title="${U.esc(full)}"${act}><span class="au-nm">${U.t(X.name(u))}${X.ar(u) ? ' <span class="muted">' + U.t(X.ar(u)) + "</span>" : ""}</span><span class="au-sub">${sub}</span></${AU().ro() ? "div" : "button"}>`;
+  };
+
+  X.foot = (pid, us, days, T) => {
+    const row = (lab, f) => `<div class="au-lab au-ft"><span class="lbl">${lab}</span></div>` + days.map((d) => `<div class="au-fc${d === T ? " now" : ""}">${f(d)}</div>`).join("");
+    return row("On site", (d) => { const n = us.filter((u) => X.dayState(u, d, T)).length; return n || '<span class="zero">·</span>'; }) +
+      row("SAR / day", (d) => { const h = U.sum(us.filter((u) => !u.noPrice && X.dayState(u, d, T)), (u) => u.daily); const q = us.some((u) => u.noPrice && X.dayState(u, d, T)); return (h ? (h >= 100000 ? U.mk(h / 100) : U.mw(h / 100)) : "") + (q ? '<span class="c-warn">+?</span>' : "") || '<span class="zero">·</span>'; });
+  };
+
+  X.chart = (pid, w, T) => {
+    const us = X.rentals(pid), days = w.days, ti = days.indexOf(T);
+    const groups = new Map();
+    for (const u of us) {
+      const k = w.mode === "jobs" ? u.jobId || "" : u.crewId || "";
+      if (!groups.has(k)) groups.set(k, []);
+      groups.get(k).push(u);
+    }
+    const order = [...groups.keys()].sort((a, b) => (a === "") - (b === "") || (w.mode === "jobs" ? M.jobs(pid).findIndex((j) => j.id === a) - M.jobs(pid).findIndex((j) => j.id === b) : M.crewName(a).localeCompare(M.crewName(b))));
+    let body = "";
+    for (const k of order) {
+      const list = groups.get(k);
+      const title = w.mode === "jobs" ? (k ? "<b>" + U.esc(M.jobCode(k)) + "</b> " + U.t(M.jobName(k)) : "No job") : k ? U.t(M.crewName(k)) : "No crew";
+      const jc = w.mode === "jobs" ? AU().jc(pid, k) : 0;
+      body += `<div class="au-grp eq-grp j${jc}"><span class="au-nm">${title} · ${list.length} line${list.length > 1 ? "s" : ""}</span></div>`;
+      for (const u of list) body += X.label(pid, u, T) + days.map((d) => X.cell(pid, u, d, T, "j" + AU().jc(pid, u.jobId))).join("");
+    }
+    if (!us.length) body = `<div class="au-empty">No equipment rented yet${AU().ro() ? "" : ' · <button type="button" class="lnk" data-act="addEquipment">+ Equipment</button>'}</div>`;
+    const line = ti >= 0 ? `<i class="au-now" style="--i:${ti}" aria-hidden="true" title="Today"></i>` : "";
+    return `<div class="au-sc" id="au-scroll" data-ti="${ti}"><div class="au-g" style="--n:${days.length}" role="grid" aria-label="Equipment on site">${AU().head(pid, days, T, "Equipment")}${body}${us.length ? X.foot(pid, us, days, T) : ""}${line}</div></div>`;
+  };
+})(window.SL);
+
+/* ---- chunk 2: the view ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = SL._eqa, AU = () => SL._audit;
+
+  SL.views.eqaudit = {
+    tab: "audit",
+    render(route, pid) {
+      const w = X.where(route), T = U.today(), ro = AU().ro(), todo = X.todo(pid);
+      const seg = ui.seg("", [["crews", "By crew"], ["jobs", "By job"]], w.mode, { act: "eqMode", label: "Rows" });
+      let h = '<div class="v-audit v-eqa">' + AU().switcher("eqaudit") + '<div class="hrow au-top"><h2 class="t20">Equipment</h2><span class="spacer"></span>' + seg + "</div>";
+      h += `<div class="hrow au-nav"><button type="button" class="td-nav" data-go="${U.esc(X.href(w.mode, U.addDays(w.from, -7)))}" aria-label="A week earlier">‹</button>` +
+        `<span class="au-range t13">${U.esc(U.dDM(w.days[0]) + " – " + U.dDM(w.days[w.days.length - 1]))}</span><button type="button" class="td-nav" data-go="${U.esc(X.href(w.mode, U.addDays(w.from, 7)))}" aria-label="A week later">›</button>` +
+        (w.days.includes(T) ? "" : `<button type="button" class="chip" data-go="${U.esc(X.href(w.mode, ""))}">Today</button>`) + "</div>";
+      if (todo.length && !ro) h += `<div class="notice au-todo"><span>△ ${todo.length} rental${todo.length > 1 ? "s" : ""} with no price or arrival date · they count 0 until set</span>` +
+        `<span class="btns"><button type="button" class="btn sm" data-act="eqDay" data-id="${U.esc(todo[0].id)}">Set them ›</button>${SL.actions.bulkPrice ? '<button type="button" class="btn sm sec" data-act="bulkPrice">All in one list</button>' : ""}</span></div>`;
+      h += X.chart(pid, w, T);
+      h += '<div class="au-leg t12"><span><i class="au-sw j1"></i>on site (colour = job)</span><span><i class="au-sw eq-idle-sw"></i>on site, crew not working</span><span><i class="au-sw eq-np-sw"></i>no price yet</span><span><i class="au-sw plan"></i>still out</span><span><i class="au-sw nowl"></i>today</span><span class="muted">number = SAR a day</span></div>';
+      h += '<p class="t12 muted au-help">Tap a line or a day: say when it arrived and when it went back, set qty and rate. It accrues every day on site, both ends included, and shows in Balances under Equipment.</p>';
+      if (!ro && SL.actions.addEquipment) h += '<div class="btns"><button type="button" class="btn sec sm" data-act="addEquipment">+ Equipment</button></div>';
+      return h + "</div>";
+    },
+    after: (el, route, pid) => SL.views.audit.after(el, route, pid),
+  };
+  SL.actions.eqMode = (d) => { const w = X.where(ui.route); ui.go("eqaudit", d.val === "jobs" ? "jobs" : "", w.from === U.addDays(U.weekStart(U.today()), -7) ? "" : w.from); };
+})(window.SL);
+
+/* ---- chunk 3: the rental editor ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._eqa, AU = () => SL._audit;
+  const FIELDS = ["qty", "rate", "rateUnit", "in", "out", "jobId", "supplier"];
+  X.snap = (c) => { const o = {}; for (const f of FIELDS) o[f] = c[f] == null ? (f === "qty" ? 1 : f === "rate" ? 0 : f === "rateUnit" ? "day" : "") : c[f]; o.date = c.date || ""; return o; };
+  X.step = (r) => (r >= 100 ? 10 : 5);
+
+  /** Save fields on the rental at once; the first change remembers how it was (Undo). */
+  X.put = async (sh, patch) => {
+    const s = sh.state, c = (SL.S.costs || {})[s.id]; if (!c) return;
+    if (!s.orig) s.orig = X.snap(c);
+    if ("in" in patch && !("date" in patch)) patch.date = patch.in;
+    const before = Object.assign({}, s.local || {});
+    s.local = Object.assign({}, s.local || {}, patch); sh.err = ""; sh.refresh();
+    const r = await SL.store.patch("costs", s.id, patch);
+    if (!r.ok) {
+      // show what is really stored again, not the value that didn't save
+      s.local = before;
+      if (ui.sheets.includes(sh)) sh.error("Not saved · " + SL.store.errText(r)); else ui.toast("Not saved · " + U.esc(SL.store.errText(r)), { ms: 8000 });
+      return false;
+    }
+    return true;
+  };
+  /** A typed number: accepts Arabic-Indic digits (١٥٠), "1,500" and "12.5"; NaN for anything else. */
+  X.parseNum = (txt) => {
+    let t = String(txt == null ? "" : txt).trim().replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x6f0)).replace(/٫/g, ".").replace(/٬/g, ",").replace(/\s+/g, "");
+    if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/,/g, "");
+    return /^\d+(\.\d+)?$/.test(t) ? parseFloat(t) : NaN;
+  };
+  /** The rental as the sheet sees it: the db doc with what the sheet just wrote on top. */
+  X.cur = (sh) => Object.assign({}, (SL.S.costs || {})[sh.state.id] || {}, sh.state.local || {});
+  const dBtn = (act, label, val, on) => `<button type="button" class="chip${on ? " on" : ""}" data-act="${act}" data-val="${U.esc(val)}">${label}</button>`;
+
+  X.sheetBody = (sh) => {
+    const s = sh.state, c = X.cur(sh), u = M.unitById(s.id), T = U.today();
+    if (!u || c.void) return '<div class="empty">This rental is no longer in the ledger.</div>';
+    const r = M.calc(u, T), rate = U.num(c.rate), qty = U.num(c.qty) || 1, unit = c.rateUnit === "month" ? "month" : "day";
+    // same fallbacks as the model: in || date, out || endDate
+    const inRaw = c.in || c.date || "", outRaw = c.out || c.endDate || "";
+    const inD = U.isISO(inRaw) ? inRaw : "", outD = U.isISO(outRaw) ? outRaw : "", tap = U.isISO(s.date || "") ? s.date : "";
+    const firstCrew = u.crewId && SL._crew && SL._crew.crewFirstOnJob ? SL._crew.crewFirstOnJob(u.projectId, u.crewId, u.jobId) : "";
+    let h = '<div class="v-audit au-sheet eq-sheet">';
+    h += `<p class="t12 muted">${[u.crewId ? "with " + U.t(M.crewName(u.crewId)) : "", c.supplier ? "from " + U.t(c.supplier) : "", u.jobId ? U.esc(M.jobCode(u.jobId)) : ""].filter(Boolean).join(" · ")}</p>`;
+    // arrived
+    const inOpts = [];
+    if (tap && tap !== inD && (!outD || tap <= outD)) inOpts.push(dBtn("eqIn", U.dShort(tap), tap));
+    if (firstCrew && firstCrew !== inD && firstCrew !== tap && (!outD || firstCrew <= outD)) inOpts.push(dBtn("eqIn", "with the crew · " + U.dShort(firstCrew), firstCrew));
+    if (T !== inD && T !== tap && (!outD || T <= outD)) inOpts.push(dBtn("eqIn", "Today", T));
+    h += `<div class="eq-date"><span class="au-rl">Arrived</span><span class="eq-dv">${inD ? "<b>" + U.esc(U.dShort(inD)) + "</b>" : '<b class="c-warn">? not set</b>'}</span><div class="chips">${inOpts.join("")}</div></div>`;
+    // returned
+    const outOpts = [];
+    if (inD) {
+      if (tap && tap >= inD && tap !== outD) outOpts.push(dBtn("eqOut", "Returned " + U.dShort(tap), tap));
+      if (T >= inD && T !== outD && T !== tap) outOpts.push(dBtn("eqOut", "Returned today", T));
+      if (outD) outOpts.push(dBtn("eqOut", "Still on site", ""));
+    }
+    h += `<div class="eq-date"><span class="au-rl">Returned</span><span class="eq-dv">${outD ? "<b>" + U.esc(U.dShort(outD)) + "</b>" : inD ? "still on site" : '<span class="muted">–</span>'}</span><div class="chips">${outOpts.join("")}</div></div>`;
+    // qty + rate
+    const st = (f, v, lab, txt) => `<span class="au-step" role="group" aria-label="${lab}"><button type="button" class="au-arr" data-act="eqStep" data-f="${f}" data-dir="-1" aria-label="${lab} down"${v > (f === "qty" ? 1 : 0) ? "" : " disabled"}>▼</button><span class="au-v num">${txt}</span><button type="button" class="au-arr" data-act="eqStep" data-f="${f}" data-dir="1" aria-label="${lab} up">▲</button></span>`;
+    h += '<div class="au-rows">' +
+      `<div class="au-row"><span class="au-rl">Qty</span>${st("qty", qty, "Quantity", qty)}</div>` +
+      `<div class="au-row"><span class="au-rl">Rate<small>SAR per piece</small></span>${st("rate", rate, "Rate", rate > 0 ? U.mw(rate) : '<span class="c-warn">?</span>')}<span></span>${ui.seg("", [["day", "/ day"], ["month", "/ month"]], unit, { act: "eqUnit", label: "Rate per" })}</div>` +
+      `<div class="au-row"><span class="au-rl">Exact rate</span><input id="eq-rate-in" class="inp eq-rate-in" type="text" inputmode="decimal" value="${U.esc(s.draft && s.draft.rate != null ? s.draft.rate : rate > 0 ? String(rate) : "")}" placeholder="type it" aria-label="Exact rate"></div></div>`;
+    const daily = unit === "month" ? (qty * rate) / 30 : qty * rate;
+    h += `<div class="au-total"><span>${rate > 0 && inD ? "Accrues " + U.m(daily) + " a day · so far" : "Counts 0 until it has a rate and an arrival date"}</span><b class="num t20">${U.m(r.inc / 100)}</b></div>`;
+    if (r.paid || r.owed) h += `<p class="t12">${r.paid ? "Paid " + U.m(r.paid / 100) : "Nothing paid"}${r.owed ? ' · <span class="c-owed">owed ' + U.m(r.owed / 100) + "</span>" : r.prepaid ? ' · <span class="c-prepaid">prepaid ' + U.m(r.prepaid / 100) + "</span>" : ""}${A.payUnit && !ui.isPast() ? ` · <button type="button" class="lnk" data-act="eqPay">Pay…</button>` : ""}</p>`;
+    // same rate for the other lines of this equipment with no price
+    const same = c.equipmentId && rate > 0 ? X.rentals(u.projectId).filter((x) => x.id !== s.id && x.doc.equipmentId === c.equipmentId && !(x.rate > 0)) : [];
+    if (same.length) h += `<button type="button" class="btn ghost block" data-act="eqSame">Same rate (${U.mw(rate)}/${unit}) for the other ${same.length} ${U.t(M.equipment()[c.equipmentId] ? M.equipment()[c.equipmentId].name : "")} line${same.length > 1 ? "s" : ""}</button>`;
+    h += `<div class="fld"><span class="lbl">Job</span>${ui.jobChips(u.projectId, c.jobId || "", { act: "eqJob", none: true, add: false })}</div>`;
+    h += `<div class="fld"><label class="lbl" for="eq-sup-in">From (supplier)</label><input id="eq-sup-in" class="inp" type="text" value="${U.esc(s.draft && s.draft.supplier != null ? s.draft.supplier : c.supplier || "")}" autocomplete="off" placeholder="optional"></div>`;
+    if (s.orig && JSON.stringify(X.snap(c)) !== JSON.stringify(s.orig)) h += '<button type="button" class="btn sec block au-undo" data-act="eqUndo">↶ Undo my changes</button>';
+    return h + "</div>";
+  };
+  /** The next rental still without a price, after this one in list order (wraps round). */
+  X.nextTodo = (id) => {
+    const u = M.unitById(id); if (!u) return null;
+    const all = X.rentals(u.projectId), i = all.findIndex((x) => x.id === id);
+    for (let k = 1; k <= all.length; k++) { const x = all[(i + k + all.length) % all.length]; if (x.id !== id && x.noPrice) return x; }
+    return null;
+  };
+  X.sheetFoot = (sh) => {
+    const s = sh.state, u = M.unitById(s.id), next = u ? X.todo(u.projectId).filter((x) => x.id !== s.id) : [];
+    return (next.length ? `<button type="button" class="btn sec" data-act="eqNext">Next without price (${next.length}) ›</button>` : "") + '<button type="button" class="btn" data-act="close">Done</button>';
+  };
+
+  X.acts = {
+    eqIn: (d, el, ev, sh) => X.put(sh, { in: d.val }),
+    eqOut: (d, el, ev, sh) => X.put(sh, { out: d.val || "" }),
+    eqUnit: (d, el, ev, sh) => X.put(sh, { rateUnit: d.val === "month" ? "month" : "day" }),
+    eqJob: (d, el, ev, sh) => { const u = M.unitById(sh.state.id); if (d.job && u) ui.rememberJob(u.projectId, d.job); return X.put(sh, { jobId: d.job || "" }); },
+    eqStep: (d, el, ev, sh) => {
+      const c = X.cur(sh), up = U.num(d.dir) > 0;
+      if (d.f === "qty") return X.put(sh, { qty: Math.max(1, (U.num(c.qty) || 1) + (up ? 1 : -1)) });
+      const r = U.num(c.rate), st = X.step(up ? r : Math.max(0, r - 1));
+      const n = Math.max(0, up ? (Math.floor(r / st) + 1) * st : (Math.ceil(r / st) - 1) * st);
+      return X.put(sh, { rate: n, rateUnit: c.rateUnit === "month" ? "month" : "day" });
+    },
+    eqSame: async (d, el, ev, sh) => {
+      const c = X.cur(sh), u = M.unitById(sh.state.id); if (!u) return;
+      const others = X.rentals(u.projectId).filter((x) => x.id !== sh.state.id && x.doc.equipmentId === c.equipmentId && !(x.rate > 0));
+      const undo = [];
+      for (const x of others) { const r = await SL.store.patch("costs", x.id, { rate: U.num(c.rate), rateUnit: c.rateUnit === "month" ? "month" : "day" }); if (!r.ok) return sh.error("Not saved · " + SL.store.errText(r)); undo.push({ id: x.id, v: { rate: U.num(x.doc.rate), rateUnit: x.doc.rateUnit || "day" } }); }
+      sh.state.others = (sh.state.others || []).concat(undo);
+      ui.toast("Same rate on " + undo.length + " more line" + (undo.length > 1 ? "s" : ""), { ms: 10000, undo: async () => { const out = []; for (const x of undo) out.push(await SL.store.patch("costs", x.id, x.v)); sh.state.others = (sh.state.others || []).filter((o) => !undo.includes(o)); return out; } });
+      sh.refresh();
+    },
+    eqNext: (d, el, ev, sh) => {
+      const nx = X.nextTodo(sh.state.id); if (!nx) return;
+      X.closeToast(sh); sh.state = { id: nx.id, date: "" }; sh.err = ""; sh.refresh();
+    },
+    eqUndo: async (d, el, ev, sh) => {
+      const s = sh.state; if (!s.orig) return;
+      const ok = await X.put(sh, Object.assign({}, s.orig));
+      if (!ok) return;
+      for (const x of s.others || []) await SL.store.patch("costs", x.id, x.v);
+      s.orig = null; s.local = null; s.others = null; s.draft = null; sh.refresh();
+    },
+    eqPay: (d, el, ev, sh) => { const u = M.unitById(sh.state.id); if (!u) return; sh.close(true); A.payUnit({ key: u.key }); },
+  };
+  /** A toast with Undo for what the sheet changed on the rental it is leaving. */
+  X.closeToast = async (sh) => {
+    const s = sh.state, c = (SL.S.costs || {})[s.id];
+    // a typed value not yet committed (still in the box when Done was tapped)
+    if (s.draft && s.draft.supplier != null && s.draft.supplier.trim() !== (c && c.supplier) && c) await X.put(sh, { supplier: s.draft.supplier.trim() });
+    s.draft = null;
+    if (!s.orig || !c) return;
+    const cur = (SL.S.costs || {})[s.id] || c;
+    if (JSON.stringify(X.snap(cur)) === JSON.stringify(s.orig) && !(s.others && s.others.length)) return;
+    const id = s.id, o = s.orig, others = (s.others || []).slice(), u = M.unitById(id);
+    // the equipment's usual rate: learnt once, from the final price, only while it has none
+    let learnt = null;
+    if (U.num(cur.rate) > 0 && cur.equipmentId && SL._crew && SL._crew.learnRate) learnt = await SL._crew.learnRate(cur.equipmentId, U.num(cur.rate), cur.rateUnit === "month" ? "month" : "day");
+    s.orig = null; s.others = null; s.local = null;
+    ui.toast(U.t(u ? X.name(u) : "Rental") + " saved" + (others.length ? " · +" + others.length + " line" + (others.length > 1 ? "s" : "") : ""), { ms: 10000, undo: async () => {
+      const out = [await SL.store.patch("costs", id, o)];
+      for (const x of others) out.push(await SL.store.patch("costs", x.id, x.v));
+      if (learnt && SL._crew.unlearn) await SL._crew.unlearn([learnt]);
+      return out;
+    } });
+  };
+
+  /** Open the rental editor. d: {id, date?} (date = the day tapped). */
+  A.eqDay = (d) => {
+    if (AU().ro()) return;
+    const c = (SL.S.costs || {})[d.id];
+    if (!c || c.type !== "rental") { ui.toast("That rental isn't in the ledger any more"); return; }
+    ui.sheet({
+      title: (sh) => { const u = M.unitById(sh.state.id); return u ? U.t(X.name(u)) + (X.ar(u) ? ' <span class="muted">' + U.t(X.ar(u)) + "</span>" : "") : "Rental"; },
+      state: { id: d.id, date: U.isISO(d.date || "") ? d.date : "" },
+      live: true,
+      body: X.sheetBody,
+      foot: X.sheetFoot,
+      acts: X.acts,
+      after: (sh) => {
+        const ri = sh.el.querySelector("#eq-rate-in"), si = sh.el.querySelector("#eq-sup-in");
+        const draft = (k, v) => { sh.state.draft = Object.assign({}, sh.state.draft || {}, { [k]: v }); };
+        const undraft = (k) => { if (sh.state.draft) delete sh.state.draft[k]; };
+        if (ri && !ri._b) {
+          ri._b = true;
+          ri.addEventListener("input", () => draft("rate", ri.value));
+          ri.addEventListener("change", () => {
+            if (ri.value.trim() === "") { undraft("rate"); return; }
+            const v = X.parseNum(ri.value);
+            if (!(v >= 0)) return sh.error("Type the rate as a number, like 150");
+            undraft("rate"); X.put(sh, { rate: U.round2(v), rateUnit: X.cur(sh).rateUnit === "month" ? "month" : "day" });
+          });
+        }
+        if (si && !si._b) {
+          si._b = true;
+          si.addEventListener("input", () => draft("supplier", si.value));
+          si.addEventListener("change", () => { undraft("supplier"); X.put(sh, { supplier: si.value.trim() }); });
+        }
+      },
+      onClose: (sh) => X.closeToast(sh),
+    });
+  };
+})(window.SL);
+
+/* ---- 46-invoices.js ---- */
+/* 46-invoices: Invoices audit (#invaudit[.<filter>]) — every purchase and service: received? paid? proof? price OK?
+ *   Tiles and chips filter: Not received · Unpaid · Price up · No proof. Tap an invoice for its lines: price paid vs
+ *   the usual (from our own history, SL.prices) and vs the market (catalog item .market, written by Claude Code when
+ *   Ryan asks "check market prices"). "Price watch" ranks items by how far the last price moved. */
+
+/* ---- chunk 1: data ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = (SL._inva = SL._inva || {});
+  const P = () => SL.prices;
+
+  X.FILTERS = [["all", "All"], ["notrec", "Not received"], ["unpaid", "Unpaid"], ["up", "Price up"], ["noproof", "No proof"]];
+  X.list = (pid) => M.unitsFor(pid).filter((u) => (u.kind === "purchase" || u.kind === "service") && !u.archived);
+  /** Market reference for a catalog item: {low, high, typical, unit, sources[], checkedAt} or null. */
+  X.market = (itemId) => { const it = itemId && M.items()[itemId]; return it && it.market && (U.num(it.market.typical) > 0 || U.num(it.market.high) > 0) ? it.market : null; };
+  X.mkRef = (m) => U.num(m.typical) || (U.num(m.low) + U.num(m.high)) / 2;
+  /** Short price: whole riyals from 100 up, else 2 decimals (1.64, not "2"). */
+  X.pr = (v) => (Math.abs(v) >= 100 ? U.mw(v) : U.m(v, { plain: true }));
+  /** Per line: VAT-incl unit price, deviation vs our usual, and vs the market (same unit only). */
+  X.lineInfo = (u, l) => {
+    const doc = u.doc, price = P().basis(l, doc);
+    let dev = { status: "none" }; try { dev = P().deviation(l, doc) || dev; } catch (e) {}
+    const m = X.market(l.itemId), mref = m && (!m.unit || !l.unit || m.unit === l.unit) ? X.mkRef(m) : 0;
+    const mpct = price && mref ? (price - mref) / mref : null;
+    return { l, price, dev, m: mref ? m : null, mref, mpct };
+  };
+  X.up = (li) => (li.dev && (li.dev.status === "above" || (li.dev.status === "wayoff" && li.dev.pct > 0))) || (li.mpct != null && li.mpct > 0.1);
+  /** Everything the screen needs about one invoice, as of today. */
+  X.info = (u, T) => {
+    const r = M.calc(u, T), doc = u.doc;
+    const lines = (doc.lines || []).filter((l) => l && (l.unitPrice || l.amount)).map((l) => X.lineInfo(u, l));
+    const pays = u.payments.filter((p) => !p.void && p.date && p.date <= T);
+    const who = U.uniq(pays.map((p) => { const w = M.wallet(p.walletId); return (w && w.kind === "owner") || p.walletId === "w_ryan" ? "you" : M.walletName(p.walletId); }));
+    return {
+      u, r, lines, received: !u.pendingDelivery, recDate: u.delivered || "", paidBy: who, total: U.hal(doc.amount),
+      // owed / prepaid follow the money rules (nothing is owed before delivery); due = what is left to pay on the paper
+      paid: r.paid, owed: r.owed, prepaid: r.prepaid, due: Math.max(0, U.hal(doc.amount) - r.paid), proof: (doc.files || []).length, up: lines.filter(X.up).length,
+      quote: doc.doc && doc.doc.kind === "quote", unrev: doc.review && doc.review.reviewed === false,
+    };
+  };
+  X.match = (f, i) => f === "notrec" ? !i.received : f === "unpaid" ? i.due > 0 : f === "up" ? i.up > 0 : f === "noproof" ? !i.proof : true;
+  /** Items bought in this project, with last price, usual before it and the market: Price watch rows. */
+  X.watch = (pid, T) => {
+    const rows = [];
+    for (const [id, it] of Object.entries(M.items())) {
+      const obs = P().observations(id).filter((o) => !o.q && (!o.projectId || o.projectId === pid) && o.date <= T);
+      if (!obs.length) continue;
+      const last = obs[obs.length - 1];
+      let usual = null, pct = null;
+      const prior = obs.slice(0, -1).filter((o) => (o.unit || "") === (last.unit || "")).slice(-6);
+      if (prior.length) { usual = U.median(prior.map((o) => o.price)); pct = (last.price - usual) / usual; }
+      const m = X.market(id), mref = m && (!m.unit || m.unit === last.unit) ? X.mkRef(m) : 0;
+      rows.push({ id, it, last, obs, usual, pct, m: mref ? m : null, mref, mpct: mref ? (last.price - mref) / mref : null });
+    }
+    const score = (r) => Math.max(r.pct != null ? r.pct : -9, r.mpct != null ? r.mpct : -9);
+    return rows.sort((a, b) => score(b) - score(a) || (b.last.date || "").localeCompare(a.last.date || ""));
+  };
+  X.lastCheck = () => { let d = ""; for (const it of Object.values(M.items())) { const v = it.market && String(it.market.checkedAt || "").slice(0, 10); if (v && U.isISO(v)) d = U.maxDate(d, v); } return d; };
+  X.pct = (p) => (p == null ? "" : (p > 0 ? "↑ " : p < 0 ? "↓ " : "") + Math.round(Math.abs(p) * 100) + "%");
+  X.pcls = (p) => (p == null ? "muted" : p > 0.25 ? "c-stop" : p > 0.1 ? "c-warn" : p < -0.1 ? "c-info" : "muted");
+})(window.SL);
+
+/* ---- chunk 2: the view ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._inva, AU = () => SL._audit;
+  const DOC = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M9.5 1.5V5H13M6 8.5h5M6 11h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+
+  X.tiles = (infos, f) => {
+    const t = (k, label, n, amt, cls) => `<button type="button" class="ia-tile${f === k ? " on" : ""}${n ? " " + cls : ""}" data-go="${U.esc(ui.href("invaudit", k === f ? "" : k))}" aria-pressed="${f === k}"><b class="num">${n}</b><span>${label}</span>${amt != null ? '<small class="num">' + (amt ? U.mw(amt / 100) : "–") + "</small>" : ""}</button>`;
+    const nr = infos.filter((i) => !i.received), un = infos.filter((i) => i.due > 0), up = infos.filter((i) => i.up), np = infos.filter((i) => !i.proof);
+    return '<div class="ia-tiles">' + t("notrec", "not received", nr.length, U.sum(nr, (i) => i.total), "warn") + t("unpaid", "left to pay", un.length, U.sum(un, (i) => i.due), "owed") +
+      t("up", "price up", up.length, null, "stop") + t("noproof", "no document", np.length, null, "warn") + "</div>";
+  };
+
+  X.chips = (i) => {
+    const c = [];
+    if (i.quote) c.push('<span class="ia-chip stop">Quote, not an invoice</span>');
+    if (i.received) c.push(`<span class="ia-chip ok">✓ ${i.u.kind === "service" ? "Performed" : "Received"} ${U.esc(U.dDM(i.recDate))}</span>`);
+    else if (!AU().ro()) c.push(`<button type="button" class="ia-chip act" data-act="markDelivered" data-id="${U.esc(i.u.id)}">${i.u.kind === "service" ? "Mark performed" : "Mark received"}</button>`);
+    else c.push('<span class="ia-chip warn">Not received</span>');
+    const by = i.paidBy.length ? " · " + U.esc(i.paidBy.join(" + ")) : "";
+    if (!i.received && i.paid) c.push(`<span class="ia-chip ok">Prepaid ${U.mw(i.paid / 100)}${by}</span>` + (i.due ? `<span class="ia-chip warn">${U.mw(i.due / 100)} to pay on delivery</span>` : ""));
+    else if (!i.received && i.due) c.push(`<span class="ia-chip warn">Not paid · ${U.mw(i.due / 100)}</span>`);
+    else if (i.due > 0 && !i.paid) c.push(`<span class="ia-chip owed">Unpaid ${U.mw(i.due / 100)}</span>`);
+    else if (i.due > 0) c.push(`<span class="ia-chip owed">Owed ${U.mw(i.due / 100)}</span>`);
+    else c.push(`<span class="ia-chip ok">Paid${i.paidBy.length ? " · " + U.esc(i.paidBy.join(" + ")) : ""}</span>`);
+    c.push(i.proof ? `<a class="ia-chip ok doc" href="${U.esc(U.assetUrl(i.u.doc.files[0]))}" target="_blank" rel="noopener">${DOC} doc</a>` : '<span class="ia-chip warn">no document</span>');
+    if (i.up) c.push(`<span class="ia-chip stop">↑ ${i.up} price${i.up > 1 ? "s" : ""}</span>`);
+    if (i.unrev) c.push('<span class="ia-chip info">Added by Claude · check</span>');
+    return '<div class="ia-chips">' + c.join("") + "</div>";
+  };
+
+  X.linesTable = (i) => {
+    if (!i.lines.length) return '<p class="t12 muted">No lines on this invoice (total only).</p>';
+    const rows = i.lines.map((li) => {
+      const l = li.l, it = l.itemId && M.items()[l.itemId], name = (it && it.name) || l.desc || "Line";
+      const dev = li.dev && li.dev.usual ? `<span class="${X.pcls(li.dev.pct)}">${X.pct(li.dev.pct)}</span><small>usual ${U.m(li.dev.usual, { plain: true })}</small>` : li.dev && li.dev.status === "baseline" ? '<small class="muted">first buys</small>' : '<small class="muted">–</small>';
+      const mk = li.m ? `<span class="${X.pcls(li.mpct)}">${X.pct(li.mpct)}</span><small>market ~${X.pr(li.mref)}</small>` : '<small class="muted">no market price</small>';
+      return `<tr${l.itemId ? ` class="tap" data-go="${U.esc(ui.href("item", l.itemId))}"` : ""}><td class="ia-it">${U.t(name)}${l.ar ? '<small dir="rtl" lang="ar">' + U.t(l.ar) + "</small>" : ""}</td><td class="r num">${U.esc(String(U.num(l.qty) || ""))} ${U.esc(l.unit || "")}</td><td class="r num">${li.price ? U.m(li.price) : '<span class="unk">?</span>'}</td><td class="r ia-d"><span class="ia-cmp">${dev}</span><span class="ia-cmp">${mk}</span></td></tr>`;
+    }).join("");
+    return `<div class="tscroll"><table class="t ia-lines"><thead><tr><th>Item</th><th class="r">Qty</th><th class="r">Unit price<br><small>incl. VAT</small></th><th class="r">vs usual<br><small>vs market</small></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  };
+
+  X.card = (i) => {
+    const u = i.u, k = "ia:" + u.key, open = ui.isOpen(k, false);
+    const kind = u.doc.doc && u.doc.doc.kind;
+    return `<div class="ia-card${open ? " open" : ""}${i.up ? " up" : ""}">` +
+      `<button type="button" class="ia-head" data-act="toggle" data-k="${U.esc(k)}" aria-expanded="${open}"><span class="ia-t">${kind ? ui.kindPill(kind) + " " : ""}${U.t(u.title)}</span><span class="ia-amt num">${U.m(i.total / 100)}</span>` +
+      `<span class="ia-m">${U.esc(U.dShort(u.date))}${u.jobId ? " · " + U.esc(M.jobCode(u.jobId)) : ' · <span class="c-warn">no job</span>'}${i.lines.length ? " · " + i.lines.length + " line" + (i.lines.length > 1 ? "s" : "") : ""}</span><span class="ia-car">${open ? "▾" : "›"}</span></button>` +
+      X.chips(i) + (open ? '<div class="ia-body">' + X.linesTable(i) + `<button type="button" class="lnk" data-act="openUnit" data-key="${U.esc(u.key)}">Open invoice (edit, pay, photo) ›</button></div>` : "") + "</div>";
+  };
+
+  X.watchBlock = (pid, T) => {
+    let rows = [];
+    try { rows = X.watch(pid, T); } catch (e) { console.warn("[invaudit] price watch", e); return ""; }
+    const all = ui.isOpen("ia.watchAll", false), shown = all ? rows : rows.slice(0, 8), last = X.lastCheck();
+    if (!rows.length) return "";
+    const strip = (r) => {
+      const ps = r.obs.slice(-12).map((o) => o.price), mn = Math.min(...ps, r.mref || Infinity), mx = Math.max(...ps, r.mref || 0), sp = mx - mn || 1;
+      return '<span class="ia-strip" aria-hidden="true">' + ps.map((p, j) => `<i style="left:${(((p - mn) / sp) * 100).toFixed(1)}%"${j === ps.length - 1 ? ' class="last"' : ""}></i>`).join("") + (r.mref ? `<b style="left:${(((r.mref - mn) / sp) * 100).toFixed(1)}%" title="market"></b>` : "") + "</span>";
+    };
+    let h = `<section class="sec ia-watch">${ui.sech("Price watch", '<span class="t12 muted">' + (last ? "market checked " + U.esc(U.dShort(last)) : "market not checked yet") + "</span>")}`;
+    h += '<div class="ia-wl">' + shown.map((r) => `<button type="button" class="ia-w" data-go="${U.esc(ui.href("item", r.id))}">` +
+      `<span class="ia-wn">${U.t(r.it.name || r.id)}${r.it.ar ? ' <span class="muted" dir="rtl" lang="ar">' + U.t(r.it.ar) + "</span>" : ""}<small>last ${U.m(r.last.price, { plain: true })}/${U.esc(r.last.unit || "?")} · ${U.esc(U.dDM(r.last.date))} · ${U.t(r.last.supplier || "")}</small></span>` +
+      strip(r) +
+      `<span class="ia-wd"><span class="${X.pcls(r.pct)}">${r.pct != null ? X.pct(r.pct) : "first"}</span><small>${r.usual != null ? "vs " + U.m(r.usual, { plain: true }) : "no history"}</small></span>` +
+      `<span class="ia-wd"><span class="${X.pcls(r.mpct)}">${r.mpct != null ? X.pct(r.mpct) : "–"}</span><small>${r.m ? "market " + X.pr(r.mref) : "no market"}</small></span></button>`).join("") + "</div>";
+    if (rows.length > 8) h += `<button type="button" class="lnk" data-act="toggle" data-k="ia.watchAll">${all ? "Show fewer" : "Show all " + rows.length + " items"}</button>`;
+    h += '<p class="t12 muted">Our usual = median of the last 6 prices we paid. Market = a price check Claude Code runs on the web when you ask it: “check market prices” (with sources). ◆ last price · ● earlier · ▮ market.</p>';
+    return h + "</section>";
+  };
+
+  SL.views.invaudit = {
+    tab: "audit",
+    render(route, pid) {
+      const T = U.today(), f = X.FILTERS.some(([k]) => k === (route.args || [])[0]) ? route.args[0] : "all";
+      const infos = U.sortBy(X.list(pid).map((u) => X.info(u, T)), (i) => (i.u.date || "") + ":" + String(i.u.doc.createdAt || 0).padStart(15, "0"), "desc");
+      const list = infos.filter((i) => X.match(f, i));
+      let h = '<div class="v-audit v-inva">' + AU().switcher("invaudit") + '<div class="hrow au-top"><h2 class="t20">Invoices</h2><span class="spacer"></span><span class="t12 muted">' + infos.length + " · " + U.mw(U.sum(infos, (i) => i.total) / 100) + " SAR</span></div>";
+      h += X.tiles(infos, f);
+      h += '<div class="chips ia-f">' + X.FILTERS.map(([k, l]) => `<button type="button" class="chip${k === f ? " on" : ""}" data-go="${U.esc(ui.href("invaudit", k === "all" ? "" : k))}">${l}</button>`).join("") + "</div>";
+      if (!list.length) h += `<div class="empty">${infos.length ? "Nothing here · every invoice passes this check." : "No invoices yet."}</div>`;
+      let lastDay = null;
+      for (const i of list) {
+        if (i.u.date !== lastDay) { lastDay = i.u.date; h += `<div class="ia-day lbl">${U.esc(i.u.date === T ? "Today" : U.dShort(i.u.date))}</div>`; }
+        h += X.card(i);
+      }
+      h += X.watchBlock(pid, T);
+      return h + "</div>";
+    },
   };
 })(window.SL);
 
@@ -11283,7 +12551,7 @@ window.SL = window.SL || {};
 /* ---- chunk 8b: #item.<id> | #item.eq.<id> | #item.svc.<sub> | #item.rate.<m|l|food> ---- */
 (function (SL) {
   "use strict";
-  const U = SL.util, ui = SL.ui, A = SL.actions, P = SL.prices;
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions, P = SL.prices;
   const X = SL._docviews;
 
   X.obsLink = (o, txt) => {
@@ -11319,6 +12587,21 @@ window.SL = window.SL || {};
         `<span>Usual (median, last 6)</span><span class="v num">${b ? U.m(b.usual) : '<span class="unk">?</span>'}</span>` +
         `<span>Range 180 days</span><span class="v num">${s.min != null ? U.m(s.min) + (s.max !== s.min ? "–" + U.m(s.max) : "") : '<span class="unk">?</span>'}</span>` +
         `<span>Tolerance ±${tol}%</span><span class="v num">${b ? "→ " + U.m(b.usual * (1 - s.tol)) + "–" + U.m(b.usual * (1 + s.tol)) : '<span class="unk">?</span>'}</span></div>`;
+      const mk = info.kind === "item" && (M.items()[info.id] || {}).market;
+      if (mk && (U.num(mk.typical) > 0 || U.num(mk.high) > 0)) {
+        const lo = U.num(mk.low), hi = U.num(mk.high), ty = U.num(mk.typical) || (lo + hi) / 2, sameU = !mk.unit || !s.unit || mk.unit === s.unit;
+        const last = s.obs.filter((o) => !o.q && (!o.date || o.date <= D)).slice(-1)[0], dp = last && sameU && ty ? (last.price - ty) / ty : null;
+        h += '<div class="sec dv-mk">' + ui.sech("Market price", "checked " + U.esc(U.isISO(String(mk.checkedAt || "").slice(0, 10)) ? U.dShort(String(mk.checkedAt).slice(0, 10)) : "?")) +
+          `<div class="kv dv-kv"><span>Typical in Riyadh</span><span class="v num">${U.m(ty)} / ${U.esc(mk.unit || s.unit || "?")}</span>` +
+          (lo || hi ? `<span>Range seen</span><span class="v num">${U.m(lo || hi)}${hi && hi !== lo ? "–" + U.m(hi) : ""}</span>` : "") +
+          (dp != null ? `<span>Our last price</span><span class="v num">${U.m(last.price)} <span class="${dp > 0.25 ? "c-stop" : dp > 0.1 ? "c-warn" : dp < -0.1 ? "c-info" : "muted"}">${dp > 0 ? "+" : dp < 0 ? "−" : ""}${Math.abs(Math.round(dp * 100))}%</span></span>` : "") + "</div>" +
+          (!sameU ? `<p class="t12 c-warn">Market is per ${U.esc(mk.unit)}, we buy per ${U.esc(s.unit)}: not compared.</p>` : "") +
+          (() => { const src = (Array.isArray(mk.sources) ? mk.sources : []).map((x) => (typeof x === "string" ? { url: x, title: x } : x)).filter((x) => x && typeof x === "object"); if (!mk.note && !src.length) return "";
+            return `<details class="dv-mkd"><summary class="t13">Where these prices come from${src.length ? " · " + src.length + " source" + (src.length > 1 ? "s" : "") : ""}</summary>` +
+              (mk.note ? `<p class="t12 muted">${U.t(mk.note)}</p>` : "") +
+              (src.length ? '<ul class="dv-src">' + src.map((x) => `<li>${/^https?:\/\//.test(x.url || "") ? `<a href="${U.esc(x.url)}" target="_blank" rel="noopener noreferrer">${U.t(x.title || x.url)}</a>` : U.t(x.title || "")}${x.price ? ' <span class="muted">· ' + U.t(String(x.price)) + "</span>" : ""}</li>`).join("") + "</ul>" : "") + "</details>"; })() +
+          '<p class="t12 muted">Web check by Claude Code. Ask it “check market prices” to refresh.</p></div>';
+      }
       if (!b) h += `<p class="t12 muted">No usual yet: it needs ${(SL.S.config.flags && SL.S.config.flags.minObs) || 2} paid prices in 180 days. Until then new buys read "baseline".</p>`;
       if (s.otherUnits.length) h += `<p class="t12 c-warn">Also bought by ${U.esc(s.otherUnits.join(", ") || "no unit")}: unit differs from ${U.esc(s.unit || "?")}, never compared.</p>`;
       // history
