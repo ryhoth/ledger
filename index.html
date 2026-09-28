@@ -1455,6 +1455,28 @@ html[dir=rtl] .v-bal .bl .bl-leak{box-shadow:inset -3px 0 0 var(--stop)}
 html[dir=rtl] .v-bal .bl tr.bl-pend .bl-d{box-shadow:inset -3px 0 0 var(--warn),-1px 0 0 var(--line)}
 html[dir=rtl] .v-bal .bl-box::after{border-radius:var(--r-ctl) 0 0 var(--r-ctl);background:linear-gradient(to left,transparent,var(--paper))}
 
+/* by party: earned / paid / owed / ahead per party (tap = filter), then the cash-to-Sayed line (tap = float ledger) */
+.v-bal .bl-parties{border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);overflow:hidden}
+.v-bal .bl-pt{width:100%;border-collapse:collapse;font-size:var(--t-13)}
+.v-bal .bl-pt th,.v-bal .bl-pt td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:start;white-space:nowrap}
+.v-bal .bl-pt thead th{font-size:var(--t-11);font-weight:700;color:var(--ink-2);text-transform:uppercase;letter-spacing:.03em;background:var(--sunk)}
+.v-bal .bl-pt .r{text-align:end;font-variant-numeric:tabular-nums}
+.v-bal .bl-pt tbody th{font-weight:600;color:var(--ink)}
+.v-bal .bl-pt tbody th small{display:block;font-size:10px;font-weight:600}
+.v-bal .bl-pt tbody tr.tap{cursor:pointer}
+.v-bal .bl-pt tbody tr.tap:hover td,.v-bal .bl-pt tbody tr.tap:hover th{background:var(--sunk)}
+.v-bal .bl-pt tbody tr.on th{box-shadow:inset 3px 0 0 var(--ink)}
+.v-bal .bl-pt tfoot th,.v-bal .bl-pt tfoot td{font-weight:700;border-top:2px solid var(--line-2);border-bottom:0}
+.v-bal .bl-cash{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;width:100%;padding:8px;border-top:1px solid var(--line);background:var(--float-bg);color:var(--ink);font-size:var(--t-13);text-align:start}
+.v-bal .bl-cash b{font-weight:700}
+@media (max-width:600px){
+  .v-bal .bl-pt{font-size:var(--t-12)}
+  .v-bal .bl-pt th,.v-bal .bl-pt td{padding:7px 4px}
+  .v-bal .bl-pt th:first-child{padding-inline-start:8px}
+  .v-bal .bl-pt td:last-child,.v-bal .bl-pt th:last-child{padding-inline-end:8px}
+  .v-bal .bl-pt td.num{font-stretch:80%}
+}
+
 /* ---- 44-audit.css ---- */
 /* 44-audit: Crews — the crew-day Gantt and the day editor. Tokens only (plus the job colours below). */
 .v-audit{--lab:124px;--dw:44px;display:flex;flex-direction:column;gap:var(--s3);min-width:0}
@@ -8693,6 +8715,7 @@ window.SL = window.SL || {};
       let h = '<div class="v-bal"><div class="hrow bl-top"><h2 class="t20">' + U.L("Balances", "الأرصدة") + '</h2><span class="spacer"></span>' + ui.asOfChip() + "</div>";
       if (!all.length) return h + '<div class="empty">' + U.L("Nothing logged yet.", "لم يُسجَّل شيء بعد.") + "</div></div>";
       h += X.tiles(all, t, sayed, f, holds);
+      h += X.partyTable(pid, D, f, sayed, fw, holds);
       h += '<div class="chips bl-chips" role="group" aria-label="' + U.L("Show", "عرض") + '">' + X.FILTERS.map(([k, l, fn, ar]) => { const n = all.filter(fn).length; return `<button type="button" class="chip${k === f ? " on" : ""}" data-act="balFilter" data-val="${k}" aria-pressed="${k === f}">${U.esc(k === "sayed" ? sayed : U.L(l, ar))} <small class="muted">${n}</small></button>`; }).join("") + "</div>";
       const help = ui.isOpen("bl.help", false), sy = U.esc(sayed), me = U.L("Me", "أنا"), arr = U.L("→", "←");
       h += `<div class="bl-tools"><input id="bl-q" class="inp" type="search" placeholder="${U.L("Search: supplier, crew, job, amount", "بحث: مورد، طاقم، بند، مبلغ")}" aria-label="${U.L("Search events", "بحث في الحركات")}" value="${U.esc(X.q)}" autocomplete="off"><button type="button" class="lnk bl-hlp" data-act="toggle" data-k="bl.help" aria-expanded="${help}">${help ? U.L("Hide help", "إخفاء الشرح") : U.L("How to read", "طريقة القراءة")}</button></div>`;
@@ -8768,6 +8791,51 @@ window.SL = window.SL || {};
     const r = await SL.store.patch("costs", d.id, { delivered: "" });
     if (!r.ok) return ui.toast(U.esc(SL.store.errText(r)));
     ui.toast(U.L("Not delivered yet · ", "لم يُسلَّم بعد · ") + (c.supplier || c.desc ? U.t(c.supplier || c.desc) : U.L("cost", "تكلفة")), { ms: 10000, undo: () => SL.store.patch("costs", d.id, { delivered: before }) });
+  };
+})(window.SL);
+
+/* ---- by party: earned, paid, owed and paid ahead for tradesmen, suppliers and equipment renters; cash to Sayed ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = SL._bal;
+  const PARTY = { T: "T", P: "P", S: "P", O: "P", E: "E" };
+  /** Per party as of D, straight from the units (the money model's rules):
+   *  earned = cost to date (work done / delivered) · paid = payments dated ≤ D · owed = max(0, earned − paid) · ahead = prepaid. */
+  X.partyTotals = (pid, D) => {
+    const z = () => ({ earned: 0, paid: 0, owed: 0, ahead: 0, unpriced: 0 });
+    const t = { T: z(), P: z(), E: z(), all: z() };
+    for (const u of M.unitsFor(pid)) {
+      if (u.archived) continue;
+      const r = M.calc(u, D), x = t[PARTY[u.cat] || "P"];
+      x.earned += r.inc; x.paid += r.paid; x.owed += r.owed; x.ahead += r.prepaid;
+      if (u.noPrice && !r.paid && !r.inc) x.unpriced++; // same rule as the tiles' "+n unpriced"
+    }
+    for (const k of ["T", "P", "E"]) for (const f in t.all) t.all[f] += t[k][f];
+    return t;
+  };
+  /** The table under the tiles: tap a party to show only its events (the chips' filter), tap the cash line for the float. */
+  X.partyTable = (pid, D, f, sayed, fw, holds) => {
+    const t = X.partyTotals(pid, D), sy = U.esc(sayed);
+    const cell = (h, cls) => `<td class="r num${h && cls ? " " + cls : ""}">${h ? U.mw(h / 100) : '<span class="zero">–</span>'}</td>`;
+    const cells = (x) => cell(x.earned) + cell(x.paid) + cell(x.owed, "c-owed") + cell(x.ahead, "c-prepaid");
+    const row = (k, fk, label) => {
+      const x = t[k], on = f === fk;
+      const np = x.unpriced ? `<small class="c-warn">${U.L("+" + x.unpriced + " unpriced", U.ltr("+" + x.unpriced) + " بلا سعر")}</small>` : "";
+      return `<tr class="tap${on ? " on" : ""}" data-act="balFilter" data-val="${on ? "all" : fk}" role="button" tabindex="0" aria-pressed="${on}"><th scope="row">${label}${np}</th>${cells(x)}</tr>`;
+    };
+    let h = '<div class="bl-parties"><table class="bl-pt"><thead><tr><th scope="col">' + U.L("SAR", "ر.س") + "</th>" +
+      [U.L("Earned", "قيمة العمل"), U.L("Paid", "مدفوع"), U.L("Owed", "مستحق"), U.L("Ahead", "مقدماً")].map((l) => `<th scope="col" class="r">${l}</th>`).join("") + "</tr></thead><tbody>" +
+      row("T", "trades", U.L("Tradesmen", "الحرفيون")) + row("P", "suppliers", U.L("Suppliers", "الموردون")) + row("E", "equip", U.L("Equipment renters", "مؤجرو المعدات")) +
+      `</tbody><tfoot><tr><th scope="row">${U.L("Total", "الإجمالي")}</th>${cells(t.all)}</tr></tfoot></table>`;
+    if (fw && M.wallet(fw) && M.wallet(fw).kind === "float") {
+      const src = M.sources(pid, D);
+      h += `<button type="button" class="bl-cash" data-go="${U.esc(ui.href("float", fw))}">` +
+        `<span>${U.L("Cash to " + sy, "نقد إلى " + sy)} <b class="num">${U.mw(src.given / 100)}</b></span>` +
+        `<span class="muted">${U.L("paid out", "صرف")} <b class="num">${U.mw(src.floatSpent / 100)}</b> · ` +
+        (holds < 0 ? `<b class="c-stop">${U.L("short by ", "ناقص ")}${U.mw(-holds / 100)}</b>` : `${U.L("holds", "معه")} <b class="num">${U.mw(holds / 100)}</b>`) + U.L(" ›", " ‹") + "</span></button>";
+    }
+    return h + "</div>";
   };
 })(window.SL);
 
