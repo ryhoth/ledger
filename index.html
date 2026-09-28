@@ -1609,6 +1609,25 @@ html[dir=rtl] .v-audit .au-dh small{top:1px;font-size:10px;line-height:11px;z-in
 .v-audit .au-pd.lg{position:static;display:inline-block}
 html[dir=rtl] .v-audit .au-pw{box-shadow:inset -1px 0 0 var(--line-2)}
 
+/* other expenses marker (bottom end of the day; the paid ✓ sits bottom start, the food dot and the ? badge top end),
+   food amount / other rows and the day sheet's Paid section (Crews) */
+.v-audit .au-oth{position:absolute;z-index:3;inset-inline-end:5px;bottom:11px;width:5px;height:5px;border-radius:1px;background:currentColor;opacity:.85}
+.sheet .au-step .au-in{width:64px;min-height:48px;padding:0 2px;border:0;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);border-radius:0;background:var(--paper);color:var(--ink);text-align:center;font-size:var(--t-20);font-weight:700;font-stretch:80%}
+.sheet .au-step .au-in:focus{outline:none;box-shadow:inset 0 0 0 2px var(--ink)}
+.sheet .au-oamt{display:inline-flex;align-items:center;gap:8px;justify-self:end}
+.sheet .au-oamt>.muted{font-size:var(--t-12)}
+.sheet .au-oamt .au-in{width:96px;text-align:end;font-variant-numeric:tabular-nums}
+.sheet .au-oth-row .au-note{grid-column:1/-1}
+.sheet .au-paid{gap:8px;padding-top:12px;border-top:1px solid var(--line)}
+.sheet .au-plist{display:flex;flex-direction:column}
+.sheet .au-prow{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:4px 10px;min-height:40px;border-bottom:1px solid var(--line);font-size:var(--t-13)}
+.sheet .au-pvia{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sheet .au-pundo{min-height:40px;padding-inline:8px}
+.sheet .au-pask{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding-block:2px 8px}
+.sheet .au-pask .btn{min-height:40px}
+.sheet .au-pform{align-items:end}
+.sheet .au-pahead{align-self:flex-start;min-height:40px}
+
 /* ---- 45-equip.css ---- */
 /* 45-equip: Equipment Gantt (reuses the .v-audit grid from 44-audit.css) and the rental editor. */
 .v-eqa .au-c.eq-idle::before{background:repeating-linear-gradient(135deg,var(--jc) 0 4px,color-mix(in srgb,var(--jc) 45%,transparent) 4px 8px)}
@@ -1629,6 +1648,23 @@ html[dir=rtl] .v-audit .au-pw{box-shadow:inset -1px 0 0 var(--line-2)}
 .v-eqa .eq-grp .au-nm{position:sticky;inset-inline-start:8px;font-size:var(--t-12);text-transform:uppercase;letter-spacing:.03em;color:var(--ink-2);overflow:visible}
 /* right-to-left (Arabic): the group's job colour bar on the right */
 html[dir=rtl] .v-eqa .eq-grp{box-shadow:inset -3px 0 0 var(--jc)}
+
+/* deposits strip (above the grid) and its sheets — logical sides only (RTL) */
+.v-eqa .eq-dep{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);min-width:0}
+.v-eqa .eq-dep-h{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;min-height:44px;padding-block:4px;padding-inline:10px 6px}
+.v-eqa .eq-dep-h>b{font-size:var(--t-13)}
+.v-eqa .eq-dep-h .btn,.v-eqa .eq-dep-b .btn{min-height:36px}
+.v-eqa .eq-dep-r{display:flex;align-items:center;flex-wrap:wrap;gap:4px 8px;padding-block:6px;padding-inline:10px 6px;border-top:1px solid var(--line)}
+.v-eqa .eq-dep-i{display:flex;flex-direction:column;align-items:flex-start;flex:1 1 12rem;min-width:0}
+.v-eqa .eq-dep-t{max-width:100%;padding:0;border:0;background:none;color:var(--ink);font:inherit;font-weight:600;font-size:var(--t-13);text-align:start;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.v-eqa button.eq-dep-t{min-height:28px;cursor:pointer;text-decoration:underline dotted var(--ink-3);text-underline-offset:3px}
+.v-eqa .eq-dep-m{font-size:var(--t-12);color:var(--ink-2)}
+.v-eqa .eq-dep-b{display:flex;gap:6px;margin-inline-start:auto}
+.v-eqa .eq-dep-rf{display:flex;align-items:center;flex-wrap:wrap;gap:4px 10px;flex-basis:100%;padding-inline-start:10px;border-inline-start:2px solid var(--line-2);font-size:var(--t-12);color:var(--ink-2)}
+.v-eqa .eq-dep-rf .lnk{min-height:32px}
+.v-eqa .eq-dep-more{align-self:flex-start;min-height:36px;padding-inline:10px;border-top:1px solid var(--line);width:100%;text-align:start}
+.sheet .eq-dep-sheet .chips .chip{min-height:40px}
+.sheet .eq-dep-sheet .seg{min-height:44px}
 
 /* ---- 46-invoices.css ---- */
 /* 46-invoices: Invoices audit — tiles, invoice cards, price watch. */
@@ -2391,6 +2427,12 @@ window.SL = window.SL || {};
   U.hal = (sar) => Math.round(U.num(sar) * 100);
   U.sar = (hal) => Math.round(hal) / 100;
   U.round2 = (x) => Math.round(U.num(x) * 100) / 100;
+  /** A typed amount: accepts Arabic-Indic digits (١٥٠), "1,500" and "12.5"; NaN for anything else (and for ""). */
+  U.parseNum = (txt) => {
+    let t = String(txt == null ? "" : txt).trim().replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x6f0)).replace(/٫/g, ".").replace(/٬/g, ",").replace(/\s+/g, "");
+    if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/,/g, "");
+    return /^\d+(\.\d+)?$/.test(t) ? parseFloat(t) : NaN;
+  };
   const grp = (n) => n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   /** Exact: "28,326<span class=h>.84</span>" (HTML). opts.plain → "28,326.84". opts.sign → leading "+". */
   U.m = (sar, opts) => {
@@ -2784,14 +2826,20 @@ window.SL = window.SL || {};
     if (u.kind === "crew") return { coll: "timesheets", id: u.tsId, wrap: (p) => ({ crews: { [u.crewId]: p } }) };
     return { coll: "costs", id: u.id, wrap: (p) => p };
   }
+  const tl = (en, ar) => (U.L ? U.L(en, ar) : en);
   /**
    * Record a payment on a unit. amount in SAR. Returns {ok, ref} where ref undoes it via store.voidPay(ref).
-   * opts: {amount, walletId, date, note, batch}
+   * opts: {amount, walletId, date, note, batch, refund}. refund:true stores −|amount| with refund:true (money back
+   * into walletId, e.g. a deposit returned); a negative amount without refund is refused.
    */
   store.pay = async (u, opts) => {
+    // a negative amount is money coming back (a deposit returned): only as a refund (opts.refund), never on a crew week
+    if (U.num(opts.amount) < 0 && !opts.refund) return { ok: false, code: "bad_amount", message: tl("an amount below 0 is only for a refund", "المبلغ السالب للاسترداد فقط") };
+    if (opts.refund && u.kind === "crew") return { ok: false, code: "bad_amount", message: tl("a crew week can't take a refund", "لا استرداد على أسبوع طاقم") };
     const key = "p" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
     const t = payTarget(u);
     const pay = { date: opts.date || U.today(), amount: U.round2(opts.amount), walletId: opts.walletId, at: Date.now() };
+    if (opts.refund) { pay.amount = -Math.abs(pay.amount); pay.refund = true; }
     if (opts.note) pay.note = opts.note;
     if (opts.batch) pay.batch = opts.batch;
     const r = await store.patch(t.coll, t.id, t.wrap({ payments: { [key]: pay } }));
@@ -2801,6 +2849,28 @@ window.SL = window.SL || {};
   store.voidPay = (ref) => {
     const body = ref.coll === "timesheets" && ref.crewId ? { crews: { [ref.crewId]: { payments: { [ref.key]: { void: true, voidAt: Date.now() } } } } } : { payments: { [ref.key]: { void: true, voidAt: Date.now() } } };
     return store.patch(ref.coll, ref.id, body);
+  };
+  /** The voidPay ref of an existing payment (payId = the key in the payments map, i.e. a model payment's .id). */
+  store.payRef = (u, payId) => { const t = payTarget(u); return { coll: t.coll, id: t.id, key: payId, crewId: u.kind === "crew" ? u.crewId : undefined }; };
+  /** Money back on a cost unit (a deposit returned): a payment of −|amount| with refund:true. opts: {amount, walletId, date, note}. */
+  store.refund = (u, opts) => store.pay(u, Object.assign({}, opts, { refund: true }));
+  /**
+   * New equipment deposit: a costs doc {type:"rental", deposit:true, qty 0 × rate 0} carrying one payment, so it costs
+   * nothing and shows as Prepaid under Equipment. opts: {amount, walletId, date, supplier, note}. → {ok, id, ref}
+   * (ref = the payment's voidPay ref). Undo the whole deposit with store.patch("costs", id, {void: true}).
+   */
+  store.addDeposit = (pid, opts) => {
+    const date = U.isISO(opts.date) ? opts.date : U.today(), amount = U.round2(opts.amount);
+    if (!(amount > 0)) return Promise.resolve({ ok: false, code: "bad_amount", message: tl("enter an amount above 0", "أدخل مبلغاً أكبر من 0") });
+    const id = "dep-" + date.replace(/-/g, "") + "-" + Math.random().toString(36).slice(2, 6);
+    const key = "p" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+    const doc = {
+      type: "rental", deposit: true, projectId: pid, date, desc: "Equipment deposit", supplier: String(opts.supplier || "").trim(),
+      jobId: "", crewId: "", equipmentId: "", qty: 0, rate: 0, rateUnit: "day", in: "", out: "", files: [], paper: "",
+      note: String(opts.note || "").trim(), payments: { [key]: { date, amount, walletId: opts.walletId || (SL.model ? SL.model.defaultWallet(pid) : "w_sayed"), at: Date.now() } },
+      review: { by: "ryan", reviewed: true }, acks: {},
+    };
+    return store.put("costs", id, doc).then((r) => Object.assign(r, { id, ref: { coll: "costs", id, key } }));
   };
   /** Ack / snooze a flag on its owning doc. target = {coll,id,crewId?} ; value = {at,note,fp,until?} or null to clear. */
   store.ack = (target, flagId, value) => {
@@ -2909,17 +2979,21 @@ window.SL = window.SL || {};
 
   /* ---------------- units ---------------- */
   function normPays(map) {
-    return U.sortBy(Object.entries(map || {}).map(([id, p]) => ({ id, date: p.date || "", h: U.hal(p.amount), walletId: normWallet(p.walletId), void: !!p.void, batch: p.batch || "", note: p.note || "", at: p.at || 0 })), (p) => p.date + ":" + p.at);
+    return U.sortBy(Object.entries(map || {}).map(([id, p]) => ({ id, date: p.date || "", h: U.hal(p.amount), walletId: normWallet(p.walletId), void: !!p.void, batch: p.batch || "", note: p.note || "", at: p.at || 0, refund: !!p.refund || U.hal(p.amount) < 0 })), (p) => p.date + ":" + p.at);
   }
   function normWallet(w) { return w === "me" ? "w_ryan" : w === "sayed" ? "w_sayed" : w || ""; }
   function dayH(day, rates) {
     const rm = day.rm != null ? U.num(day.rm) : U.num(rates.m), rl = day.rl != null ? U.num(day.rl) : U.num(rates.l);
-    return U.hal(U.num(day.m) * rm) + U.hal(U.num(day.l) * rl) + U.hal(day.food);
+    return U.hal(U.num(day.m) * rm) + U.hal(U.num(day.l) * rl) + U.hal(day.food) + U.hal(day.other);
   }
+  /** Halalas for one crew-day record under the week's rates: m × rate + l × rate + food + other (day.rm / day.rl override). */
+  M.dayH = (day, rates) => (day ? dayH(day, rates || S().config.defaults) : 0);
+  /** A day record that costs something when confirmed: people, food or other expenses (a food-only or other-only day counts). */
+  M.dayHasCost = (d) => !!d && (U.num(d.m) + U.num(d.l) > 0 || U.num(d.food) > 0 || U.num(d.other) > 0);
   function crewUnit(ts, crewId, block) {
     const rates = block.rates || S().config.defaults;
-    const days = U.sortBy(Object.entries(block.days || {}).filter(([, d]) => d && (U.num(d.m) + U.num(d.l) > 0 || U.num(d.food) > 0)).map(([date, d]) => ({
-      date, m: U.num(d.m), l: U.num(d.l), food: U.num(d.food), job: d.job || block.job || "", plan: !!d.plan, est: !!d.est, rm: d.rm, rl: d.rl, h: dayH(d, rates),
+    const days = U.sortBy(Object.entries(block.days || {}).filter(([, d]) => M.dayHasCost(d)).map(([date, d]) => ({
+      date, m: U.num(d.m), l: U.num(d.l), food: U.num(d.food), other: U.num(d.other), otherNote: d.otherNote || "", job: d.job || block.job || "", plan: !!d.plan, est: !!d.est, rm: d.rm, rl: d.rl, h: dayH(d, rates),
     })), (d) => d.date);
     const conf = days.filter((d) => !d.plan);
     const crew = M.crew(crewId) || {};
@@ -2933,6 +3007,20 @@ window.SL = window.SL || {};
       planned: (from, to) => days.filter((d) => d.plan && d.date > from && d.date <= to).map((d) => ({ date: d.date, jobId: d.job, h: d.h })),
       ackTarget: { coll: "timesheets", id: ts.id, crewId },
     };
+  }
+  /* An equipment deposit (costs doc type "rental", deposit:true): money handed to a rental shop and held there. It never
+   * accrues (cost 0), so what was paid shows as Prepaid under Equipment and leaves the payer's wallet like any payment;
+   * a refund is a payment with a negative amount (refund:true). It is not a rental line: no price, no days on site. */
+  const tr = (en, ar) => (U.L ? U.L(en, ar) : en);
+  function depositUnit(u, c) {
+    const date = c.date || (c.createdAt ? U.ymd(new Date(c.createdAt)) : "");
+    u.deposit = true; u.noPrice = false; u.daily = 0; u.qty = 0; u.rate = 0; u.in = ""; u.out = "";
+    u.date = date; u.lastDate = date; u.crewId = "";
+    u.shop = c.supplier || "";
+    u.title = tr("Deposit", "تأمين") + " · " + (u.shop || tr("rental shop", "محل التأجير"));
+    u.payee = u.shop || tr("Equipment deposit", "تأمين المعدات");
+    u.parts = () => [];
+    u.onSite = () => false;
   }
   function costUnit(c, archived) {
     const kind = c.type === "rental" ? "rental" : c.type === "service" ? "service" : c.type === "other" ? "other" : "purchase";
@@ -2968,6 +3056,7 @@ window.SL = window.SL || {};
         return out;
       };
       u.onSite = (d) => !!inD && inD <= d && (!outD || d <= outD);
+      if (c.deposit) depositUnit(u, c);
     } else {
       const date = c.date || (c.createdAt ? U.ymd(new Date(c.createdAt)) : "");
       const h = U.hal(c.amount);
@@ -3084,14 +3173,16 @@ window.SL = window.SL || {};
   M.projectTotals = (pid, D) => memo("pt:" + pid + ":" + D, () => M.totals(M.unitsFor(pid), D));
 
   /* ---------------- crews ---------------- */
-  /** {mDays, lDays, heads, wages (h), food (h), days (confirmed count), planDays} for a crew unit (optionally one job). */
+  /** {mDays, lDays, heads, wages (h), food (h), other (h), days (confirmed count), planDays} for a crew unit (optionally one job).
+   *  wages + food + other = the counted days' cost. */
   M.crewStats = (u, D, jobId) => {
-    const t = { mDays: 0, lDays: 0, wages: 0, food: 0, days: 0, planDays: 0, plannedH: 0 };
+    const t = { mDays: 0, lDays: 0, wages: 0, food: 0, other: 0, days: 0, planDays: 0, plannedH: 0 };
     for (const d of u.days) {
       if (jobId !== undefined && (d.job || "") !== jobId) continue;
       if (d.plan) { t.planDays++; t.plannedH += d.h; continue; }
       if (d.date > D) continue;
-      t.days++; t.mDays += d.m; t.lDays += d.l; t.food += U.hal(d.food); t.wages += d.h - U.hal(d.food);
+      t.days++; t.mDays += d.m; t.lDays += d.l; t.food += U.hal(d.food); t.wages += d.h - U.hal(d.food) - U.hal(d.other);
+      t.other += U.hal(d.other);
     }
     return t;
   };
@@ -3100,6 +3191,21 @@ window.SL = window.SL || {};
     const sat = U.weekStart(date), ts = (S().timesheets || {})[pid + "_" + sat];
     const block = ts && ts.crews && ts.crews[crewId];
     return { sat, tsId: pid + "_" + sat, block: block || null, day: (block && block.days && block.days[date]) || null };
+  };
+  /** The crew-week money unit (Sat–Fri block) holding `date`, or null when that week has no day or payment for the crew.
+   *  Pay it with SL.store.pay(u, {amount, walletId, date, note}) and undo with SL.store.voidPay(ref). */
+  M.crewWeekUnit = (pid, crewId, date) => (U.isISO(date) ? M.crewUnit(pid, U.weekStart(date), crewId) : null);
+  /** A crew's money across its week units as of D: {inc, paid, owed, prepaid, paidOff, units[]}; optional [from, to]
+   *  keeps the weeks that overlap it (weekStart ≤ to and weekStart + 6 ≥ from). Owed/prepaid are per week, summed. */
+  M.crewMoney = (pid, crewId, D, from, to) => {
+    const t = { inc: 0, paid: 0, owed: 0, prepaid: 0, paidOff: 0, units: [] };
+    for (const u of M.unitsFor(pid)) {
+      if (u.kind !== "crew" || u.crewId !== crewId) continue;
+      if ((to && u.weekStart > to) || (from && U.addDays(u.weekStart, 6) < from)) continue;
+      const r = M.calc(u, D);
+      t.inc += r.inc; t.paid += r.paid; t.owed += r.owed; t.prepaid += r.prepaid; t.paidOff += r.paidOff; t.units.push(u);
+    }
+    return t;
   };
   /** Crew ids that have any block in this project, most recently active first. */
   M.projectCrewIds = (pid) => memo("pcrews:" + pid, () => {
@@ -3166,6 +3272,8 @@ window.SL = window.SL || {};
       else if (c.type === "adjust") rows.push({ date: c.date, h: U.hal(c.amount), label: U.L("Adjustment", "تعديل العهدة") +(c.note ? " · " + c.note : ""), cashId: c.id, ctype: "adjust", kind: U.hal(c.amount) >= 0 ? "in" : "out", at: c.createdAt || 0 });
     }
     for (const u of M.units()) for (const p of u.payments) if (!p.void && p.walletId === wid && p.date && p.date <= D) rows.push({ date: p.date, h: -p.h, label: u.title + (u.kind === "crew" ? U.L(" · wk ", " · أسبوع ") + U.dDM(u.weekStart) : ""), unitKey: u.key, payId: p.id, kind: "out", projectId: u.projectId, hasPhoto: !!(u.doc.files && u.doc.files.length), cat: u.cat, at: p.at || 0 });
+    // a refund (negative payment, e.g. a deposit returned) is money coming back into this wallet
+    for (const r of rows) if (r.payId) { const u = M.unit(r.unitKey); if (u && u.deposit) r.deposit = true; if (r.h > 0) { r.kind = "in"; r.refund = true; r.label = M.refundLabel(u); } }
     rows.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : (b.h > 0) - (a.h > 0) || a.at - b.at));
     let bal = 0; for (const r of rows) { bal += r.h; r.bal = bal; }
     return rows;
@@ -3185,6 +3293,7 @@ window.SL = window.SL || {};
       if (r.cashId) { if (r.ctype === "topup") { L.B += r.h; L.rows.B.push(r); } else { L.G += -r.h; L.rows.G.push(r); } continue; } // returns and ± adjustments net into G
       const u = M.unit(r.unitKey), out = -r.h;
       if (u && u.kind === "crew") { L.F += out; L.rows.F.push(r); continue; }
+      if (u && u.deposit) { L.G += out; L.rows.G.push(r); continue; } // a deposit and its return: cash held by a shop, no receipt to chase; they net in G
       const hasPhoto = !!(u && u.doc.files && u.doc.files.length), paper = u && u.doc.paper;
       if (hasPhoto) { L.C += out; L.rows.C.push(r); } else if (paper === "ryan" || paper === "sayed") { L.D += out; L.rows.D.push(r); } else { L.E += out; L.rows.E.push(r); }
     }
@@ -3293,11 +3402,33 @@ window.SL = window.SL || {};
     return r;
   });
 
+  /* ---------------- equipment deposits ---------------- */
+  /** Equipment deposits of a project as of D (default today), newest first. Voided docs and void payments are left out.
+   *  → [{id, key, unit, doc, date, supplier, title, paidH, refundedH, heldH, walletId, note, payments, refunds}]
+   *  paidH = Σ payments > 0 · refundedH = Σ |refunds| · heldH = paidH − refundedH (what the shop still holds). */
+  M.deposits = (pid, D) => {
+    D = D || U.today();
+    const out = [];
+    for (const u of M.unitsFor(pid)) {
+      if (!u.deposit || u.archived || (u.date && u.date > D)) continue;
+      const pays = u.payments.filter((p) => !p.void && p.date && p.date <= D), paid = pays.filter((p) => p.h > 0), back = pays.filter((p) => p.h < 0);
+      const paidH = U.sum(paid, (p) => p.h), refundedH = -U.sum(back, (p) => p.h);
+      out.push({ id: u.id, key: u.key, unit: u, doc: u.doc, date: u.date, supplier: u.shop, title: u.title, paidH, refundedH, heldH: paidH - refundedH,
+        walletId: (paid[0] || pays[0] || {}).walletId || "", note: u.doc.note || "", payments: paid, refunds: back });
+    }
+    return U.sortBy(out, (x) => x.date + ":" + String(x.doc.createdAt || 0).padStart(15, "0"), "desc");
+  };
+  /** {paidH, refundedH, heldH, n} over M.deposits(pid, D). */
+  M.depositTotals = (pid, D) => { const ds = M.deposits(pid, D); return { paidH: U.sum(ds, (x) => x.paidH), refundedH: U.sum(ds, (x) => x.refundedH), heldH: U.sum(ds, (x) => x.heldH), n: ds.length }; };
+  /** Label for a refund (a negative payment): "Deposit returned · <shop>" on a deposit, else "Refund · <title>". */
+  M.refundLabel = (u) => (u && u.deposit ? tr("Deposit returned", "أُرجع التأمين") + " · " + (u.shop || tr("rental shop", "محل التأجير")) : tr("Refund", "استرداد") + (u ? " · " + u.title : ""));
+
   /* ---------------- titles & text ---------------- */
   M.unitTitle = (u) => u.title;
   /** The "no job" tag in unit meta lines (ui.unitMeta colours it). */
   M.NO_JOB = () => U.L("⊘ no job", "⊘ بدون بند");
   M.unitMeta = (u) => {
+    if (u.deposit) return [u.date ? U.dShort(u.date) : "", tr("Deposit", "تأمين")].filter(Boolean);
     const p = [];
     if (u.kind === "crew") p.push(U.L("wk ", "أسبوع ") + U.dDM(u.weekStart));
     else if (u.kind === "rental") p.push(u.in ? U.L("in ", "من ") + U.dShort(u.in) + (u.out ? U.L(" → ", " ← ") + U.dShort(u.out) : U.L(" · on site", " · في الموقع")) : U.L("no in-date", "بلا تاريخ دخول"));
@@ -3559,8 +3690,8 @@ window.SL = window.SL || {};
 
   /** Build the per-run context. */
   X.ctx = (pid, T) => {
-    const units = M.unitsFor(pid).filter((u) => !u.archived && !(u.doc && u.doc.void));
-    const costs = Object.values(SL.S.costs || {}).filter((c) => !c.void && M.pidOf(c) === pid);
+    const units = M.unitsFor(pid).filter((u) => !u.archived && !(u.doc && u.doc.void) && !u.deposit); // deposits: money only, no checks
+    const costs = Object.values(SL.S.costs || {}).filter((c) => !c.void && M.pidOf(c) === pid && !c.deposit);
     return { pid, T, cfg: X.cfg(), units, costs, project: M.project(pid) || {} };
   };
 
@@ -4976,12 +5107,12 @@ window.SL = window.SL || {};
   X.dayH = (rec, rates) => {
     if (!rec) return 0;
     const rm = rec.rm != null ? U.num(rec.rm) : U.num(rates.m), rl = rec.rl != null ? U.num(rec.rl) : U.num(rates.l);
-    return U.hal(U.num(rec.m) * rm) + U.hal(U.num(rec.l) * rl) + U.hal(rec.food);
+    return U.hal(U.num(rec.m) * rm) + U.hal(U.num(rec.l) * rl) + U.hal(rec.food) + U.hal(rec.other);
   };
   X.heads = (rec) => (rec ? U.num(rec.m) + U.num(rec.l) : 0);
   /** The stored day only when it holds people or food (as the model counts it): a {job}-only record is a
    * pending job for a day nobody logged yet (crew grid), not a day record. */
-  X.day = (pid, cid, date) => { const d = M.crewDay(pid, cid, date).day; return d && (X.heads(d) > 0 || U.num(d.food) > 0) ? d : null; };
+  X.day = (pid, cid, date) => { const d = M.crewDay(pid, cid, date).day; return M.dayHasCost(d) ? d : null; };
   /** A stored day as a complete value, so writing it back over the merged doc restores it exactly (Undo). */
   X.full = (rec) => (rec ? Object.assign({ job: "", est: false }, rec) : null);
   /** A crew's usual composition as a day record (confirmed). */
@@ -5273,7 +5404,7 @@ window.SL = window.SL || {};
     const pid = ui.pid(), cid = ds.cid, date = ds.date, cur = M.crewDay(pid, cid, date).day;
     if (!cur) return;
     // up to today it is a fact ("didn't come", day.off, costs nothing); a future plan is just removed
-    const val = date <= U.today() ? { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false } : null;
+    const val = date <= U.today() ? { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false, other: 0, otherNote: "" } : null;
     const r = await SL.store.setDays(pid, U.weekStart(date), cid, { [date]: val });
     if (!r.ok) { ui.toast(U.esc(SL.store.errText(r))); return; }
     const back = Object.assign({ m: 0, l: 0, food: 0, plan: false, off: false, job: "", rm: null, rl: null, est: false }, U.clone(cur));
@@ -5362,7 +5493,7 @@ window.SL = window.SL || {};
   X.weekCell = (pid, cid, d, bj, ro) => {
     const rec = M.crewDay(pid, cid, d).day, fri = !M.isWorkDay(pid, d);
     let inner = "", cls = "wk-d" + (fri ? " off" : "") + (d === U.today() ? " now" : "");
-    if (rec && (X.heads(rec) || U.num(rec.food))) {
+    if (M.dayHasCost(rec)) { // people, food or other expenses
       if (rec.plan) cls += " plan";
       const j = rec.job && rec.job !== bj ? '<small class="wk-j">' + U.esc(M.jobCode(rec.job)) + "</small>" : "";
       inner = `<span class="num">${X.pair(rec.m, rec.l)}</span>${U.num(rec.food) ? '<i class="wk-food" title="' + U.L("food", "أكل") + '"></i>' : ""}${j}`;
@@ -5595,7 +5726,7 @@ window.SL = window.SL || {};
           const s = sh.state;
           if (s.date > U.today()) return C.save(sh, null);
           s.recs[s.date] = null; sh.err = ""; sh.refresh();
-          return SL.store.setDays(s.pid, U.weekStart(s.date), s.cid, { [s.date]: { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false } }).then((r) => { if (!r.ok && ui.sheets.includes(sh)) sh.error(U.L("Not saved · ", "لم يُحفظ · ") + SL.store.errText(r)); });
+          return SL.store.setDays(s.pid, U.weekStart(s.date), s.cid, { [s.date]: { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false, other: 0, otherNote: "" } }).then((r) => { if (!r.ok && ui.sheets.includes(sh)) sh.error(U.L("Not saved · ", "لم يُحفظ · ") + SL.store.errText(r)); });
         },
       },
       onKey: (sh, ev) => {
@@ -5706,7 +5837,7 @@ window.SL = window.SL || {};
   X.rawDay = (pid, sat, cid, date) => {
     const b = X.block(pid, sat, cid), d = b && b.days && b.days[date];
     if (!d) return null;
-    if (U.num(d.m) + U.num(d.l) <= 0 && U.num(d.food) <= 0) return null;
+    if (!M.dayHasCost(d)) return null; // people, food or other expenses
     return d;
   };
   /** Job stored on a day, even when the day has no people yet ("applies once the day is ticked"). */
@@ -5718,7 +5849,7 @@ window.SL = window.SL || {};
   X.dayH = (d, rates) => {
     if (!d) return 0;
     const rm = d.rm != null ? U.num(d.rm) : U.num(rates.m), rl = d.rl != null ? U.num(d.rl) : U.num(rates.l);
-    return U.hal(U.num(d.m) * rm) + U.hal(U.num(d.l) * rl) + U.hal(d.food);
+    return U.hal(U.num(d.m) * rm) + U.hal(U.num(d.l) * rl) + U.hal(d.food) + U.hal(d.other);
   };
   X.isPlan = (d) => !!(d && d.plan);
   X.isConf = (d) => !!(d && !d.plan && U.num(d.m) + U.num(d.l) > 0);
@@ -5827,7 +5958,7 @@ window.SL = window.SL || {};
     if (!from) return { from: "", dates: [] };
     const thu = U.addDays(sat, 5);
     const offOn = (d) => { const b = X.block(pid, sat, cid), x = b && b.days && b.days[d]; return !!(x && x.off); };
-    const dates = U.weekDays(sat).filter((d) => d > from && d <= thu && !U.isFri(d) && M.isWorkDay(pid, d) && !X.isConf(X.rawDay(pid, sat, cid, d)) && !X.isPlan(X.rawDay(pid, sat, cid, d)) && !offOn(d));
+    const dates = U.weekDays(sat).filter((d) => d > from && d <= thu && !U.isFri(d) && M.isWorkDay(pid, d) && !X.rawDay(pid, sat, cid, d) && !offOn(d)); // rawDay: any recorded or planned day (people, food or other)
     return { from, dates };
   };
 
@@ -5888,8 +6019,8 @@ window.SL = window.SL || {};
     if (!u) return `<div class="sec c-tot">${ui.sech(U.L("Week", "الأسبوع"))}<p class="t12 muted">${U.L("Nothing logged this week yet.", "لم يُسجَّل شيء هذا الأسبوع بعد.")}</p></div>`;
     const s = M.crewStats(u, D), t = M.totals([u], D);
     const plans = u.days.filter((d) => d.plan);
-    const fd = s.food ? U.mw(s.food / 100) : "–";
-    let h = `<div class="sec c-tot">` + ui.sech(U.L("Week", "الأسبوع"), s.days ? U.L(`${s.mDays} M-days · ${s.lDays} L-days · food ${fd}`, `أيام المعلمين ${s.mDays} · أيام العمال ${s.lDays} · أكل ${fd}`) : U.L("no confirmed days", "لا أيام مؤكدة"));
+    const fd = s.food ? U.mw(s.food / 100) : "–", oth = s.other ? " · " + U.L("other ", "مصاريف أخرى ") + U.mw(s.other / 100) : "";
+    let h = `<div class="sec c-tot">` + ui.sech(U.L("Week", "الأسبوع"), s.days ? U.L(`${s.mDays} M-days · ${s.lDays} L-days · food ${fd}${oth}`, `أيام المعلمين ${s.mDays} · أيام العمال ${s.lDays} · أكل ${fd}${oth}`) : U.L("no confirmed days", "لا أيام مؤكدة"));
     h += ui.moneyBar(t);
     const w = [`${U.L("Cost", "التكلفة")} <b class="num">${ui.mz(t.cost)}</b>`, `${U.L("Paid off", "مسدد")} <b class="num">${ui.mz(t.paidOff)}</b>`];
     w.push(t.owed ? `<span class="c-owed">${U.L("Owed", "مستحق")} <b class="num">${ui.m(t.owed)}</b></span>` : `${U.L("Owed", "مستحق")} <b class="num"><span class="zero">–</span></b>`);
@@ -6220,7 +6351,7 @@ window.SL = window.SL || {};
       if (!X.isConf(pd)) continue;
       const nd = U.addDays(dt, 7), cur = X.rawDay(pid, sat, cid, nd);
       const stored = X.block(pid, sat, cid) && (X.block(pid, sat, cid).days || {})[nd];
-      if (X.isConf(cur) || (stored && stored.off)) continue; // never over a recorded day or a "didn't come"
+      if ((cur && !X.isPlan(cur)) || (stored && stored.off)) continue; // never over a recorded day (people, food or other) or a "didn't come"
       days[nd] = { m: U.num(pd.m), l: U.num(pd.l), food: U.num(pd.food), job: pd.job || "", plan: true };
       undo[nd] = X.full(cur);
     }
@@ -6900,6 +7031,11 @@ window.SL = window.SL || {};
       <div class="v-prj-bar">${ui.moneyBar(t, { scale, committed: commH, budget: X.budgetH(j) })}</div></div>`;
   };
 
+  /** Equipment deposits in the "No job" bucket (by nature on no job): not counted as untagged costs; alone they get a plain row. */
+  X.njDeposits = (nj) => (nj && nj.unitKeys ? [...nj.unitKeys].filter((k) => (M.unit(k) || {}).deposit).length : 0);
+  X.depNoJobRow = (nj, scale) => `<div class="row nosw v-prj-nojob"><span class="t">${U.L("Equipment deposits", "تأمينات المعدات")} <span class="muted t12">${U.L("held by rental shops", "لدى محلات التأجير")}</span></span>
+        <span class="a num">${X.mx(nj.cost)}</span><span class="f"></span><span class="m">${X.owedWord(nj, true)}</span><span class="w"></span>
+        <div class="v-prj-bar">${ui.moneyBar(nj, { scale })}</div></div>`;
   X.jobsBlock = (pid, D) => {
     const bj = M.byJob(pid, D), comm = M.committed(pid).byJob || {}, ro = X.noWrite();
     const jobs = M.jobs(pid), tOf = (id) => bj[id] || Z();
@@ -6920,8 +7056,10 @@ window.SL = window.SL || {};
       h += `<button type="button" class="v-prj-grp" data-act="toggle" data-k="${k}" aria-expanded="${open}"><span class="lbl">${open ? "▾" : U.L("▸", "◂")} ${U.esc(label)} <span class="num">(${list.length})</span></span><span class="num">${ui.mw(tot)}</span></button>`;
       if (open) h += list.map((j) => X.jobRow(j, tOf(j.id), D, scale, comm[j.id] || 0)).join("");
     }
-    if (nj && (nj.cost || nj.units || (nj.unitKeys && nj.unitKeys.size))) {
-      const n = nj.unitKeys ? nj.unitKeys.size : nj.units;
+    const nDep = X.njDeposits(nj);
+    if (nDep && nDep === nj.unitKeys.size) h += X.depNoJobRow(nj, scale);
+    else if (nj && (nj.cost || nj.units || (nj.unitKeys && nj.unitKeys.size))) {
+      const n = (nj.unitKeys ? nj.unitKeys.size : nj.units) - nDep;
       h += `<div class="row nosw v-prj-nojob"><span class="t"><span class="c-warn">⊘</span> ${U.L("No job", "بدون بند")} <span class="muted t12">${U.L(`${n} cost${n === 1 ? "" : "s"}`, U.plAr(n, "تكلفة واحدة", "تكلفتان", "تكاليف", "تكلفة"))}</span></span>
         <span class="a num">${X.mx(nj.cost)}</span><span class="f"></span><span class="m">${X.owedWord(nj, true)}</span>
         <span class="w">${ro ? "" : `<button class="btn sm sec" data-act="tagUntagged" id="prj-tag">${U.L("Tag", "حدد البند")}</button>`}</span>
@@ -6990,6 +7128,7 @@ window.SL = window.SL || {};
     const pl = (n, w) => n + " " + w + (n === 1 ? "" : "s");
     let s = U.L(`${pl(cs.mDays, "master-day")} · ${pl(cs.lDays, "laborer-day")} · wages ${ui.mw(cs.wages)} + food ${ui.mw(cs.food)}`,
       `أيام المعلمين ${cs.mDays} · أيام العمال ${cs.lDays} · أجور ${ui.mw(cs.wages)} + أكل ${ui.mw(cs.food)}`);
+    if (cs.other) s += " + " + U.L("other", "مصاريف أخرى") + " " + ui.mw(cs.other);
     if (cs.planDays) s += ` · <span class="c-committed">(${ui.mw(cs.plannedH)}) ${U.L("Planned", "مخطط")}</span>`;
     return `<div class="t12 muted v-job-crew">${s}</div>`;
   };
@@ -7194,7 +7333,7 @@ window.SL = window.SL || {};
   const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
   const X = (SL._project = SL._project || {});
 
-  X.untagged = (pid) => M.unitsFor(pid).filter((u) => (u.kind === "crew" ? (u.days || []).some((d) => !d.job) : !u.jobId && !(u.doc && u.doc.void)));
+  X.untagged = (pid) => M.unitsFor(pid).filter((u) => (u.kind === "crew" ? (u.days || []).some((d) => !d.job) : !u.jobId && !(u.doc && u.doc.void) && !u.deposit));
 
   X.tagOne = async (sh, d) => {
     const u = M.unit(d.key), jid = d.job || "", pid = sh.state.pid;
@@ -7368,6 +7507,7 @@ window.SL = window.SL || {};
       else if (u.kind === "rental" && !u.in) { k = "noin"; label = U.L("No in-date", "بلا تاريخ دخول"); sort = ""; }
       else if (!u.date) { k = "nodate"; label = U.L("No date", "بلا تاريخ"); sort = ""; }
       else { k = "d:" + u.date; label = U.dShort(u.date); sort = u.date; }
+      if (u.deposit && u.date) { k = "d:" + u.date; label = U.dShort(u.date); sort = u.date; } // a deposit has no in-date: it sits on its day
       if (!map.has(k)) map.set(k, { k, label, sort, units: [] });
       const g = map.get(k);
       if (u.kind === "crew" && (u.lastDate || "") > g.sort) g.sort = u.lastDate;
@@ -7478,9 +7618,18 @@ window.SL = window.SL || {};
     const ro = ui.readOnlyUI();
     return '<div class="lg-pays"><div class="lbl">' + U.L("Payments", "الدفعات") + "</div>" + u.payments.map((p) => {
       const later = p.date && p.date > D;
+      if (p.h < 0) return X.refundPay(u, p, later);
       const line = '<span class="d">' + U.esc(p.date ? U.dShort(p.date) : U.L("no date", "بلا تاريخ")) + '</span><span class="w">' + U.t(M.walletName(p.walletId)) + (!ro && p.note && !/^migrated from v1/i.test(p.note) ? ' <span class="muted">· ' + U.t(p.note) + "</span>" : "") + '</span><span class="num">' + ui.m(p.h) + "</span>";
       return '<div class="lg-pay' + (p.void ? " void" : "") + (later ? " later" : "") + '">' + (p.void ? "<s>" + line + "</s>" : line) + (p.void ? '<span class="t12 muted">' + U.L("void", "ملغى") + "</span>" : later ? '<span class="t12 muted">' + U.L("after as-of", "بعد التاريخ") + "</span>" : "<span></span>") + "</div>";
     }).join("") + "</div>";
+  };
+  /** A refund (a negative payment, e.g. a deposit returned): "Deposit returned · back to Sayed" −200. */
+  X.refundPay = (u, p, later) => {
+    const note = !ui.readOnlyUI() && p.note ? ' <span class="muted">· ' + U.t(p.note) + "</span>" : "";
+    const lab = (u.deposit ? U.L("Deposit returned", "أُرجع التأمين") : U.L("Refund", "استرداد")) + " · " + U.L("back to", "أُعيد إلى") + " " + U.t(M.walletName(p.walletId)) + note;
+    const line = '<span class="d">' + U.esc(p.date ? U.dShort(p.date) : U.L("no date", "بلا تاريخ")) + '</span><span class="w">' + lab + '</span><span class="num">' + ui.m(p.h) + "</span>";
+    const tail = p.void ? '<span class="t12 muted">' + U.L("void", "ملغى") + "</span>" : later ? '<span class="t12 muted">' + U.L("after as-of", "بعد التاريخ") + "</span>" : "<span></span>";
+    return '<div class="lg-pay rf' + (p.void ? " void" : "") + (later ? " later" : "") + '">' + (p.void ? "<s>" + line + "</s>" : line) + tail + "</div>";
   };
 })(window.SL);
 
@@ -7493,6 +7642,7 @@ window.SL = window.SL || {};
 
   /** Rentals: in/out, qty × rate, days on site, cost to date. */
   X.rentalBlock = (u, D) => {
+    if (u.deposit) return X.depositBlock(u, D);
     const r = M.calc(u, D), days = u.noPrice ? (u.in && u.in <= D ? U.diffDays(u.in, u.out && u.out < D ? u.out : D) + 1 : 0) : u.parts(D).length;
     const month = (u.doc && u.doc.rateUnit) === "month";
     const per = month ? U.L(" / month", " في الشهر") : U.L(" / day", " في اليوم");
@@ -7506,14 +7656,37 @@ window.SL = window.SL || {};
     if (u.crewId) kv.splice(3, 0, [U.L("Crew", "الطاقم"), U.t(X.crewNm(u.crewId))]);
     return '<div class="kv lg-kv">' + kv.map(([k, v]) => '<span>' + k + '</span><span class="v">' + v + "</span>").join("") + "</div>";
   };
+  /** An equipment deposit: shop, paid, returned, what the shop still holds (it costs nothing: Prepaid until it comes back). */
+  X.depositBlock = (u, D) => {
+    const d = M.deposits(u.projectId, D).find((x) => x.id === u.id);
+    if (!d) return "";
+    const kv = [
+      [U.L("Shop", "المحل"), u.shop ? U.t(u.shop) : '<span class="muted">' + U.L("not named", "غير محدد") + "</span>"],
+      [U.L("Paid", "المدفوع"), ui.m(d.paidH)],
+      [U.L("Returned", "المُرجع"), ui.mz(d.refundedH)],
+      [U.L("Held by the shop", "لدى المحل"), '<span class="c-prepaid">' + ui.m(d.heldH) + "</span>"],
+    ];
+    if (d.note && !ui.readOnlyUI()) kv.push([U.L("Note", "ملاحظة"), U.t(d.note)]);
+    return '<div class="kv lg-kv">' + kv.map(([k, v]) => "<span>" + k + '</span><span class="v">' + v + "</span>").join("") + "</div>" +
+      '<p class="t12 muted">' + U.L("A deposit costs nothing: it stays Prepaid under Equipment until the shop gives it back.", "التأمين لا يُحسب تكلفة: يبقى مدفوعاً مقدماً تحت المعدات حتى يعيده المحل.") + "</p>";
+  };
+  /** Ledger buttons on a deposit: "Returned…" while the shop holds some; no Move job / Return (it is on no job, never on site). */
+  X.depositActs = (u, D, b) => {
+    const d = M.deposits(u.projectId, U.today()).find((x) => x.id === u.id);
+    const out = b.filter((x) => !/data-act="(ledgerMoveJob|returnRental)"/.test(x));
+    if (d && d.heldH > 0 && SL.actions.eqDepBack) out.unshift('<button class="btn sm sec" data-act="eqDepBack" data-id="' + U.esc(u.id) + '">' + U.L("Returned…", "أُرجع…") + "</button>");
+    return '<div class="btns lg-acts">' + out.join("") + "</div>";
+  };
 
+  /** " + other 40 water" under a crew day's food (other expenses are in the day's amount). */
+  X.otherTag = (d) => (U.num(d.other) > 0 ? '<br><small class="muted">+ ' + U.L("other", "مصاريف أخرى") + " " + U.m(U.num(d.other)) + (d.otherNote ? " " + U.t(d.otherNote) : "") + "</small>" : "");
   /** Crew units: day list (date, M, L, food, job, amount) + link to the crew week. */
   X.crewBlock = (u, D) => {
     const rows = u.days.map((d) => {
       const fut = d.date > D, pl = d.plan;
       const amt = pl ? '<span class="c-committed">(' + ui.m(d.h) + ")</span>" : fut ? '<span class="faint">' + ui.m(d.h) + "</span>" : (d.est ? '<span class="est">' + U.ltr("~" + ui.m(d.h)) + "</span>" : ui.m(d.h));
       return '<tr class="' + (pl ? "lg-plan" : "") + '"><td>' + U.esc(U.dShort(d.date)) + (pl ? ' <span class="t12 c-committed">' + U.L("plan", "مخطط") + "</span>" : "") + '</td><td class="r">' + (d.m ? d.m + (d.rm != null ? '<small class="c-warn"> ' + U.ltr("×" + U.mw(U.num(d.rm))) + "</small>" : "") : '<span class="zero">–</span>') + '</td><td class="r">' + (d.l ? d.l + (d.rl != null ? '<small class="c-warn"> ' + U.ltr("×" + U.mw(U.num(d.rl))) + "</small>" : "") : '<span class="zero">–</span>') +
-        '</td><td class="r">' + (d.food ? U.m(d.food) : '<span class="zero">–</span>') + "</td><td>" + U.esc(M.jobCode(d.job || u.jobId) || "–") + '</td><td class="r">' + amt + "</td></tr>";
+        '</td><td class="r">' + (d.food ? U.m(d.food) : '<span class="zero">–</span>') + X.otherTag(d) + "</td><td>" + U.esc(M.jobCode(d.job || u.jobId) || "–") + '</td><td class="r">' + amt + "</td></tr>";
     }).join("");
     const r = M.calc(u, D), s = M.crewStats ? M.crewStats(u, D) : null;
     const foot = '<tr><td>' + U.L("Cost to date", "التكلفة حتى اليوم") + '</td><td class="r">' + (s ? s.mDays : "") + '</td><td class="r">' + (s ? s.lDays : "") + '</td><td class="r"></td><td></td><td class="r">' + ui.m(r.inc) + "</td></tr>";
@@ -7550,6 +7723,7 @@ window.SL = window.SL || {};
       b.push('<button class="btn sm ghost" data-act="ledgerMoveJob" data-id="' + id + '">' + U.L("Move job", "نقل لبند آخر") + "</button>");
       b.push('<button class="btn sm ghost danger" data-act="ledgerVoid" data-id="' + id + '">' + U.L("Void", "إلغاء القيد") + "</button>");
     }
+    if (u.deposit) return X.depositActs(u, D, b);
     return '<div class="btns lg-acts">' + b.join("") + "</div>";
   };
 
@@ -8134,7 +8308,7 @@ window.SL = window.SL || {};
 
   X.jobsRows = (pid, D, C, g, opts) => {
     const bj = M.byJob(pid, D), jobs = M.jobs(pid), rentBy = {};
-    for (const u of M.unitsFor(pid)) if (u.kind === "rental") (rentBy[u.jobId || ""] = rentBy[u.jobId || ""] || []).push(u);
+    for (const u of M.unitsFor(pid)) if (u.kind === "rental" && !u.deposit) (rentBy[u.jobId || ""] = rentBy[u.jobId || ""] || []).push(u);
     let h = "";
     for (const st of M.STATUS_ORDER) {
       const js = jobs.filter((j) => M.jobStatus(j) === st);
@@ -8390,6 +8564,7 @@ window.SL = window.SL || {};
         rows.push(Object.assign({}, base, { date: p.date, seq: 1, at: p.at || 0, payId: p.id, wid: p.walletId, fx,
           title: U.L(who + " paid " + U.t(payee), pk === "me" ? "دفعت إلى " + shown : bd(who) + " دفع إلى " + shown),
           meta: [bd(U.t(what)), note].filter(Boolean).join(" · ") }));
+        if (u.deposit || p.h < 0) X.depositRow(rows[rows.length - 1], u, p, note);
       }
     }
     const sayedName = (wid) => bd(U.esc(M.walletName(wid)));
@@ -8423,6 +8598,14 @@ window.SL = window.SL || {};
     }
     return rows;
   };
+  /** Relabel the payment row of an equipment deposit ("Deposit · shop" · paid by …) or of a refund, a negative payment
+   *  ("Deposit returned · shop" · back to …). Its money (fx) is already right: a refund is cash back into that pocket. */
+  X.depositRow = (row, u, p, note) => {
+    const who = X.pocket(p.walletId) === "me" ? U.L("you", "أنت") : bd(U.esc(M.walletName(p.walletId)));
+    row.title = U.t(p.h < 0 ? M.refundLabel(u) : u.title);
+    row.meta = [(p.h < 0 ? U.L("back to", "أُعيد إلى") : U.L("paid by", "دفعها")) + " " + who, note].filter(Boolean).join(" · ");
+    row.deposit = !!u.deposit; row.refund = p.h < 0;
+  };
   X.sum = (rows) => { const t = X.blank(); for (const r of rows) for (const k in t) t[k] += r.fx[k]; return t; };
   /** Bottom summary: what Ryan paid, what the float still holds, and payables / prepaid per party. */
   X.summary = (rows, t, sayed, holds) => {
@@ -8447,7 +8630,7 @@ window.SL = window.SL || {};
     ? `<a class="bl-pf ok" href="${U.esc(U.assetUrl(files[0]))}" target="_blank" rel="noopener" title="${U.L("Backed by a document · open it", "يدعمه مستند · افتحه")}" aria-label="${U.L("Open the document", "افتح المستند")}">${DOC}<small>${files.length > 1 ? U.L(files.length + " docs", U.plAr(files.length, "مستند", "مستندان", "مستندات", "مستنداً")) : U.L("doc", "مستند")}</small></a>`
     : `<span class="bl-pf no" title="${U.L("No document backs this", "لا يوجد مستند يدعمه")}" aria-label="${U.L("No document", "بلا مستند")}">${NODOC}<small>${U.L("none", "لا يوجد")}</small></span>`;
   /** Money created outside Me: pockets + what parties were paid must net to 0 (capital is new money into Me). */
-  X.leak = (r) => { if (r.capital) return 0; const n = r.fx.me + r.fx.sayed + X.PARTIES.reduce((s, k) => s + Math.max(0, r.fx[k]), 0); return Math.abs(n) > 1 ? n : 0; };
+  X.leak = (r) => { if (r.capital) return 0; const n = r.fx.me + r.fx.sayed + X.PARTIES.reduce((s, k) => s + (r.refund ? r.fx[k] : Math.max(0, r.fx[k])), 0); return Math.abs(n) > 1 ? n : 0; };
   /** A row still open: some party is owed or prepaid. */
   X.isOpen = (r) => r.open;
 
@@ -8593,6 +8776,8 @@ window.SL = window.SL || {};
  *   rows = crews (By trade) or crews grouped under the job they worked (By job); columns = days; red line = today.
  *   Tap a day: came / planned / didn't come, masters and laborers ▼▲, day rates (default = the crew week's rates,
  *   200 / 150), food, job. Every change saves at once and can be changed back (Undo in the sheet and on the toast).
+ *   Food is any amount (chip = the week's food; ▼▲ in 5s or type it). Other = that day's other expenses (amount + note:
+ *   water, tools, transport), counted like food. The sheet's Paid section records payments for that crew week (chunk 6).
  *   A work day up to today with nothing logged for a crew that has started shows "?" until it is filled or marked
  *   "didn't come" (day.off = true, which costs nothing). It all writes timesheets, so Balances follows at once.
  *   Under each crew a Paid? row has one switch per crew week (paid ⇄ not paid, Undo toast); paid days carry a ✓. */
@@ -8626,7 +8811,7 @@ window.SL = window.SL || {};
    *  0 masters · 0 laborers (the digit sheet) also means nobody came. A {job}-only record is still nothing. */
   X.state = (d) => {
     if (!d) return "";
-    if (X.heads(d) > 0 || U.num(d.food) > 0) return d.plan ? "plan" : "came";
+    if (M.dayHasCost(d)) return d.plan ? "plan" : "came"; // people, food or other expenses
     if (d.off) return "off";
     return d.m !== undefined && d.l !== undefined && !d.plan ? "off" : "";
   };
@@ -8640,8 +8825,8 @@ window.SL = window.SL || {};
   X.dayJob = (pid, cid, date, d) => (d && d.job) || X.blockJob(pid, cid, date);
   X.rm = (d, r) => (d && d.rm != null ? U.num(d.rm) : U.num(r.m));
   X.rl = (d, r) => (d && d.rl != null ? U.num(d.rl) : U.num(r.l));
-  /** Halalas for a day with people (mirrors the model): m × master rate + l × laborer rate + food. */
-  X.dayH = (d, r) => (!d || !(X.heads(d) > 0 || U.num(d.food) > 0) ? 0 : U.hal(U.num(d.m) * X.rm(d, r)) + U.hal(U.num(d.l) * X.rl(d, r)) + U.hal(d.food));
+  /** Halalas for a day with a cost (the model's own rule): m × master rate + l × laborer rate + food + other. */
+  X.dayH = (d, r) => (!d || !M.dayHasCost(d) ? 0 : M.dayH(d, r));
   X.usual = (cid) => { const c = M.crew(cid) || {}, u = c.usual || {}; const m = U.num(u.m), l = U.num(u.l); return m + l > 0 ? { m, l } : { m: 1, l: 0 }; };
   X.name = (cid) => { const c = M.crew(cid); return c ? c.name || cid : cid; };
   /** The crew's name to show: its Arabic name in Arabic (X.name stays English, for sorting and code). */
@@ -8710,7 +8895,7 @@ window.SL = window.SL || {};
       if (same(U.addDays(date, 1))) cls.push("cr");
       const pd = st === "came" && X.isPaid(pid, cid, date, T); // a worked day the crew week's payments cover
       if (pd) cls.push("pd");
-      inner = '<b class="num">' + U.num(d.m) + "·" + U.num(d.l) + "</b>" + (U.num(d.food) > 0 ? '<i class="au-food" aria-hidden="true"></i>' : "") + (st === "due" ? '<em class="au-due" aria-hidden="true">?</em>' : "") + (pd ? '<i class="au-pd" aria-hidden="true">✓</i>' : "");
+      inner = '<b class="num">' + U.num(d.m) + "·" + U.num(d.l) + "</b>" + (U.num(d.food) > 0 ? '<i class="au-food" aria-hidden="true"></i>' : "") + (U.num(d.other) > 0 ? '<i class="au-oth" aria-hidden="true"></i>' : "") + (st === "due" ? '<em class="au-due" aria-hidden="true">?</em>' : "") + (pd ? '<i class="au-pd" aria-hidden="true">✓</i>' : "");
       label += U.L((st === "came" ? "came " : st === "due" ? "planned, did they come? " : "planned ") + U.num(d.m) + " masters " + U.num(d.l) + " laborers" + (jid ? " on " + M.jobCode(jid) : "") + " · " + U.mw(X.dayH(d, r) / 100) + " SAR",
         (st === "came" ? "حضر " : st === "due" ? "مخطط، هل حضروا؟ " : "مخطط ") + U.num(d.m) + " معلمين " + U.num(d.l) + " عمال" + (jid ? " على " + M.jobCode(jid) : "") + " · " + U.mw(X.dayH(d, r) / 100) + " ر.س") +
         (st === "came" ? (pd ? U.L(" · paid", " · مسدد") : U.L(" · not paid yet", " · لم يُدفع بعد")) : "");
@@ -8718,6 +8903,7 @@ window.SL = window.SL || {};
     else if ((ctx.onlyJob === undefined || (X.blockJob(pid, cid, date) || "") === ctx.onlyJob) && X.isMissing(pid, cid, date, T, ctx.win)) { cls.push("st-miss"); inner = "<b>?</b>"; label += U.L("nothing logged, tap to fill", "لم يُسجَّل شيء، اضغط للتعبئة"); }
     else label += date > T ? U.L("tap to plan", "اضغط للتخطيط") : U.L("nothing logged", "لم يُسجَّل شيء");
     const tag = X.ro() ? "span" : "button";
+    if (busy(st) && inJob(d, date)) label += X.extraLabel(d);
     const act = X.ro() ? "" : ` type="button" data-act="auDay" data-cid="${U.esc(cid)}" data-date="${date}"${ctx.onlyJob !== undefined ? ` data-job="${U.esc(ctx.onlyJob)}"` : ""}`;
     return `<${tag} class="${cls.join(" ")}"${act} aria-label="${U.esc(label)}">${inner}</${tag}>`;
   };
@@ -8733,7 +8919,7 @@ window.SL = window.SL || {};
     }
     const left = c.active === false ? '<span class="au-left">' + U.L("left", "غادر") + "</span>" : "";
     return `<button type="button" class="au-lab" data-go="${U.esc(ui.href("crew", cid))}"><span class="au-nm">${miss ? '<b class="au-q">?' + miss + "</b>" : ""}${U.t(U.nm(c) || cid)}${left}</span>` +
-      `<span class="au-sub">${tr.name ? '<span class="au-tr">' + U.t(U.nm(tr)) + " · </span>" : ""}${md + ld ? X.ml(md, ld) + " · " + U.mw(h / 100) : U.L("nothing yet", "لا شيء بعد")}</span></button>`;
+      `<span class="au-sub">${tr.name ? '<span class="au-tr">' + U.t(U.nm(tr)) + " · </span>" : ""}${md + ld || h ? X.ml(md, ld) + " · " + U.mw(h / 100) : U.L("nothing yet", "لا شيء بعد")}</span></button>`;
   };
 
   X.head = (pid, days, T, first) => {
@@ -8800,7 +8986,7 @@ window.SL = window.SL || {};
   X.legend = (pid) => {
     const jobs = M.jobs(pid).filter((j) => M.jobStatus(j) !== "done").slice(0, 6);
     return '<div class="au-leg t12">' + jobs.map((j) => `<span><i class="au-sw j${X.jc(pid, j.id)}"></i>${U.esc(M.jobCode(j.id))}</span>`).join("") +
-      `<span><i class="au-sw plan"></i>${U.L("planned", "مخطط")}</span><span><i class="au-pd lg">✓</i>${U.L("paid", "مسدد")}</span><span><b class="au-k miss">?</b>${U.L("to answer", "للإجابة")}</span><span><b class="au-k">✕</b>${U.L("didn't come", "لم يحضر")}</span><span><i class="au-sw nowl"></i>${U.L("today", "اليوم")}</span><span class="muted">${U.L("3·2 = masters·laborers · • food", "3·2 = معلمين·عمال · • أكل")}</span></div>`;
+      `<span><i class="au-sw plan"></i>${U.L("planned", "مخطط")}</span><span><i class="au-pd lg">✓</i>${U.L("paid", "مسدد")}</span><span><b class="au-k miss">?</b>${U.L("to answer", "للإجابة")}</span><span><b class="au-k">✕</b>${U.L("didn't come", "لم يحضر")}</span><span><i class="au-sw nowl"></i>${U.L("today", "اليوم")}</span><span class="muted">${U.L("3·2 = masters·laborers · • food · ▪ other expenses", "3·2 = معلمين·عمال · • أكل · ▪ مصاريف أخرى")}</span></div>`;
   };
 
   SL.views.audit = {
@@ -8823,7 +9009,7 @@ window.SL = window.SL || {};
       }
       h += X.chart(pid, w, T) + X.legend(pid);
       h += '<p class="t12 muted au-help">' + U.L("Tap a day to say who came: masters and laborers ▼▲, their day rates, food and the job. Changes save at once; tap the day again to change or undo. Every crew day shows in Balances. Paid? row: tap a week's switch to mark it paid (today, from Sayed's float) or not paid yet.",
-        "اضغط على يوم لتحدد من حضر: المعلمين والعمال ▼▲، أجرة اليوم، الأكل والبند. التغييرات تُحفظ فوراً؛ اضغط على اليوم مرة أخرى للتعديل أو التراجع. كل يوم عمل يظهر في الأرصدة. صف مدفوع؟: اضغط مفتاح الأسبوع لتسجيله مسدداً (اليوم، من عهدة " + U.t(M.walletName(M.defaultWallet(pid)) || "سيد") + ") أو غير مدفوع بعد.") + "</p>";
+        "اضغط على يوم لتحدد من حضر: المعلمين والعمال ▼▲، أجرة اليوم، الأكل والبند. التغييرات تُحفظ فوراً؛ اضغط على اليوم مرة أخرى للتعديل أو التراجع. كل يوم عمل يظهر في الأرصدة. صف مدفوع؟: اضغط مفتاح الأسبوع لتسجيله مسدداً (اليوم، من عهدة " + U.t(M.walletName(M.defaultWallet(pid)) || "سيد") + ") أو غير مدفوع بعد.") + "</p>" + X.helpMore();
       if (!ro) h += '<div class="btns"><button type="button" class="btn sec sm" data-act="newCrew">' + U.L("+ Crew", "+ طاقم") + "</button></div>";
       return h + "</div>";
     },
@@ -8868,8 +9054,8 @@ window.SL = window.SL || {};
   const has = (o, k) => Object.prototype.hasOwnProperty.call(o, k);
 
   /** A stored day as a complete record, so writing it back restores it exactly (maps merge in the db). */
-  X.full = (d) => (d ? Object.assign({ m: 0, l: 0, food: 0, plan: false, off: false, job: "", rm: null, rl: null, est: false }, U.clone(d)) : null);
-  X.offRec = () => ({ m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false });
+  X.full = (d) => (d ? Object.assign({ m: 0, l: 0, food: 0, plan: false, off: false, job: "", rm: null, rl: null, est: false, other: 0, otherNote: "" }, U.clone(d)) : null);
+  X.offRec = () => ({ m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false, other: 0, otherNote: "" });
   X.key = (s) => s.cid + "|" + s.date;
   /** The sheet's current record for its crew / date: what it just wrote, else the db. */
   X.cur = (sh) => { const s = sh.state, k = X.key(s); return has(s.recs, k) ? s.recs[k] : X.full(X.raw(s.pid, s.cid, s.date)); };
@@ -8897,7 +9083,7 @@ window.SL = window.SL || {};
   X.usualRec = (s, plan) => {
     const us = X.usual(s.cid), r = X.rates(s.pid, s.cid, s.date), bj = X.blockJob(s.pid, s.cid, s.date), raw = X.raw(s.pid, s.cid, s.date);
     const want = s.job !== undefined ? s.job : (raw && raw.job) || "";
-    return { m: us.m, l: us.l, food: U.num(r.food), plan: !!plan, off: false, job: want && want !== bj ? want : "", rm: null, rl: null, est: false };
+    return { m: us.m, l: us.l, food: U.num(r.food), plan: !!plan, off: false, job: want && want !== bj ? want : "", rm: null, rl: null, est: false, other: 0, otherNote: "" };
   };
 
   const step = (f, v, label, txt, canDown) => `<span class="au-step" role="group" aria-label="${U.esc(label)}"><button type="button" class="au-arr" data-act="auStep" data-f="${f}" data-dir="-1" aria-label="${U.esc(U.L(label + " down", "تقليل " + label))}"${canDown ? "" : " disabled"}>▼</button>` +
@@ -8922,10 +9108,10 @@ window.SL = window.SL || {};
         `<span class="au-rate"><span class="muted">${U.L("× SAR", "× ر.س")}</span>${step("rm", rm, U.L("Master day rate", "أجرة يوم المعلم"), U.mw(rm), rm > 0)}${rm !== U.num(r.m) ? '<small class="au-def">' + U.L("usual ", "المعتاد ") + U.mw(r.m) + "</small>" : ""}</span></div>` +
         `<div class="au-row"><span class="au-rl">${U.L("Laborers<small>" + U.t("عمال") + "</small>", "عمال")}</span>${step("l", U.num(d.l), U.L("Laborers", "عمال"), U.num(d.l), U.num(d.l) > 0)}` +
         `<span class="au-rate"><span class="muted">${U.L("× SAR", "× ر.س")}</span>${step("rl", rl, U.L("Laborer day rate", "أجرة يوم العامل"), U.mw(rl), rl > 0)}${rl !== U.num(r.l) ? '<small class="au-def">' + U.L("usual ", "المعتاد ") + U.mw(r.l) + "</small>" : ""}</span></div>` +
-        `<div class="au-row"><span class="au-rl">${U.L("Food", "أكل")}</span><button type="button" class="chip${U.num(d.food) > 0 ? " on" : ""}" data-act="auFood" aria-pressed="${U.num(d.food) > 0}">${U.L("+food ", "+ أكل ")}${U.mw(U.num(d.food) || U.num(r.food))}</button></div>` +
+        X.foodRows(sh, d, r) +
         "</div>" +
         `<div class="au-total"><span>${st === "came" ? U.L("Day total", "مجموع اليوم") : U.L("Planned (not counted until they come)", "مخطط (لا يُحسب حتى يحضروا)")}</span><b class="num t20${st !== "came" ? " c-committed" : ""}">${U.m(dh / 100)}</b></div>`;
-      if (!X.heads(d)) h += '<p class="t12 c-warn">' + U.L("Nobody on this day: ▲ someone, or tap Didn't come.", "لا أحد في هذا اليوم: ▲ أضف أحداً، أو اضغط لم يحضر.") + "</p>";
+      if (!M.dayHasCost(d)) h += '<p class="t12 c-warn">' + U.L("Nobody on this day: ▲ someone, or tap Didn't come.", "لا أحد في هذا اليوم: ▲ أضف أحداً، أو اضغط لم يحضر.") + "</p>";
       const jid = X.dayJob(s.pid, s.cid, s.date, d), bj = X.blockJob(s.pid, s.cid, s.date);
       h += `<div class="fld"><span class="lbl">${U.L("Job", "البند")} <span class="muted">${U.L("optional · ", "اختياري · ")}${bj ? U.L("week job " + U.esc(M.jobCode(bj)) + " · tap again to go back to it", "بند الأسبوع " + U.esc(M.jobCode(bj)) + " · اضغط مرة أخرى للرجوع إليه") : U.L("no week job · tap again to clear", "لا يوجد بند للأسبوع · اضغط مرة أخرى للمسح")}</span></span>${ui.jobChips(s.pid, jid, { act: "auJob", add: false })}</div>`;
     }
@@ -8963,7 +9149,7 @@ window.SL = window.SL || {};
       const r = X.rates(s.pid, s.cid, s.date), dir = U.num(d.dir) < 0 ? -1 : 1, rec = Object.assign({}, cur, { est: false, off: false });
       if (d.f === "m" || d.f === "l") {
         rec[d.f] = Math.max(0, U.num(cur[d.f]) + dir);
-        if (!X.heads(rec)) rec.food = 0; // nobody came: no food either
+        if (!X.heads(rec) && U.num(cur.food) === U.num(r.food)) rec.food = 0; // nobody came: no (usual) food either; a food amount typed in stays (food-only day)
         else if (!X.heads(cur) && !(U.num(cur.food) > 0)) rec.food = U.num(r.food);
       } else {
         const base = d.f === "rm" ? U.num(r.m) : U.num(r.l), now = d.f === "rm" ? X.rm(cur, r) : X.rl(cur, r);
@@ -9014,7 +9200,8 @@ window.SL = window.SL || {};
       title: (sh) => { const c = M.crew(sh.state.cid); return U.isAr() ? U.t(X.dn(sh.state.cid)) : U.t(X.name(sh.state.cid)) + (c && c.ar ? ' <span class="muted">' + U.t(c.ar) + "</span>" : ""); },
       state: { pid, cid, date, job: d.job !== undefined && d.job !== null && d.job !== "" ? d.job : undefined, recs: {}, orig: {}, saved: {}, pending: [], jobsUsed: [] },
       live: true,
-      body: X.sheetBody,
+      onInput: (sh, f, v, el, evType) => X.onInput(sh, f, v, el, evType),
+      body: (sh) => X.sheetBody(sh) + X.paySection(sh),
       foot: X.sheetFoot,
       acts: X.acts,
       // the arrow toward the start side goes a day back (right-to-left in Arabic, like the ‹ › buttons)
@@ -9120,6 +9307,161 @@ window.SL = window.SL || {};
   };
 })(window.SL);
 
+/* ---- chunk 6: food amount, other expenses and the day sheet's Paid section (part payments, Ryan direct, a date, the
+ *      week's payment list). Same crew-week unit and M.calc as chunk 5's Paid? row, so paying in one shows in the other. ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = SL._audit;
+
+  /** " · food 150 · other 40 water" for a grid cell's aria-label. */
+  X.extraLabel = (d) => (U.num(d.food) > 0 ? " · " + U.L("food ", "أكل ") + U.mw(d.food) : "") +
+    (U.num(d.other) > 0 ? " · " + U.L("other ", "مصاريف أخرى ") + U.mw(d.other) + (d.otherNote ? " " + d.otherNote : "") : "");
+  X.helpMore = () => '<p class="t12 muted au-help">' + U.L("Under Food: that day's other expenses (water, tools, transport), counted like food. To pay part of a week, pay Ryan direct or on another date, open any of its days: the Paid section lists the week's payments.",
+    "تحت الأكل: مصاريف أخرى لذلك اليوم (ماء، أدوات، نقل) وتُحسب مثل الأكل. لدفع جزء من الأسبوع أو دفعه من ريان مباشرة أو بتاريخ آخر، افتح أي يوم منه: قسم الدفع يعرض دفعات الأسبوع.") + "</p>";
+
+  /* ---- food amount + other expenses rows (the day sheet, under the day rates) ---- */
+  /** Typed values not saved yet for the sheet's day ({food, other, otherNote}); they survive live re-renders. */
+  X.draft = (sh) => { const s = sh.state; return s.dr && s.dr._k === X.key(s) ? s.dr : {}; };
+  const dv = (dr, k, v) => (dr[k] !== undefined ? dr[k] : v);
+  /** ▼ [amount you can type] ▲ (steps of 5). */
+  const amtStep = (f, val, label, canDown) => `<span class="au-step" role="group" aria-label="${U.esc(label)}"><button type="button" class="au-arr" data-act="auAmt" data-f="${f}" data-dir="-1" aria-label="${U.esc(U.L(label + " down", "تقليل " + label))}"${canDown ? "" : " disabled"}>▼</button>` +
+    `<input class="au-v au-in num" id="au-in-${f}" data-f="dr.${f}" type="text" inputmode="decimal" autocomplete="off" value="${U.esc(val)}" aria-label="${U.esc(label)}">` +
+    `<button type="button" class="au-arr" data-act="auAmt" data-f="${f}" data-dir="1" aria-label="${U.esc(U.L(label + " up", "زيادة " + label))}">▲</button></span>`;
+  X.foodRows = (sh, d, r) => {
+    const food = U.num(d.food), other = U.num(d.other), rf = U.num(r.food), dr = X.draft(sh), sar = `<span class="muted">${U.L("SAR", "ر.س")}</span>`;
+    return `<div class="au-row"><span class="au-rl">${U.L("Food", "أكل")}</span><button type="button" class="chip${food > 0 ? " on" : ""}" data-act="auFood" aria-pressed="${food > 0}">${U.L("+food ", "+ أكل ")}${U.mw(food || rf)}</button>` +
+      `<span class="au-rate">${sar}${amtStep("food", dv(dr, "food", food), U.L("Food amount", "مبلغ الأكل"), food > 0)}${food > 0 && food !== rf ? '<small class="au-def">' + U.L("usual ", "المعتاد ") + U.mw(rf) + "</small>" : ""}</span></div>` +
+      `<div class="au-row au-oth-row"><label class="au-rl" for="au-in-other">${U.L("Other expenses", "مصاريف أخرى")}<small>${U.L("water, tools, transport…", "ماء، أدوات، نقل…")}</small></label>` +
+      `<span class="au-oamt">${sar}<input class="inp au-in num" id="au-in-other" data-f="dr.other" type="text" inputmode="decimal" autocomplete="off" placeholder="0" value="${U.esc(dv(dr, "other", other || ""))}"></span>` +
+      `<input class="inp au-note" id="au-in-otherNote" data-f="dr.otherNote" type="text" maxlength="60" autocomplete="off" placeholder="${U.esc(U.L("What for? (optional)", "لأي غرض؟ (اختياري)"))}" aria-label="${U.esc(U.L("Other expenses: what for", "مصاريف أخرى: لأي غرض"))}" value="${U.esc(dv(dr, "otherNote", d.otherNote || ""))}"></div>`;
+  };
+  /** Save a typed food / other amount or the other note (on change: Enter or leaving the field). */
+  X.commitDraft = (sh, name) => {
+    const cur = X.cur(sh), dr = X.draft(sh);
+    if (!cur || dr[name] === undefined) return;
+    const raw = dr[name]; delete dr[name];
+    const note = name === "otherNote", txt = String(raw == null ? "" : raw).trim(), n = note || txt === "" ? 0 : U.parseNum(txt); // Arabic digits ok; only an empty box means 0
+    if (!(n >= 0)) return sh.error(U.L("Not saved: enter an amount, like 25", "لم يُحفظ: أدخل مبلغاً، مثلاً 25")); // the box goes back to the saved amount
+    const v = note ? txt.slice(0, 60) : U.round2(n);
+    sh.err = "";
+    if (v === (note ? cur.otherNote || "" : U.num(cur[name]))) return sh.refresh();
+    return X.put(sh, Object.assign({}, cur, { [name]: v }, note ? {} : { est: false, off: false }));
+  };
+
+  /* ---- Paid: the crew week's money and payments ---- */
+  X.fw = () => (M.floatWallets()[0] || {}).id || "";
+  const isOwner = (wid) => wid === M.ownerWalletId();
+  /** "Sayed" in the viewer's language for Sayed's wallet, else the holder's name as stored (HTML-escaped). */
+  X.holder = (wid) => { const n = M.walletName(wid); return n === "Sayed" ? U.L("Sayed", "سيد") : n === "Ryan" ? U.L("Ryan", "ريان") : U.esc(n); };
+  X.via = (wid) => (isOwner(wid) ? U.L("Ryan direct", "ريان مباشرة") : M.walletName(wid) === "Sayed" ? U.L("Sayed's float", "عهدة سيد") : U.L(X.holder(wid) + "'s float", "عهدة " + X.holder(wid)));
+  /** The pay button's label, one <span> (a flex button keeps its pieces in order in Arabic). */
+  X.payBtn = (wid, a) => "<span>" + (isOwner(wid) ? U.L("Paid by Ryan", "دفعها ريان") : U.L("Paid by ", "دفعها ") + X.holder(wid)) + (a > 0 ? " · " + U.m(a) : "") + "</span>";
+  /** The sheet's pay draft for this crew week ({w, amt, date}); a new week starts from its defaults. */
+  const payDraft = (s, u) => { if (!s.pay || s.pay._k !== u.key) s.pay = { _k: u.key }; return s.pay; };
+  /** A typed pay amount (Arabic digits ok) → SAR > 0, else 0. */
+  X.amtOf = (v) => { const n = typeof v === "number" ? v : U.parseNum(v); return n > 0 ? n : 0; };
+  /** Made in the last 15 minutes: one tap undoes it. An older payment asks first ("Void…" → Void / Keep in the row). */
+  X.recent = (at) => U.num(at) > 0 && Date.now() - U.num(at) < 15 * 60000;
+  X.payLine = (s, p, ro) => {
+    const h = `<div class="au-prow"><span class="num">${U.esc(U.dDM(p.date))}</span><b class="num">${U.m(p.h / 100)}</b><span class="muted au-pvia">${X.via(p.walletId)}${p.note ? " · " + U.t(p.note) : ""}</span>`;
+    if (ro) return h + "</div>";
+    const id = U.esc(p.id), amt = U.unbidi(U.m(p.h / 100, { plain: true }));
+    if (X.recent(p.at)) return h + `<button type="button" class="lnk au-pundo" data-act="auPayUndo" data-id="${id}" aria-label="${U.esc(U.L("Undo the payment of ", "تراجع عن دفعة ") + amt)}">${U.L("Undo", "تراجع")}</button></div>`;
+    if (s.payAsk !== p.id) return h + `<button type="button" class="lnk au-pundo" data-act="auPayAsk" data-id="${id}" aria-label="${U.esc(U.L("Void the payment of ", "إلغاء قيد دفعة ") + amt)}">${U.L("Void…", "إلغاء القيد…")}</button></div>`;
+    return h + `<span></span><div class="au-pask" role="group" aria-label="${U.esc(U.L("Void this payment?", "إلغاء قيد هذه الدفعة؟"))}"><span class="t13">${U.L("Void this payment? The week shows it unpaid again.", "إلغاء قيد هذه الدفعة؟ يظهر الأسبوع غير مدفوع مجدداً.")}</span>` +
+      `<button type="button" class="btn sm danger" data-act="auPayUndo" data-id="${id}">${U.L("Void", "إلغاء القيد")}</button><button type="button" class="btn sm sec" data-act="auPayKeep">${U.L("Keep", "إبقاء")}</button></div></div>`;
+  };
+  X.paySection = (sh) => {
+    const s = sh.state, T = U.today(), u = M.crewWeekUnit(s.pid, s.cid, s.date);
+    if (!u) return "";
+    const r = M.calc(u, T), ro = X.ro(), pays = u.payments.filter((p) => !p.void), cs = M.crewStats(u, T);
+    let h = `<section class="v-audit au-sheet au-paid" aria-label="${U.esc(U.L("Paid", "الدفع"))}"><div class="lbl">${U.L("Paid · ", "الدفع · ")}${U.esc(U.dWeek(u.weekStart))}</div>`;
+    h += `<div class="kv au-pkv"><span>${U.L("Cost to date", "التكلفة حتى اليوم")}</span><span class="v">${U.m(r.inc / 100)}</span><span>${U.L("Paid", "المدفوع")}</span><span class="v">${U.m(r.paid / 100)}</span>` +
+      (r.prepaid > 0 ? `<span class="c-prepaid">${U.L("Prepaid", "مدفوع مقدماً")}</span><span class="v c-prepaid">${U.m(r.prepaid / 100)}</span>`
+        : `<span${r.owed ? ' class="c-owed"' : ""}>${U.L("Owed", "مستحق")}</span><span class="v${r.owed ? " c-owed" : ""}">${r.owed ? U.m(r.owed / 100) : '<span class="zero">–</span>'}</span>`) + "</div>";
+    if (cs.plannedH) h += `<div class="t12 c-committed">(${U.mw(cs.plannedH / 100)}) ${U.L("planned, not counted until they come", "مخطط، لا يُحسب حتى يحضروا")}</div>`;
+    if (pays.length) h += '<div class="au-plist">' + pays.map((p) => X.payLine(s, p, ro)).join("") + "</div>";
+    if (ro) return h + "</section>";
+    const fw = X.fw(), rw = M.ownerWalletId(), pd = payDraft(s, u), w = pd.w || fw || rw;
+    if (!r.owed && !pd.open) return h + `<button type="button" class="lnk au-pahead" data-act="auPayOpen">${U.L("Pay ahead ›", "ادفع مقدماً ›")}</button></section>`;
+    const amt = pd.amt !== undefined ? pd.amt : r.owed > 0 ? r.owed / 100 : "", date = pd.date || T; // today, like the Pay screen: the amount is today's owed
+    h += ui.seg("pay.w", [[fw, X.via(fw)], [rw, U.L("Ryan direct", "ريان مباشرة")]].filter(([v]) => v), w, { full: true, label: U.L("Paid by", "دُفع من") });
+    h += '<div class="grid2 au-pform">' + ui.field({ id: "au-pay-amt", f: "pay.amt", label: U.L("Amount (SAR)", "المبلغ (ر.س)"), value: amt, attrs: 'autocomplete="off" inputmode="decimal"' }) +
+      ui.field({ id: "au-pay-date", f: "pay.date", label: U.L("Date", "التاريخ"), type: "date", value: date, attrs: 'max="' + T + '"' }) + "</div>";
+    h += `<button type="button" class="btn block${isOwner(w) ? "" : " float"}" id="au-pay-btn" data-act="auPay"${X.amtOf(amt) > 0 ? "" : " disabled"}>${X.payBtn(w, X.amtOf(amt))}</button>`;
+    return h + "</section>";
+  };
+
+  /** Sheet inputs: food / other / note drafts save on change; the pay amount relabels the button as you type. */
+  X.onInput = (sh, f, v, el, evType) => {
+    const s = sh.state;
+    if (f.indexOf("dr.") === 0) {
+      const k = X.key(s), name = f.slice(3);
+      if (s.dr._k !== k) s.dr = { _k: k, [name]: v }; // a draft left from another day starts over
+      if (evType === "change") X.commitDraft(sh, name);
+      return;
+    }
+    if (f.indexOf("pay.") !== 0) return;
+    const u = M.crewWeekUnit(s.pid, s.cid, s.date); if (!u) return;
+    const name = f.slice(4);
+    if (s.pay._k !== u.key) s.pay = { _k: u.key, [name]: v };
+    if (name === "amt") {
+      const b = sh.el.querySelector("#au-pay-btn"), a = X.amtOf(v);
+      if (b) { b.disabled = !(a > 0); b.innerHTML = X.payBtn(s.pay.w || X.fw() || M.ownerWalletId(), a); }
+    }
+  };
+
+  Object.assign(X.acts, {
+    auPayAsk: (d, el, ev, sh) => { sh.state.payAsk = d.id; sh.refresh(); },
+    auPayKeep: (d, el, ev, sh) => { sh.state.payAsk = ""; sh.refresh(); },
+    auPayOpen: (d, el, ev, sh) => { const s = sh.state, u = M.crewWeekUnit(s.pid, s.cid, s.date); if (!u) return; payDraft(s, u).open = true; sh.refresh(); },
+    /** Food / other ▼▲ in steps of 5 (a step from an odd amount lands on the next multiple of 5). */
+    auAmt: (d, el, ev, sh) => {
+      const cur = X.cur(sh); if (!cur) return;
+      const f = d.f === "other" ? "other" : "food", dir = U.num(d.dir) < 0 ? -1 : 1, now = U.num(cur[f]);
+      const n = Math.max(0, (dir > 0 ? Math.floor(now / 5) + 1 : Math.ceil(now / 5) - 1) * 5);
+      delete X.draft(sh)[f];
+      return X.put(sh, Object.assign({}, cur, { [f]: n, est: false, off: false }));
+    },
+    /** Record a payment on this crew week (Sayed's float by default, or Ryan direct). */
+    auPay: async (d, el, ev, sh) => {
+      if (X.ro()) return;
+      const s = sh.state, T = U.today(), u = M.crewWeekUnit(s.pid, s.cid, s.date); if (!u || s.paying) return;
+      const pd = payDraft(s, u), owed = M.calc(u, T).owed, wid = pd.w || X.fw() || M.ownerWalletId();
+      const a = U.round2(pd.amt !== undefined ? X.amtOf(pd.amt) : owed / 100), date = pd.date || T;
+      if (!(a > 0)) return sh.error(U.L("Enter an amount above 0.", "أدخل مبلغاً أكبر من 0."));
+      if (!U.isISO(date)) return sh.error(U.L("Pick a date.", "اختر التاريخ."));
+      if (date > T) return sh.error(U.L("The date can't be after today.", "لا يمكن أن يكون التاريخ بعد اليوم."));
+      s.paying = true;
+      const res = await SL.store.pay(u, { amount: a, walletId: wid, date });
+      s.paying = false;
+      if (!res.ok) return sh.error(U.L("Not saved · ", "لم يُحفظ · ") + SL.store.errText(res));
+      s.pay = { _k: u.key }; sh.err = "";
+      if (ui.sheets.includes(sh)) sh.refresh();
+      const who = U.esc(U.nm(M.crew(s.cid)) || X.name(s.cid));
+      setTimeout(() => {
+        const fl = !isOwner(wid), left = fl ? " · " + U.L("float left ", "المتبقي في العهدة ") + U.mw(M.walletCalc(wid, U.today()).holds / 100) : "";
+        ui.toast(U.L("Paid ", "دُفع لـ ") + who + " " + U.m(a) + " · " + X.via(wid) + left, { ms: 10000, undo: () => SL.store.voidPay(res.ref) });
+      }, 50);
+    },
+    /** Undo a listed payment (void:true; the toast's Undo brings it back). */
+    auPayUndo: async (d, el, ev, sh) => {
+      if (X.ro()) return;
+      const s = sh.state, u = M.crewWeekUnit(s.pid, s.cid, s.date); if (!u) return;
+      const p = u.payments.find((x) => x.id === d.id && !x.void); if (!p) return;
+      if (!X.recent(p.at) && s.payAsk !== p.id) { s.payAsk = p.id; return sh.refresh(); } // an older payment: ask first
+      const ref = SL.store.payRef(u, p.id), res = await SL.store.voidPay(ref);
+      if (!res.ok) return sh.error(U.L("Not saved · ", "لم يُحفظ · ") + SL.store.errText(res));
+      s.payAsk = "";
+      if (ui.sheets.includes(sh)) sh.refresh();
+      ui.toast((X.recent(p.at) ? U.L("Payment undone · ", "أُلغيت الدفعة · ") : U.L("Payment voided · ", "أُلغي قيد الدفعة · ")) + U.m(p.h / 100) + " · " + U.esc(U.dDM(p.date)), {
+        ms: 10000, undo: () => SL.store.patch(ref.coll, ref.id, { crews: { [ref.crewId]: { payments: { [ref.key]: { void: false } } } } }),
+      });
+    },
+  });
+})(window.SL);
+
 /* ---- 45-equip.js ---- */
 /* 45-equip: Equipment (#eqaudit[.jobs][.<sat>]) — a Gantt of rentals on site, like Crews.
  *   rows = rental lines grouped by crew (or by job); columns = days; red line = today.
@@ -9143,7 +9485,7 @@ window.SL = window.SL || {};
     return { mode, from, days: Array.from({ length: AU().DAYS }, (_, k) => U.addDays(from, k)) };
   };
   X.href = (mode, from) => ui.href("eqaudit", mode === "jobs" ? "jobs" : "", from || "");
-  X.rentals = (pid) => U.sortBy(M.unitsFor(pid).filter((u) => u.kind === "rental" && !u.archived), (u) => (u.out ? "1" : "0") + (u.in || "9999") + (u.title || ""));
+  X.rentals = (pid) => U.sortBy(M.unitsFor(pid).filter((u) => u.kind === "rental" && !u.archived && !u.deposit), (u) => (u.out ? "1" : "0") + (u.in || "9999") + (u.title || ""));
   /** What needs Ryan: no rate or no in-date (counts 0 until set). */
   X.todo = (pid) => X.rentals(pid).filter((u) => u.noPrice);
   /** Day state of a rental: "site" (on site that day), "ahead" (still out, a future day), "" (not here). */
@@ -9252,6 +9594,7 @@ window.SL = window.SL || {};
         (w.days.includes(T) ? "" : `<button type="button" class="chip" data-go="${U.esc(X.href(w.mode, ""))}">${U.L("Today", "اليوم")}</button>`) + "</div>";
       if (todo.length && !ro) h += `<div class="notice au-todo"><span>△ ${U.L(todo.length + " rental" + (todo.length > 1 ? "s" : "") + " with no price or arrival date · they count 0 until set", X.nLines(todo.length) + " بلا سعر أو تاريخ دخول · تُحسب 0 حتى تُحدَّد")}</span>` +
         `<span class="btns"><button type="button" class="btn sm" data-act="eqDay" data-id="${U.esc(todo[0].id)}">${U.L("Set them ›", "حدّدها ›")}</button>${SL.actions.bulkPrice ? '<button type="button" class="btn sm sec" data-act="bulkPrice">' + U.L("All in one list", "الكل في قائمة واحدة") + "</button>" : ""}</span></div>`;
+      h += X.depStrip(pid, ro);
       h += X.chart(pid, w, T);
       h += `<div class="au-leg t12"><span><i class="au-sw j1"></i>${U.L("on site (colour = job)", "في الموقع (اللون = البند)")}</span><span><i class="au-sw eq-idle-sw"></i>${U.L("on site, crew not working", "في الموقع، الطاقم لا يعمل")}</span><span><i class="au-sw eq-np-sw"></i>${U.L("no price yet", "بلا سعر بعد")}</span><span><i class="au-sw plan"></i>${U.L("still out", "ما زالت مستأجرة")}</span><span><i class="au-sw nowl"></i>${U.L("today", "اليوم")}</span><span class="muted">${U.L("number = SAR a day", "الرقم = ر.س في اليوم")}</span></div>`;
       h += '<p class="t12 muted au-help">' + U.L("Tap a line or a day: say when it arrived and when it went back, set qty and rate. It accrues every day on site, both ends included, and shows in Balances under Equipment.",
@@ -9290,11 +9633,7 @@ window.SL = window.SL || {};
     return true;
   };
   /** A typed number: accepts Arabic-Indic digits (١٥٠), "1,500" and "12.5"; NaN for anything else. */
-  X.parseNum = (txt) => {
-    let t = String(txt == null ? "" : txt).trim().replace(/[٠-٩]/g, (d) => String(d.charCodeAt(0) - 0x660)).replace(/[۰-۹]/g, (d) => String(d.charCodeAt(0) - 0x6f0)).replace(/٫/g, ".").replace(/٬/g, ",").replace(/\s+/g, "");
-    if (/^\d{1,3}(,\d{3})+(\.\d+)?$/.test(t)) t = t.replace(/,/g, "");
-    return /^\d+(\.\d+)?$/.test(t) ? parseFloat(t) : NaN;
-  };
+  X.parseNum = (txt) => U.parseNum(txt); // one parser for the whole app (00-core)
   /** The rental as the sheet sees it: the db doc with what the sheet just wrote on top. */
   X.cur = (sh) => Object.assign({}, (SL.S.costs || {})[sh.state.id] || {}, sh.state.local || {});
   const dBtn = (act, label, val, on) => `<button type="button" class="chip${on ? " on" : ""}" data-act="${act}" data-val="${U.esc(val)}">${label}</button>`;
@@ -9416,6 +9755,7 @@ window.SL = window.SL || {};
   A.eqDay = (d) => {
     if (AU().ro()) return;
     const c = (SL.S.costs || {})[d.id];
+    if (c && c.deposit) return A.eqDepEdit(d); // a deposit is not a rental line: its own sheet
     if (!c || c.type !== "rental") { ui.toast(U.L("That rental isn't in the ledger any more", "هذا الإيجار لم يعد في الدفتر")); return; }
     ui.sheet({
       // English: "Grinder <muted>صاروخ</muted>" · Arabic: the Arabic name alone (the English one when there is none)
@@ -9446,6 +9786,221 @@ window.SL = window.SL || {};
         }
       },
       onClose: (sh) => X.closeToast(sh),
+    });
+  };
+})(window.SL);
+
+/* ---- chunk 4: equipment deposits — money handed to a rental shop and held there until it comes back ----
+ *   A deposit is a costs doc {type:"rental", deposit:true, qty 0 × rate 0}: it costs nothing, its payment shows as
+ *   Prepaid under Equipment and leaves the payer's cash (Sayed's float) like any payment. "Returned…" records the money
+ *   back as a negative payment (refund:true). Undo voids (never deletes). The strip sits above the Gantt. */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._eqa, AU = () => SL._audit;
+
+  X.depList = (pid) => M.deposits(pid, U.today());
+  X.depById = (pid, id) => X.depList(pid).find((x) => x.id === id) || null;
+  X.depShop = (d) => d.supplier || U.L("rental shop", "محل التأجير");
+  X.depTitle = (d) => U.L("Deposit", "تأمين") + " · " + X.depShop(d);
+  X.depWho = (wid) => U.t(M.walletName(wid));
+  X.depFloat = (pid) => (M.floatWallets()[0] || {}).id || M.defaultWallet(pid);
+  /** Paid by / back to: each float (Sayed) or Ryan direct, bound to sheet state `field`. */
+  X.depWallets = (field, val, label) => ui.seg(field, M.floatWallets().map((w) => [w.id, U.L(U.t(w.holder || w.name) + " (float)", "عهدة " + U.t(ui.holderOf(w)))]).concat([[M.ownerWalletId(), U.L("Ryan direct", "ريان مباشرة")]]), val, { full: true, label, id: "eq-dep-" + field });
+  /** Shop names to suggest: rental shops already used (latest first), then (all) the suppliers catalog. */
+  X.depShops = (all) => {
+    const used = U.sortBy(Object.values(SL.S.costs || {}).filter((c) => c && !c.void && c.type === "rental" && String(c.supplier || "").trim()), (c) => c.in || c.date || "", "desc").map((c) => String(c.supplier).trim());
+    return U.uniq(all ? used.concat(Object.values(M.suppliers() || {}).map((s) => s && s.name).filter(Boolean)) : used);
+  };
+
+  /** One deposit: title (opens it in the Ledger), paid · by · date, what the shop still holds, returns (each undoable). */
+  X.depRow = (d, ro) => {
+    const id = U.esc(d.id), t = U.t(X.depTitle(d));
+    const title = ro ? `<span class="eq-dep-t">${t}</span>` : `<button type="button" class="eq-dep-t" data-act="openUnit" data-key="${U.esc(d.key)}">${t}</button>`;
+    const meta = [`<b class="num">${U.mw(d.paidH / 100)}</b>`, U.L("paid by", "دفعها") + " " + X.depWho(d.walletId), U.esc(U.dDM(d.date))];
+    const st = d.heldH > 0 ? `<b class="c-prepaid">${U.L("held", "محتجز")} <span class="num">${U.mw(d.heldH / 100)}</span></b>` : `<span class="muted">${U.L("returned ✓", "أُرجع ✓")}</span>`;
+    let h = `<div class="eq-dep-r"><div class="eq-dep-i">${title}<span class="eq-dep-m">${meta.join(" · ")} · ${st}</span></div>`;
+    if (!ro) h += `<span class="eq-dep-b">${d.heldH > 0 ? `<button type="button" class="btn sm sec" data-act="eqDepBack" data-id="${id}">${U.L("Returned…", "أُرجع…")}</button>` : ""}` +
+      (X.depRecent(d.doc.createdAt) ? `<button type="button" class="btn sm ghost" data-act="eqDepUndo" data-id="${id}" aria-label="${U.esc(U.L("Undo this deposit", "تراجع عن هذا التأمين"))}">${U.L("Undo", "تراجع")}</button>`
+        : `<button type="button" class="btn sm ghost" data-act="eqDepUndo" data-id="${id}" aria-label="${U.esc(U.L("Void this deposit", "إلغاء قيد هذا التأمين"))}">${U.L("Void…", "إلغاء القيد…")}</button>`) + "</span>";
+    for (const p of d.refunds) {
+      h += `<div class="eq-dep-rf"><span>${U.L("Returned", "أُرجع")} <b class="num">${U.mw(-p.h / 100)}</b> · ${U.L("to", "إلى")} ${X.depWho(p.walletId)} · ${U.esc(U.dDM(p.date))}</span>` +
+        (ro ? "" : X.depRecent(p.at) ? `<button type="button" class="lnk" data-act="eqDepUnback" data-id="${id}" data-pay="${U.esc(p.id)}" aria-label="${U.esc(U.L("Undo this return", "تراجع عن هذا الإرجاع"))}">${U.L("Undo", "تراجع")}</button>`
+          : `<button type="button" class="lnk" data-act="eqDepUnback" data-id="${id}" data-pay="${U.esc(p.id)}" aria-label="${U.esc(U.L("Void this return", "إلغاء قيد هذا الإرجاع"))}">${U.L("Void…", "إلغاء القيد…")}</button>`) + "</div>";
+    }
+    return h + "</div>";
+  };
+
+  /** The Deposits strip above the grid: what the shops hold now; fully returned ones fold away. Read-only: states only. */
+  X.depStrip = (pid, ro) => {
+    const ds = X.depList(pid), held = ds.filter((d) => d.heldH > 0), done = ds.filter((d) => d.heldH <= 0);
+    if (ro && !ds.length) return "";
+    const tot = U.sum(held, (d) => d.heldH), name = U.L("Deposits", "التأمينات");
+    let h = `<section class="eq-dep" aria-label="${U.esc(name)}"><div class="eq-dep-h"><b>${name}</b><span class="t12 muted">` +
+      (tot ? `${U.L("held", "محتجز")} <b class="num c-prepaid">${U.mw(tot / 100)}</b>` : ds.length ? U.L("all returned", "أُرجعت كلها") : U.L("paid to a rental shop, back when it's returned", "تُدفع لمحل التأجير وتُسترد عند الإرجاع")) + '</span><span class="spacer"></span>';
+    if (!ro) h += `<button type="button" class="btn sm sec" data-act="eqDepAdd">${U.L("+ Deposit", "+ تأمين")}</button>`;
+    h += "</div>" + held.map((d) => X.depRow(d, ro)).join("");
+    if (done.length) {
+      const open = ui.isOpen("eq.depDone", false);
+      h += `<button type="button" class="lnk eq-dep-more t12" data-act="toggle" data-k="eq.depDone" aria-expanded="${open}">${open ? U.L("Hide returned", "إخفاء المُرجعة") : U.L("Returned", "المُرجعة") + " (" + done.length + ")"}</button>`;
+      if (open) h += done.map((d) => X.depRow(d, ro)).join("");
+    }
+    return h + "</section>";
+  };
+
+  /** Made in the last 15 minutes: one tap undoes it. An older deposit or return asks first (a "Void…?" sheet). */
+  X.depRecent = (at) => U.num(at) > 0 && Date.now() - U.num(at) < 15 * 60000;
+  X.depAsk = (title, body, btn, run) => ui.sheet({
+    title, state: {}, body: () => `<div class="v-audit au-sheet eq-dep-sheet"><p class="t13">${body}</p></div>`,
+    foot: () => `<button type="button" class="btn sec" data-act="close">${U.L("Keep it", "إبقاء")}</button><button type="button" class="btn danger" data-act="eqDepDoVoid">${btn}</button>`,
+    acts: { eqDepDoVoid: (x, el, ev, sh) => { sh.close(true); return run(); } },
+  });
+  /** Undo a deposit: void the whole doc (never deleted); the toast brings it back. */
+  A.eqDepUndo = async (d) => {
+    if (AU().ro()) return;
+    const dep = X.depById(ui.pid(), d.id); if (!dep) return;
+    const recent = X.depRecent(dep.doc.createdAt);
+    if (!recent && !d.sure) return X.depAsk(U.L("Void this deposit?", "إلغاء قيد هذا التأمين؟"), U.t(X.depTitle(dep)) + ' · <b class="num">' + U.mw(dep.paidH / 100) + "</b> · " + U.esc(U.dDM(dep.date)) + "<br>" +
+      U.L("It stops counting everywhere: Equipment and the payer's cash no longer show it. You can undo right after.", "لن يُحسب في أي مكان: لن يظهر في المعدات ولا في نقد الدافع. يمكنك التراجع بعده مباشرة."),
+      U.L("Void deposit", "إلغاء قيد التأمين"), () => A.eqDepUndo({ id: d.id, sure: true }));
+    const r = await SL.store.patch("costs", dep.id, { void: true });
+    if (!r.ok) return ui.toast(U.esc(SL.store.errText(r)), { ms: 8000 });
+    ui.toast((recent ? U.L("Deposit undone", "تم التراجع عن التأمين") : U.L("Deposit voided", "أُلغي قيد التأمين")) + " · " + U.t(X.depShop(dep)) + " · " + U.mw(dep.paidH / 100), { ms: 10000, undo: () => SL.store.patch("costs", dep.id, { void: false }) });
+  };
+  /** Undo one "returned" (the refund payment is voided); the toast restores it. */
+  A.eqDepUnback = async (d) => {
+    if (AU().ro()) return;
+    const dep = X.depById(ui.pid(), d.id), p = dep && dep.refunds.find((x) => x.id === d.pay); if (!p) return;
+    const recent = X.depRecent(p.at);
+    if (!recent && !d.sure) return X.depAsk(U.L("Void this return?", "إلغاء قيد هذا الإرجاع؟"), U.L("Returned", "أُرجع") + ' <b class="num">' + U.mw(-p.h / 100) + "</b> · " + U.L("to", "إلى") + " " + X.depWho(p.walletId) + " · " + U.esc(U.dDM(p.date)) + "<br>" +
+      U.L("The shop shows as holding it again. You can undo right after.", "سيظهر المبلغ لدى المحل مجدداً. يمكنك التراجع بعده مباشرة."),
+      U.L("Void return", "إلغاء قيد الإرجاع"), () => A.eqDepUnback({ id: d.id, pay: d.pay, sure: true }));
+    const r = await SL.store.voidPay(SL.store.payRef(dep.unit, p.id));
+    if (!r.ok) return ui.toast(U.esc(SL.store.errText(r)), { ms: 8000 });
+    ui.toast((recent ? U.L("Return undone", "تم التراجع عن الإرجاع") : U.L("Return voided", "أُلغي قيد الإرجاع")) + " · " + U.t(X.depShop(dep)) + " · " + U.mw(-p.h / 100), { ms: 10000, undo: () => SL.store.patch("costs", dep.id, { payments: { [p.id]: { void: false } } }) });
+  };
+})(window.SL);
+
+/* ---- chunk 5: the deposit sheet (+ Deposit / Edit) and the "Returned…" sheet ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._eqa, AU = () => SL._audit;
+  const foot = (save) => `<button type="button" class="btn sec" data-act="close">${U.L("Cancel", "إلغاء")}</button><button type="button" class="btn" data-act="${save}">${U.L("Save", "حفظ")}</button>`;
+  const inp = (id, f, v, extra) => `<input id="${id}" data-f="${f}" type="text" value="${U.esc(v == null ? "" : v)}" autocomplete="off"${extra || ""}>`;
+
+  X.depBody = (sh) => {
+    const s = sh.state, T = U.today(), dep = s.editId ? X.depById(s.pid, s.editId) : null;
+    if (s.editId && !dep) return `<div class="empty">${U.L("This deposit is no longer in the ledger.", "هذا التأمين لم يعد في الدفتر.")}</div>`;
+    let h = '<div class="v-audit au-sheet eq-dep-sheet">';
+    if (s.money) {
+      const past = U.uniq(X.depList(s.pid).map((d) => d.paidH / 100).filter((x) => x > 0)).slice(0, 3), a = X.parseNum(s.amt);
+      if (past.length && !s.editId) h += `<div class="chips" role="group" aria-label="${U.esc(U.L("Amount", "المبلغ"))}">` + past.map((x) => `<button type="button" class="chip${a === x ? " on" : ""}" data-seg="amt" data-val="${x}"><b class="num">${U.mw(x)}</b></button>`).join("") + "</div>";
+      h += `<div class="fld"><label for="eq-dep-amt">${U.L("Amount (SAR)", "المبلغ (ر.س)")}</label>${inp("eq-dep-amt", "amt", s.amt, ' inputmode="decimal"' + (s.editId ? "" : " autofocus"))}</div>`;
+    } else if (dep) h += `<p class="t13">${U.L("Paid", "المدفوع")} <b class="num">${U.m(dep.paidH / 100)}</b> · ${U.L("in parts: undo it and add it again to change it", "على دفعات: تراجع عنه وأضفه من جديد لتغييره")}</p>`;
+    const lastOk = dep ? X.depLatest(dep, s.money) : "", maxD = lastOk && lastOk < T ? lastOk : T; // never after money already back (or paid)
+    h += ui.field({ id: "eq-dep-date", f: "date", label: U.L("Date paid", "تاريخ الدفع"), type: "date", value: s.date, attrs: 'max="' + maxD + '"' });
+    if (s.money) h += `<div class="fld"><span class="lb">${U.L("Paid by", "دفعها")}</span>${X.depWallets("walletId", s.walletId, U.L("Paid by", "دفعها"))}</div>`;
+    const shops = X.depShops(false).filter((n) => n !== String(s.shop || "").trim()).slice(0, 4);
+    h += `<div class="fld"><label for="eq-dep-shop">${U.L("Rental shop", "محل التأجير")}</label>${inp("eq-dep-shop", "shop", s.shop, ` list="eq-dep-sups" placeholder="${U.esc(U.L("optional", "اختياري"))}"`)}` +
+      `<datalist id="eq-dep-sups">${X.depShops(true).map((n) => `<option value="${U.esc(n)}"></option>`).join("")}</datalist></div>`;
+    if (shops.length) h += '<div class="chips eq-dep-shops">' + shops.map((n) => `<button type="button" class="chip" data-seg="shop" data-val="${U.esc(n)}">${U.t(n)}</button>`).join("") + "</div>";
+    h += `<div class="fld"><label for="eq-dep-note">${U.L("Note", "ملاحظة")}</label>${inp("eq-dep-note", "note", s.note, ` placeholder="${U.esc(U.L("e.g. scaffolding deposit", "مثلاً تأمين السقالات"))}"`)}</div>`;
+    h += `<p class="t12 muted">${U.L("It costs nothing: it shows as Prepaid under Equipment until the shop gives it back, and comes out of the payer's cash like any payment.", "لا يُحسب تكلفة: يظهر مدفوعاً مقدماً تحت المعدات حتى يعيده المحل، ويخرج من نقد الدافع مثل أي دفعة.")}</p>`;
+    return h + "</div>";
+  };
+
+  /** The latest date an edited deposit can take: its first return (the payment moves with the date when `money`), else
+   *  also its first payment (the payments keep their dates). "" = no limit. Keeps paid ≥ 0 on every day. */
+  X.depLatest = (dep, money) => (money ? dep.refunds : dep.refunds.concat(dep.payments)).reduce((m, p) => (p.date && (!m || p.date < m) ? p.date : m), "");
+  /** Edit: shop, note and date on the doc; a new amount / payer / date replaces the payment (the old one is voided) in one write. */
+  X.depEditSave = (s, a, shop, note) => {
+    const dep = X.depById(s.pid, s.editId);
+    if (!dep) return Promise.resolve({ ok: false, code: "gone", message: U.L("this deposit is no longer in the ledger", "هذا التأمين لم يعد في الدفتر") });
+    const c = dep.doc, now = Date.now(), p0 = s.money ? dep.payments[0] : null;
+    const patch = { supplier: shop, note, date: s.date }, undo = { supplier: c.supplier || "", note: c.note || "", date: c.date || "" };
+    if (p0 && (U.hal(a) !== p0.h || s.walletId !== p0.walletId || s.date !== p0.date)) {
+      const key = "p" + now.toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+      patch.payments = { [p0.id]: { void: true, voidAt: now }, [key]: { date: s.date, amount: U.round2(a), walletId: s.walletId, at: now } };
+      undo.payments = { [p0.id]: { void: false }, [key]: { void: true, voidAt: now } };
+    }
+    return SL.store.patch("costs", s.editId, patch).then((r) => Object.assign(r, { undo: () => SL.store.patch("costs", s.editId, undo) }));
+  };
+  X.depSave = async (ds, el, ev, sh) => {
+    const s = sh.state, T = U.today(), a = X.parseNum(s.amt), dep = s.editId ? X.depById(s.pid, s.editId) : null;
+    if (s.money && !(a > 0)) return sh.error(U.L("Enter the amount paid, like 500", "أدخل المبلغ المدفوع، مثلاً 500"));
+    if (dep && s.money && U.hal(a) < dep.refundedH) return sh.error(U.L(`The shop already gave back ${U.mw(dep.refundedH / 100)}: the deposit can't be less`, `أعاد المحل ${U.mw(dep.refundedH / 100)} بالفعل: لا يمكن أن يكون التأمين أقل`));
+    if (!U.isISO(s.date) || s.date > T) return sh.error(U.L("Pick a date up to today", "اختر تاريخاً حتى اليوم"));
+    const lastOk = dep ? X.depLatest(dep, s.money) : "";
+    if (lastOk && s.date > lastOk) return sh.error(U.L(`Money on it is dated ${U.dShort(lastOk)}: pick that day or earlier`, `عليه مبلغ بتاريخ ${U.dShort(lastOk)}: اختر ذلك اليوم أو قبله`));
+    const shop = String(s.shop || "").trim(), note = String(s.note || "").trim();
+    // what the float will hold after a new deposit (the model catches up after the write, so work it out now)
+    const isFloat = M.floatWallets().some((w) => w.id === s.walletId), after = isFloat && !s.editId ? M.walletCalc(s.walletId, T).holds - U.hal(a) : null;
+    sh.busy(true);
+    const r = s.editId ? await X.depEditSave(s, a, shop, note) : await SL.store.addDeposit(s.pid, { amount: U.round2(a), walletId: s.walletId, date: s.date, supplier: shop, note });
+    sh.busy(false);
+    if (!r.ok) return sh.error(SL.store.errText(r));
+    sh.close(true);
+    const who = s.money ? " · " + U.mw(a) + " · " + U.L("paid by", "دفعها") + " " + X.depWho(s.walletId) : "";
+    const fl = after != null ? " · " + U.L("float", "العهدة") + " " + U.mw(after / 100) : "";
+    ui.toast((s.editId ? U.L("Deposit saved", "حُفظ التأمين") : U.L("Deposit", "تأمين")) + " · " + U.t(shop || U.L("rental shop", "محل التأجير")) + who + fl,
+      { ms: 10000, undo: r.undo || (() => SL.store.patch("costs", r.id, { void: true })) });
+  };
+  /** Open the deposit sheet: new (editId "") or edit an existing deposit. */
+  X.depSheet = (pid, editId) => {
+    if (AU().ro()) return;
+    const dep = editId ? X.depById(pid, editId) : null;
+    if (editId && !dep) return ui.toast(U.L("That deposit isn't in the ledger any more", "هذا التأمين لم يعد في الدفتر"));
+    const fw = X.depFloat(pid), one = dep ? (dep.payments.length === 1 ? dep.payments[0] : null) : null;
+    const state = dep ? { pid, editId, amt: String(dep.paidH / 100), date: dep.date || U.today(), walletId: (one && one.walletId) || dep.walletId || fw, shop: dep.supplier || "", note: dep.note || "", money: !!one }
+      : { pid, editId: "", amt: "", date: U.today(), walletId: fw, shop: "", note: "", money: true };
+    ui.sheet({
+      title: dep ? U.L("Edit deposit", "تعديل التأمين") : U.L("Equipment deposit", "تأمين المعدات"),
+      state, body: X.depBody, foot: () => foot("eqDepSave"), acts: { eqDepSave: X.depSave },
+      dirty: (sh) => !sh.state.editId && !!(String(sh.state.amt || "").trim() || String(sh.state.shop || "").trim() || String(sh.state.note || "").trim()),
+    });
+  };
+  A.eqDepAdd = () => X.depSheet(ui.pid(), "");
+  A.eqDepEdit = (d) => { const c = (SL.S.costs || {})[d.id]; if (c && c.deposit) X.depSheet(M.pidOf(c) || ui.pid(), d.id); };
+
+  /** "Returned…": the shop gives (part of) the deposit back → a refund payment (stored negative) into that cash. */
+  X.backBody = (sh) => {
+    const s = sh.state, T = U.today(), dep = X.depById(s.pid, s.id);
+    if (!dep) return `<div class="empty">${U.L("This deposit is no longer in the ledger.", "هذا التأمين لم يعد في الدفتر.")}</div>`;
+    const kv = (k, v, cls) => `<span>${k}</span><span class="v num${cls ? " " + cls : ""}">${v}</span>`;
+    let h = '<div class="v-audit au-sheet eq-dep-sheet"><div class="kv">' + kv(U.L("Paid", "المدفوع") + " · " + X.depWho(dep.walletId) + " · " + U.esc(U.dDM(dep.date)), U.m(dep.paidH / 100)) +
+      (dep.refundedH ? kv(U.L("Returned so far", "المُرجع حتى الآن"), U.m(dep.refundedH / 100)) : "") + kv(U.L("The shop still holds", "لدى المحل الآن"), U.m(dep.heldH / 100), "c-prepaid") + "</div>";
+    h += `<div class="chips" role="group" aria-label="${U.esc(U.L("Amount", "المبلغ"))}"><button type="button" class="chip${U.hal(X.parseNum(s.amt)) === dep.heldH ? " on" : ""}" data-seg="amt" data-val="${dep.heldH / 100}"><span>${U.L("All of it", "كله")} · <b class="num">${U.mw(dep.heldH / 100)}</b></span></button></div>`;
+    h += `<div class="fld"><label for="eq-back-amt">${U.L("Amount returned (SAR)", "المبلغ المُرجع (ر.س)")}</label>${inp("eq-back-amt", "amt", s.amt, ' inputmode="decimal"')}</div>`;
+    h += ui.field({ id: "eq-back-date", f: "date", label: U.L("Date", "التاريخ"), type: "date", value: s.date, attrs: `min="${U.esc(dep.date || "")}" max="${T}"` });
+    h += `<div class="fld"><span class="lb">${U.L("Back to", "أُعيد إلى")}</span>${X.depWallets("walletId", s.walletId, U.L("Back to", "أُعيد إلى"))}</div>`;
+    h += `<div class="fld"><label for="eq-back-note">${U.L("Note", "ملاحظة")}</label>${inp("eq-back-note", "note", s.note, ` placeholder="${U.esc(U.L("optional", "اختياري"))}"`)}</div>`;
+    h += `<p class="t12 muted">${U.L("The money goes back into that cash. What is left stays held by the shop (Prepaid).", "يعود المبلغ إلى ذلك النقد، ويبقى الباقي لدى المحل (مدفوع مقدماً).")}</p>`;
+    return h + "</div>";
+  };
+  X.backSave = async (ds, el, ev, sh) => {
+    const s = sh.state, T = U.today(), dep = X.depById(s.pid, s.id), a = X.parseNum(s.amt);
+    if (!dep) return sh.error(U.L("This deposit is no longer in the ledger", "هذا التأمين لم يعد في الدفتر"));
+    if (!(a > 0)) return sh.error(U.L("Enter the amount the shop gave back", "أدخل المبلغ الذي أعاده المحل"));
+    if (U.hal(a) > dep.heldH) return sh.error(U.L(`The shop only holds ${U.mw(dep.heldH / 100)}: it can't give back more`, `لدى المحل ${U.mw(dep.heldH / 100)} فقط: لا يمكن إرجاع أكثر`));
+    if (!U.isISO(s.date) || s.date > T) return sh.error(U.L("Pick a date up to today", "اختر تاريخاً حتى اليوم"));
+    if (dep.date && s.date < dep.date) return sh.error(U.L(`It was paid on ${U.dShort(dep.date)}: pick that day or later`, `دُفع في ${U.dShort(dep.date)}: اختر ذلك اليوم أو بعده`));
+    sh.busy(true);
+    const r = await SL.store.refund(dep.unit, { amount: U.round2(a), walletId: s.walletId, date: s.date, note: String(s.note || "").trim() });
+    sh.busy(false);
+    if (!r.ok) return sh.error(SL.store.errText(r));
+    sh.close(true);
+    ui.toast(U.L("Deposit returned", "أُرجع التأمين") + " · " + U.t(X.depShop(dep)) + " · " + U.mw(a) + " · " + U.L("back to", "أُعيد إلى") + " " + X.depWho(s.walletId), { ms: 10000, undo: () => SL.store.voidPay(r.ref) });
+  };
+  A.eqDepBack = (d) => {
+    if (AU().ro()) return;
+    const pid = ui.pid(), dep = X.depById(pid, d.id);
+    if (!dep) return ui.toast(U.L("That deposit isn't in the ledger any more", "هذا التأمين لم يعد في الدفتر"));
+    if (!(dep.heldH > 0)) return ui.toast(U.L("The shop holds nothing more of this deposit", "لم يبقَ شيء من هذا التأمين لدى المحل"));
+    ui.sheet({
+      title: U.L("Deposit returned", "أُرجع التأمين") + " · " + U.t(X.depShop(dep)),
+      state: { pid, id: dep.id, amt: String(dep.heldH / 100), date: U.today(), walletId: dep.walletId || X.depFloat(pid), note: "" },
+      body: X.backBody, foot: () => foot("eqDepBackSave"), acts: { eqDepBackSave: X.backSave },
     });
   };
 })(window.SL);
@@ -9856,8 +10411,15 @@ window.SL = window.SL || {};
   /** Payments dated in the current Sat–Fri (≤ T) on this project's units. */
   X.paidThisWeek = (pid, T) => {
     const sat = U.weekStart(T), fri = U.addDays(sat, 6), rows = [];
-    for (const u of M.unitsFor(pid)) for (const p of u.payments || []) if (!p.void && p.date >= sat && p.date <= fri && p.date <= T) rows.push({ u, p });
+    for (const u of M.unitsFor(pid)) for (const p of u.payments || []) if (!p.void && p.h >= 0 && p.date >= sat && p.date <= fri && p.date <= T) rows.push({ u, p }); // money back (p.h < 0): X.backRows
     return U.sortBy(rows, (r) => r.p.date + ":" + r.u.title, "desc");
+  };
+  /** Money back this week (a deposit returned = a negative payment): listed under the payments, never added to "Paid this week". */
+  X.backRows = (pid, T) => {
+    const sat = U.weekStart(T), rows = [];
+    for (const u of M.unitsFor(pid)) for (const p of u.payments || []) if (!p.void && p.h < 0 && p.date >= sat && p.date <= T) rows.push({ u, p });
+    return U.sortBy(rows, (r) => r.p.date, "desc").map((r) => `<div class="row nosw pay-prow pay-back${SL.actions.openUnit ? ' tap" data-act="openUnit" data-key="' + U.esc(r.u.key) + '" role="button" tabindex="0"' : '"'}><span class="t">${ui.mono(r.u.cat)} ${U.t(M.refundLabel(r.u))}</span>` +
+      `<span class="a num">${U.m(-r.p.h / 100, { sign: true })}</span><span class="f"></span><span class="m">${U.esc(U.dShort(r.p.date))} · ${U.L("back to ", "أُعيد إلى ")}${X.isFloat(r.p.walletId) ? U.L("float", "العهدة") : U.L("Ryan", "ريان")}</span><span class="w"></span></div>`).join("");
   };
 
   X.paidWeek = (pid, T, ro) => {
@@ -9865,10 +10427,13 @@ window.SL = window.SL || {};
     const fl = rows.filter((r) => X.isFloat(r.p.walletId)), ow = rows.filter((r) => !X.isFloat(r.p.walletId));
     const open = ui.isOpen("pay.paid", false);
     let h = '<section class="sec pay-paid" id="pay-paid">' + ui.sech(U.L("Paid this week", "المدفوع هذا الأسبوع"), tot ? U.m(tot / 100) : '<span class="zero">–</span>');
+    const back = X.backRows(pid, T);
+    if (!rows.length && back) return h + back + "</section>"; // only money back this week (a deposit returned)
     if (!rows.length) return h + '<div class="t13 muted pay-none">' + U.L("Nothing paid since ", "لم يُدفع شيء منذ ") + U.esc(U.dShort(U.weekStart(T))) + ".</div></section>";
     const line = U.L("float ", "العهدة ") + fl.length + " · " + U.m(U.sum(fl, (r) => r.p.h) / 100) + " · " + U.esc(X.ryan()) + " " +(ow.length ? U.m(U.sum(ow, (r) => r.p.h) / 100) : '<span class="zero">–</span>');
     h += `<button class="pay-split t13" id="pay-paid-toggle" data-act="toggle" data-k="pay.paid" aria-expanded="${open}"><span class="num">${line}</span><span class="spacer"></span><span class="lnk">${open ? U.L("Hide", "إخفاء") : U.L("Show ", "عرض ") + rows.length} ${open ? "▴" : "▾"}</span></button>`;
     if (open) h += '<div class="pay-paidrows">' + rows.map((r) => `<div class="row nosw pay-prow${SL.actions.openUnit ? ' tap" data-act="openUnit" data-key="' + U.esc(r.u.key) + '" role="button" tabindex="0"' : '"'}><span class="t">${ui.mono(r.u.cat)} ${U.t(r.u.kind === "crew" ? X.crewNm(r.u.crewId) : r.u.title)}</span><span class="a num">${U.m(r.p.h / 100)}</span><span class="f"></span><span class="m">${U.esc(X.dNoMon(r.p.date))} · ${U.esc(X.viaWord(r.p.walletId))}${r.p.note && !ro ? " · " + U.t(r.p.note) : ""}</span><span class="w">${ui.stateWords(r.u, T)}</span></div>`).join("") + "</div>";
+    if (open) h += back;
     return h + "</section>";
   };
 
@@ -9972,11 +10537,13 @@ window.SL = window.SL || {};
     return ds.length ? Math.round(U.sum(ds, (d) => d.h) / ds.length) : 0;
   };
 
+  /** " + other 40 water" under a crew day's food (other expenses are in the day's SAR). */
+  X.otherTag = (d) => (U.num(d.other) > 0 ? ` <small class="muted">+ ${U.L("other", "مصاريف أخرى")} ${U.mw(U.num(d.other))}${d.otherNote ? " " + U.t(d.otherNote) : ""}</small>` : "");
   /** Crew days table for the pay sheet. */
   X.crewDaysTable = (u, T) => {
     const rows = u.days.filter((d) => d.plan || d.date <= T).map((d) => {
       const pl = d.plan;
-      return `<tr class="${pl ? "pay-plan" : ""}"><td>${U.esc(U.dStrip(d.date))}</td><td class="r num">${U.num(d.m) || '<span class="zero">–</span>'}</td><td class="r num">${U.num(d.l) || '<span class="zero">–</span>'}</td><td class="r num">${U.num(d.food) ? U.mw(U.num(d.food)) : '<span class="zero">–</span>'}</td><td class="r num">${pl ? "(" + U.mw(d.h / 100) + ")" : U.m(d.h / 100)}</td></tr>`;
+      return `<tr class="${pl ? "pay-plan" : ""}"><td>${U.esc(U.dStrip(d.date))}</td><td class="r num">${U.num(d.m) || '<span class="zero">–</span>'}</td><td class="r num">${U.num(d.l) || '<span class="zero">–</span>'}</td><td class="r num">${U.num(d.food) ? U.mw(U.num(d.food)) : '<span class="zero">–</span>'}${X.otherTag(d)}</td><td class="r num">${pl ? "(" + U.mw(d.h / 100) + ")" : U.m(d.h / 100)}</td></tr>`;
     }).join("");
     if (!rows) return "";
     return `<div class="tscroll"><table class="t pay-days"><thead><tr><th>${U.L("Day", "اليوم")}</th><th class="r">${U.L("M", "م")}</th><th class="r">${U.L("L", "ع")}</th><th class="r">${U.L("Food", "أكل")}</th><th class="r">${U.L("SAR", "ر.س")}</th></tr></thead><tbody>${rows}</tbody></table></div>`;
@@ -10411,6 +10978,7 @@ window.SL = window.SL || {};
     if (code) meta.push("<b>" + U.esc(code) + "</b>");
     else if (isCost && u && u.kind !== "crew") meta.push('<span class="c-warn">' + U.L("⊘ no job", "⊘ بدون بند") + "</span>");
     if (isCost && u && u.kind !== "crew") meta.push(r.hasPhoto ? U.L("photo ✓", "صورة ✓") : '<span class="c-warn">' + U.L("no photo", "بلا صورة") + "</span>");
+    if (r.deposit) meta.length = 1; // an equipment deposit (or its refund) is on no job and needs no photo
     if (!isCost && r.note && !ro) meta.push(U.t(r.note));
     const cls = "row nosw v-fl-row" + (isCost ? " tap" : "") + (r.h > 0 ? " in" : "");
     const act = isCost ? ` data-act="openUnit" data-key="${U.esc(r.unitKey)}" role="button" tabindex="0"` : "";
@@ -10429,7 +10997,7 @@ window.SL = window.SL || {};
       const f = X.filter, who = X.nmI(M.walletName(wid)), owner = X.nmI(M.walletName(M.ownerWalletId()));
       let rows = all.slice();
       if (f === "week") rows = rows.filter((r) => r.date >= sat);
-      else if (f === "nophoto") rows = rows.filter((r) => r.unitKey && !r.hasPhoto && (M.unit(r.unitKey) || {}).kind !== "crew");
+      else if (f === "nophoto") rows = rows.filter((r) => r.unitKey && !r.hasPhoto && !r.deposit && (M.unit(r.unitKey) || {}).kind !== "crew");
       rows.reverse();
       const out = U.sum(rows.filter((r) => r.h < 0), (r) => -r.h), inn = U.sum(rows.filter((r) => r.h > 0), (r) => r.h);
       const empty = f === "nophoto" ? U.L("Every float payment has a photo (crew wages don't need one).", "كل مدفوعات العهدة لها صورة (أجور العمالة لا تحتاج صورة).")
@@ -10554,6 +11122,7 @@ window.SL = window.SL || {};
       const fw = M.wallet(M.defaultWallet(u.projectId)), sy = fw && fw.kind === "float" ? ui.holderOf(fw) : U.L("Sayed", "سيد");
       meta.push(r.hasPhoto ? U.L("photo ✓", "صورة ✓") : paper === "sayed" ? '<span class="c-warn">' + U.L("paper with Sayed · ", "الأصل مع " + X.nmI(sy) + " · ") + X.nd(U.ageDays(r.date, U.today())) + "</span>" : paper === "ryan" ? U.L("paper with Ryan", "الأصل مع " + X.nmI(M.walletName(M.ownerWalletId()))) : '<span class="c-warn">' + U.L("no photo", "بلا صورة") + "</span>");
     }
+    if (r.deposit) meta.length = 1; // an equipment deposit (or its return) is on no job and needs no photo
     const ro = ui.readOnlyUI();
     if (!u && r.note && !ro) meta.push(U.t(r.note));
     const act = u ? ` data-act="openUnit" data-key="${U.esc(r.unitKey)}" role="button" tabindex="0"` : "";
@@ -11737,6 +12306,7 @@ window.SL = window.SL || {};
     if (X.roGuard(true)) return;
     const c = d && SL.S.costs[d.id];
     if (!c) { ui.toast(X.goneCost()); return; }
+    if (c.deposit && A.eqDepEdit) return A.eqDepEdit({ id: d.id }); // an equipment deposit: its own sheet (45-equip)
     if (c.type === "rental") return A.editRental({ id: d.id });
     return X.open(X.fromCost(Object.assign({ id: d.id }, c)));
   };
@@ -13876,7 +14446,7 @@ window.SL = window.SL || {};
     for (const k of M.CAT_ORDER) cats[k] = { cost: s(bc[k].cost), noPrice: bc[k].noPrice || 0, units: bc[k].units || 0 };
     let x = 0, y = 0;
     for (const u of M.unitsFor(pid)) {
-      if (u.kind === "crew") continue;
+      if (u.kind === "crew" || u.deposit) continue; // crews and equipment deposits need no photo
       if (M.calc(u, D).paid <= 0) continue;
       y++; if (u.doc && Array.isArray(u.doc.files) && u.doc.files.length) x++;
     }
