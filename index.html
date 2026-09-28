@@ -1463,6 +1463,9 @@ html[dir=rtl] .v-bal .bl-pt tbody tr.on th{box-shadow:inset -3px 0 0 var(--ink)}
   .v-bal .bl-pt td:last-child,.v-bal .bl-pt th:last-child{padding-inline-end:8px}
   .v-bal .bl-pt td.num{font-stretch:80%}
 }
+/* "You paid" split: cash to the float holder vs paid directly (indented, lighter) */
+.v-bal .bl-sum .kv .bl-ind{padding-inline-start:14px}
+.v-bal .bl-sum .kv .v.bl-ind-v{font-size:var(--t-14);font-weight:600;color:var(--ink-2)}
 
 /* ---- 44-audit.css ---- */
 /* 44-audit: Crews — the crew-day Gantt and the day editor. Tokens only (plus the job colours below). */
@@ -8632,6 +8635,9 @@ window.SL = window.SL || {};
   X.summary = (rows, pid, D, f, sayed, fw, holds) => {
     let out = 0, back = 0;
     for (const r of rows) if (r.fx.me < 0) out -= r.fx.me; else back += r.fx.me;
+    // what Ryan paid, split: cash handed to the float holder (top-ups) vs paid straight to a party
+    let toS = 0, nTop = 0, dir = 0; const dp = { T: 0, P: 0, E: 0 };
+    for (const r of rows) if (r.fx.me < 0) { if (r.fx.sayed > 0) { toS -= r.fx.me; nTop++; } else { dir -= r.fx.me; for (const k of X.PARTIES) if (r.fx[k] > 0) dp[k] += r.fx[k]; } }
     const t = X.partyTotals(pid, D), unk = X.unpriced, sy = U.esc(sayed), owed = t.all.owed;
     const cell = (h, cls) => `<td class="r num${h && cls ? " " + cls : ""}">${h ? U.mw(h / 100) : '<span class="zero">–</span>'}</td>`;
     const cells = (x) => cell(x.earned) + cell(x.paid) + cell(x.owed, "c-owed") + cell(x.ahead, "c-prepaid");
@@ -8645,9 +8651,14 @@ window.SL = window.SL || {};
       row("T", "trades", U.L("Tradesmen", "الحرفيون")) + row("P", "suppliers", U.L("Suppliers", "الموردون")) + row("E", "equip", U.L("Equipment renters", "مؤجرو المعدات")) +
       `</tbody><tfoot><tr><th scope="row">${U.L("Total", "الإجمالي")}</th>${cells(t.all)}</tr></tfoot></table>`;
     const line = (label, h, cls, sub) => `<span>${label}${sub ? '<small class="muted">' + sub + "</small>" : ""}</span><span class="v num${cls ? " " + cls : ""}">${h ? U.m(h / 100) : '<span class="zero">–</span>'}</span>`;
+    const subl = (label, h, sub) => `<span class="bl-ind">${label}${sub ? '<small class="muted">' + sub + "</small>" : ""}</span><span class="v num bl-ind-v">${h ? U.m(h / 100) : '<span class="zero">–</span>'}</span>`;
+    const dparts = X.PARTIES.filter((k) => dp[k]).map((k) => X.colName(k) + " " + U.mw(dp[k] / 100)).join(" · ");
+    const split = subl(U.L("To " + sy + " (cash)", "نقد إلى " + sy), toS, nTop ? U.L(nTop + " top-up" + (nTop > 1 ? "s" : ""), U.plAr(nTop, "دفعة واحدة", "دفعتان", "دفعات", "دفعة")) : "") +
+      subl(U.L("Paid directly", "دفع مباشر"), dir, dparts);
     const isFloat = fw && M.wallet(fw) && M.wallet(fw).kind === "float", src = isFloat ? M.sources(pid, D) : null;
     return `<div class="card bl-sum">${table}<div class="kv">` +
       line(U.L("You paid", "دفعت"), out, "", back ? U.L(U.mw(back / 100) + " came back (returns, capital)", "وصلك " + U.mw(back / 100) + " (إرجاع نقد، رأس مال)") : U.L("cash to " + sy + " + paid direct", "نقد إلى " + sy + " + دفع مباشر")) +
+      split +
       line(U.L(sy + " has left", "المتبقي مع " + sy), holds, holds < 0 ? "c-stop" : "", src ? U.L("got " + U.mw(src.given / 100) + " · paid out " + U.mw(src.floatSpent / 100), "استلم " + U.mw(src.given / 100) + " · صرف " + U.mw(src.floatSpent / 100)) : U.L("cash he should be holding", "النقد الذي يجب أن يكون معه")) +
       line(U.L("<b>Total owed</b>", "<b>إجمالي المستحقات</b>"), owed, owed ? "c-owed" : "", holds >= owed ? U.L(sy + "'s cash covers it", "نقد " + sy + " يغطيها") : U.L("short by " + U.mw((owed - holds) / 100) + " after " + sy + "'s cash", "ينقص " + U.mw((owed - holds) / 100) + " بعد نقد " + sy)) +
       `</div>${unk ? '<p class="t12 c-warn">? ' + U.L(unk + " rental" + (unk > 1 ? "s" : "") + " with no price yet: no money has moved, so they are not listed. Set their rates in Pay › Set", U.plAr(unk, "إيجار واحد", "إيجاران", "إيجارات", "إيجاراً") + " بلا سعر بعد: لم يتحرك أي مال، لذلك لا تظهر هنا. حدد أسعارها في الدفع › تحديد") + "</p>" : ""}</div>`;
