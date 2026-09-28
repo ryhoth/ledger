@@ -1676,14 +1676,7 @@ html[dir=rtl] .v-eqa .eq-grp{box-shadow:inset -3px 0 0 var(--jc)}
 .sheet .eq-dep-sheet .seg{min-height:44px}
 
 /* ---- 46-invoices.css ---- */
-/* 46-invoices: Invoices audit — tiles, invoice cards, price watch. */
-.v-inva .ia-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
-.v-inva .ia-tile{display:flex;flex-direction:column;align-items:flex-start;gap:0;min-height:64px;padding:8px;border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);text-align:start;color:var(--ink-2);min-width:0}
-.v-inva .ia-tile b{font-size:var(--t-20);font-stretch:80%;color:var(--ink);line-height:1.1}
-.v-inva .ia-tile span{font-size:var(--t-11);font-weight:600;text-transform:uppercase;letter-spacing:.03em;line-height:1.2}
-.v-inva .ia-tile small{font-size:var(--t-12);font-weight:600}
-.v-inva .ia-tile.warn b{color:var(--warn)} .v-inva .ia-tile.owed b{color:var(--owed)} .v-inva .ia-tile.stop b{color:var(--stop)}
-.v-inva .ia-tile.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+/* 46-invoices: Invoices audit — timeline (on the .v-audit grid of 44-audit.css), invoice cards, invoice sheet, price watch. */
 .v-inva .ia-f{margin-top:2px}
 .v-inva .ia-day{margin:8px 0 0}
 .v-inva .ia-card{border:1px solid var(--line);border-radius:var(--r-ctl);background:var(--paper);padding:0 10px 8px}
@@ -1727,7 +1720,7 @@ html[dir=rtl] .v-eqa .eq-grp{box-shadow:inset -3px 0 0 var(--jc)}
 .v-inva .ia-strip i{position:absolute;top:-4px;width:6px;height:6px;margin-inline-start:-3px;border-radius:50%;background:var(--ink-3)}
 .v-inva .ia-strip i.last{width:8px;height:8px;top:-5px;margin-inline-start:-4px;border-radius:1px;transform:rotate(45deg);background:var(--ink)}
 .v-inva .ia-strip b{position:absolute;top:-7px;width:2px;height:12px;margin-inline-start:-1px;background:var(--info)}
-@media (max-width:420px){ .v-inva .ia-tiles{grid-template-columns:repeat(2,minmax(0,1fr))} .v-inva .ia-w{grid-template-columns:minmax(0,1fr) 44px 52px 56px;gap:6px} }
+@media (max-width:420px){ .v-inva .ia-w{grid-template-columns:minmax(0,1fr) 44px 52px 56px;gap:6px} }
 @media (min-width:1100px){ .v-inva .ia-w{grid-template-columns:minmax(0,1fr) 160px 90px 90px} }
 .v-inva .ia-f{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .v-inva .ia-f::-webkit-scrollbar{display:none}
@@ -1745,6 +1738,24 @@ html[dir=rtl] .v-inva .ia-t > .pill{flex:none}
 html[dir=rtl] .v-inva .ia-tt{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Arabic: price watch meta wraps (a Latin supplier would be cut at its start, the right-hand end of an RTL line) */
 html[dir=rtl] .v-inva .ia-wn small{white-space:normal;overflow-wrap:anywhere}
+
+/* timeline: a group header per supplier (or job), a row per invoice, a bar from the invoice date to the day it came */
+.v-inva .ia-grp{grid-column:1/-1;display:flex;align-items:center;min-height:30px;padding:0 8px;background:var(--sunk);border-bottom:1px solid var(--line);box-shadow:inset 3px 0 0 var(--jc)}
+html[dir=rtl] .v-inva .ia-grp{box-shadow:inset -3px 0 0 var(--jc)}
+.v-inva .ia-grp .au-nm{position:sticky;inset-inline-start:8px;font-size:var(--t-12);color:var(--ink-2);overflow:visible}
+.v-inva .ia-lab{justify-content:center;gap:3px;padding-block:5px}
+.v-inva .ia-open{display:flex;flex-direction:column;align-items:flex-start;min-width:0;max-width:100%;text-align:start;color:var(--ink)}
+.v-inva .ia-open .au-nm,.v-inva .ia-open .au-sub{max-width:100%}
+.v-inva .ia-lab .ia-chip.paysw,.v-inva .ia-lab > .ia-chip{align-self:flex-start;min-height:24px;padding:0 7px;font-size:var(--t-11);gap:4px}
+.v-inva .ia-lab .ia-chip.paysw::after{inset:-4px -2px}
+.v-inva .ia-tail{position:absolute;z-index:1;inset-inline:0;top:50%;height:5px;margin-top:-2px;background:repeating-linear-gradient(135deg,var(--owed) 0 1.5px,transparent 1.5px 4px);box-shadow:inset 0 0 0 1px var(--owed)}
+.v-inva .ia-tail.lg{position:static;display:inline-block;width:16px;margin:0}
+.v-inva .au-c .ia-up{background:var(--stop)}
+.v-inva .ia-f .chip small{font-weight:500}
+.v-inva .ia-f .chip.owed small{color:var(--owed)} .v-inva .ia-f .chip.warn small{color:var(--warn)} .v-inva .ia-f .chip.stop small{color:var(--stop)}
+.v-inva .ia-f .chip.on small{color:inherit;opacity:.8}
+.v-inva.ia-sheet{display:flex;flex-direction:column;gap:10px}
+@media (max-width:399px){ .v-inva .ia-lab .ia-chip.paysw{padding:0 5px} }
 
 /* ---- 50-pay.css ---- */
 /* 50-pay.css: Pay view (#pay) and the pay / top-up / why sheets. Every selector is scoped under .v-pay. */
@@ -10033,8 +10044,9 @@ window.SL = window.SL || {};
 })(window.SL);
 
 /* ---- 46-invoices.js ---- */
-/* 46-invoices: Invoices audit (#invaudit[.<filter>]) — every purchase and service: received? paid? proof? price OK?
- *   Tiles and chips filter: Not received · Unpaid · Price up · No proof. Tap an invoice for its lines: price paid vs
+/* 46-invoices: Invoices audit (#invaudit[.jobs|.list][.<filter>][.<sat>]) — every purchase and service: received? paid? proof? price OK?
+ *   A timeline like Crews (a row per invoice, a bar from its date to the day it came) or a list; chips filter: Not received ·
+ *   Unpaid · Price up · No proof. Tap an invoice for its lines: price paid vs
  *   the usual (from our own history, SL.prices) and vs the market (catalog item .market, written by Claude Code when
  *   Ryan asks "check market prices"). "Price watch" ranks items by how far the last price moved. */
 
@@ -10105,11 +10117,17 @@ window.SL = window.SL || {};
   const bd = (h) => (U.isAr() && h ? "<bdi>" + h + "</bdi>" : h);
   const DOC = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M9.5 1.5V5H13M6 8.5h5M6 11h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
 
-  X.tiles = (infos, f) => {
-    const t = (k, label, n, amt, cls) => `<button type="button" class="ia-tile${f === k ? " on" : ""}${n ? " " + cls : ""}" data-go="${U.esc(ui.href("invaudit", k === f ? "" : k))}" aria-pressed="${f === k}"><b class="num">${n}</b><span>${label}</span>${amt != null ? '<small class="num">' + (amt ? U.mw(amt / 100) : "–") + "</small>" : ""}</button>`;
-    const nr = infos.filter((i) => !i.received), un = infos.filter((i) => i.due > 0), up = infos.filter((i) => i.up), np = infos.filter((i) => !i.proof);
-    return '<div class="ia-tiles">' + t("notrec", U.L("not received", "لم يُستلم"), nr.length, U.sum(nr, (i) => i.total), "warn") + t("unpaid", U.L("left to pay", "باقي للدفع"), un.length, U.sum(un, (i) => i.due), "owed") +
-      t("up", U.L("price up", "ارتفاع السعر"), up.length, null, "stop") + t("noproof", U.L("no document", "بلا مستند"), np.length, null, "warn") + "</div>";
+  /** The paid / not paid switch of one invoice (1 tap, Undo toast): a paid one → not paid (voids its payments) ·
+   *  an unpaid one → paid in full, today. short: the compact label for a timeline row. */
+  X.payChip = (i, short) => {
+    const by = !short && i.paidBy.length ? " · " + U.esc(i.paidBy.join(" + ")) : "";
+    const pay = (cls, on, body) => AU().ro() ? `<span class="ia-chip ${cls}">${body}</span>` :
+      `<button type="button" class="ia-chip ${cls} paysw${on ? " on" : ""}" data-act="invPaid" data-id="${U.esc(i.u.id)}" data-to="${on ? "off" : "on"}" role="switch" aria-checked="${on}" aria-label="${U.esc(U.unbidi(i.u.title || ""))}"><i class="ia-sw" aria-hidden="true"></i>${body}</button>`;
+    if (!i.received && i.paid) return pay("ok", true, U.L("Prepaid ", "مدفوع مقدماً ") + U.mw(i.paid / 100) + by) + (i.due && !short ? pay("warn", false, U.L(U.mw(i.due / 100) + " to pay on delivery", U.mw(i.due / 100) + " تُدفع عند التسليم")) : "");
+    if (!i.received && i.due) return pay("warn", false, U.L("Not paid · ", "غير مدفوع · ") + U.mw(i.due / 100));
+    if (i.due > 0 && !i.paid) return pay("owed", false, U.L("Unpaid ", "غير مدفوع ") + U.mw(i.due / 100));
+    if (i.due > 0) return pay("owed", false, U.L("Owed ", "مستحق ") + U.mw(i.due / 100));
+    return i.paid ? pay("ok", true, U.L("Paid ", "مسدد ") + (short ? U.mw(i.paid / 100) : "") + by) : '<span class="ia-chip ok">' + U.L("Paid", "مسدد") + "</span>";
   };
 
   X.chips = (i) => {
@@ -10118,15 +10136,7 @@ window.SL = window.SL || {};
     if (i.received) c.push(`<span class="ia-chip ok">✓ ${i.u.kind === "service" ? U.L("Performed", "تم التنفيذ") : U.L("Received", "تم الاستلام")} ${U.esc(U.dDM(i.recDate))}</span>`);
     else if (!AU().ro()) c.push(`<button type="button" class="ia-chip act" data-act="markDelivered" data-id="${U.esc(i.u.id)}">${i.u.kind === "service" ? U.L("Mark performed", "تأكيد التنفيذ") : U.L("Mark received", "تأكيد الاستلام")}</button>`);
     else c.push('<span class="ia-chip warn">' + U.L("Not received", "لم يُستلم") + "</span>");
-    const by = i.paidBy.length ? " · " + U.esc(i.paidBy.join(" + ")) : "";
-    // payment chips are a 1-tap switch (Undo toast): a paid one → not paid (voids its payments) · an unpaid one → paid in full, today
-    const pay = (cls, on, body) => AU().ro() ? `<span class="ia-chip ${cls}">${body}</span>` :
-      `<button type="button" class="ia-chip ${cls} paysw${on ? " on" : ""}" data-act="invPaid" data-id="${U.esc(i.u.id)}" data-to="${on ? "off" : "on"}" role="switch" aria-checked="${on}"><i class="ia-sw" aria-hidden="true"></i>${body}</button>`;
-    if (!i.received && i.paid) c.push(pay("ok", true, U.L("Prepaid ", "مدفوع مقدماً ") + U.mw(i.paid / 100) + by) + (i.due ? pay("warn", false, U.L(U.mw(i.due / 100) + " to pay on delivery", U.mw(i.due / 100) + " تُدفع عند التسليم")) : ""));
-    else if (!i.received && i.due) c.push(pay("warn", false, U.L("Not paid · ", "غير مدفوع · ") + U.mw(i.due / 100)));
-    else if (i.due > 0 && !i.paid) c.push(pay("owed", false, U.L("Unpaid ", "غير مدفوع ") + U.mw(i.due / 100)));
-    else if (i.due > 0) c.push(pay("owed", false, U.L("Owed ", "مستحق ") + U.mw(i.due / 100)));
-    else c.push(i.paid ? pay("ok", true, U.L("Paid", "مسدد") + by) : '<span class="ia-chip ok">' + U.L("Paid", "مسدد") + "</span>");
+    c.push(X.payChip(i, false));
     c.push(i.proof ? `<a class="ia-chip ok doc" href="${U.esc(U.assetUrl(i.u.doc.files[0]))}" target="_blank" rel="noopener">${DOC} ${U.L("doc", "مستند")}</a>` : '<span class="ia-chip warn">' + U.L("no document", "بلا مستند") + "</span>");
     if (i.up) c.push(`<span class="ia-chip stop">↑ ${U.L(i.up + " price" + (i.up > 1 ? "s" : ""), U.plAr(i.up, "سعر واحد", "سعران", "أسعار", "سعراً"))}</span>`);
     if (i.unrev) c.push('<span class="ia-chip info">' + U.L("Added by Claude · check", "أضافه Claude · راجِع") + "</span>");
@@ -10183,24 +10193,178 @@ window.SL = window.SL || {};
     return h + "</section>";
   };
 
+})(window.SL);
+
+/* ---- chunk 2b: the timeline (like Crews): one row per invoice under its supplier (or job), one column per day ----
+ *   dotted bar = ordered, waiting for delivery · solid = received (colour = job) · thin orange line = received, still owed
+ *   ✓ = the day it was paid · the number = the invoice total · red line = today. Tap a row or a bar: the invoice sheet. */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._inva, AU = () => SL._audit;
+  X.MODES = ["supplier", "jobs", "list"];
+  /** Route → {mode, f (filter), from (a Saturday), days[]}. Args in any order: a mode, a filter, a date. */
+  X.where = (route) => {
+    let mode = "supplier", f = "all", from = "";
+    for (const a of (route && route.args) || []) {
+      if (X.MODES.includes(a)) mode = a;
+      else if (X.FILTERS.some(([k]) => k === a)) f = a;
+      else if (U.isISO(a)) from = U.weekStart(a);
+    }
+    from = from || U.addDays(U.weekStart(U.today()), -7);
+    return { mode, f, from, days: Array.from({ length: AU().DAYS }, (_, k) => U.addDays(from, k)) };
+  };
+  X.href = (w, patch) => {
+    const o = Object.assign({}, w, patch || {}), dflt = U.addDays(U.weekStart(U.today()), -7);
+    return ui.href("invaudit", o.mode !== "supplier" ? o.mode : "", o.f !== "all" ? o.f : "", o.from && o.from !== dflt ? o.from : "");
+  };
+  /** Where an invoice sits on the timeline: from its date to the day it came (or today while it hasn't), then an owed
+   *  tail to today while money is left on it; ✓ on each day a payment was made. */
+  X.span = (i, T) => {
+    const d0 = i.u.date || T, rec = i.received ? i.recDate || d0 : "";
+    const from = rec && rec < d0 ? rec : d0, end = rec || T;
+    const paid = new Set(i.u.payments.filter((p) => !p.void && p.date && p.date <= T).map((p) => p.date));
+    return { from, end, rec, owedTo: rec && i.due > 0 ? T : "", paid };
+  };
+  X.touches = (sp, days) => {
+    const a = days[0], b = days[days.length - 1];
+    if (sp.from <= b && (sp.owedTo || sp.end) >= a) return true;
+    for (const d of sp.paid) if (d >= a && d <= b) return true;
+    return false;
+  };
+  /** Whole riyals, "12.4k" from 10,000 up (a day column is narrow). */
+  X.amt = (h) => (h >= 1000000 ? U.mk(h / 100) : U.mw(h / 100));
+
+  X.tcell = (pid, i, sp, date, T, jc) => {
+    const cls = ["au-c"];
+    if (!M.isWorkDay(pid, date)) cls.push("off-day");
+    if (U.dow(date) === 6) cls.push("wk");
+    const onBar = date >= sp.from && date <= sp.end, paidHere = sp.paid.has(date);
+    let inner = "", label = U.dShort(date) + ": ";
+    if (onBar) {
+      const solid = sp.rec && date === sp.rec;
+      cls.push(solid ? "st-came" : "st-plan", "j" + jc);
+      if (date > sp.from) cls.push("cl");
+      if (date < sp.end) cls.push("cr");
+      if (date === sp.from) inner += '<b class="num">' + X.amt(i.total) + "</b>";
+      if (date === sp.from && i.up) inner += '<em class="au-due ia-up" aria-hidden="true">↑</em>';
+      label += solid ? U.L("received", "تم الاستلام") : U.L("ordered, not received yet", "مطلوب، لم يُستلم بعد");
+    } else if (sp.owedTo && date > sp.end && date <= sp.owedTo) {
+      inner += '<i class="ia-tail" aria-hidden="true"></i>';
+      label += U.L("received, still owed", "مستلم، وما زال مستحقاً");
+    } else label += "–";
+    if (paidHere) { inner += '<i class="au-pd" aria-hidden="true">✓</i>'; label += U.L(" · paid this day", " · دُفع في هذا اليوم"); }
+    return `<button type="button" class="${cls.join(" ")}" data-act="iaOpen" data-id="${U.esc(i.u.id)}" aria-label="${U.esc(label)}">${inner}</button>`;
+  };
+
+  /** Row label: doc no (and the supplier when grouped by job), then total · job · proof, then the paid switch. */
+  X.tlabel = (i, mode) => {
+    const u = i.u, no = (u.doc.doc && u.doc.doc.no) || "";
+    const sup = u.doc.supplier || U.L("Supplier", "المورد");
+    const num = no ? U.ltr("#" + U.esc(no)) : ""; // "#INV-2618048" keeps its # in front in Arabic too
+    const nm = mode === "jobs" ? (U.isAr() ? "<bdi>" + U.t(sup) + "</bdi>" : U.t(sup)) + (num ? " " + num : "") : num || U.esc(U.dDM(u.date || ""));
+    const sub = [mode === "jobs" ? "" : U.esc(M.jobCode(u.jobId) || U.L("no job", "بدون بند")), i.proof ? "" : '<span class="c-warn">' + U.L("no doc", "بلا مستند") + "</span>", i.quote ? '<span class="c-stop">' + U.L("quote", "عرض سعر") + "</span>" : ""].filter(Boolean).join(" · ");
+    return `<div class="au-lab ia-lab"><button type="button" class="ia-open" data-act="iaOpen" data-id="${U.esc(u.id)}"><span class="au-nm">${nm}</span>` +
+      `<span class="au-sub"><b class="num">${U.m(i.total / 100)}</b>${sub ? " · " + sub : ""}</span></button>${X.payChip(i, true)}</div>`;
+  };
+
+  /** The chart: a header per supplier (or job), a row per invoice, then Bought / Paid per day. */
+  X.tchart = (pid, w, infos, T) => {
+    const days = w.days, ti = days.indexOf(T), rows = [];
+    for (const i of infos) { const sp = X.span(i, T); if (X.touches(sp, days)) rows.push({ i, sp }); }
+    const key = (r) => (w.mode === "jobs" ? r.i.u.jobId || "" : r.i.u.doc.supplierId || U.slug(r.i.u.doc.supplier || ""));
+    const groups = new Map();
+    for (const r of U.sortBy(rows, (r) => r.sp.from + ":" + String(r.i.u.doc.createdAt || 0).padStart(15, "0"))) { const k = key(r); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); }
+    // newest activity first; "no job" last
+    const order = [...groups.keys()].sort((a, b) => (a === "") - (b === "") || (U.maxDate(...groups.get(b).map((r) => r.sp.end)) > U.maxDate(...groups.get(a).map((r) => r.sp.end)) ? 1 : -1));
+    let body = "";
+    for (const k of order) {
+      const list = groups.get(k), first = list[0].i.u;
+      const jc = w.mode === "jobs" ? AU().jc(pid, k) : 0;
+      const j = w.mode === "jobs" && M.job(k);
+      const title = w.mode === "jobs" ? (k ? "<b>" + U.esc(M.jobCode(k)) + "</b> " + U.t(j ? U.nm(j) : k) : U.L("No job", "بدون بند")) : U.t(first.doc.supplier || U.L("Supplier", "المورد"));
+      const tot = U.sum(list, (r) => r.i.total), due = U.sum(list, (r) => r.i.due);
+      body += `<div class="au-grp ia-grp j${jc}"><span class="au-nm">${U.isAr() ? "<bdi>" + title + "</bdi>" : title} · <span class="num">${U.mw(tot / 100)}</span>${due ? ' · <span class="c-owed">' + U.L("owed ", "مستحق ") + U.mw(due / 100) + "</span>" : ""}</span></div>`;
+      for (const r of list) body += X.tlabel(r.i, w.mode) + days.map((d) => X.tcell(pid, r.i, r.sp, d, T, AU().jc(pid, r.i.u.jobId))).join("");
+    }
+    if (!rows.length) body = `<div class="au-empty">${U.L("No invoice in these three weeks.", "لا فواتير في هذه الأسابيع الثلاثة.")}</div>`;
+    else {
+      const bought = days.map((d) => U.sum(rows.filter((r) => r.i.u.date === d), (r) => r.i.total));
+      const paid = days.map((d) => U.sum(rows, (r) => U.sum(r.i.u.payments.filter((p) => !p.void && p.date === d && p.date <= T), (p) => p.h)));
+      const frow = (lab, arr) => `<div class="au-lab au-ft"><span class="lbl">${lab}</span></div>` + arr.map((h, k) => `<div class="au-fc${days[k] === T ? " now" : ""}${U.dow(days[k]) === 6 ? " wk" : ""}">${h ? "<b>" + U.mk(h / 100) + "</b>" : '<span class="zero">·</span>'}</div>`).join("");
+      body += frow(U.L("Bought", "المشتريات"), bought) + frow(U.L("Paid", "المدفوع"), paid);
+    }
+    const line = ti >= 0 ? `<i class="au-now" style="--i:${ti}" aria-hidden="true" title="${U.L("Today", "اليوم")}"></i>` : "";
+    const hidden = infos.length - rows.length;
+    return `<div class="au-sc" id="au-scroll" data-ti="${ti}"><div class="au-g" style="--n:${days.length}" role="grid" aria-label="${U.L("Invoices by day", "الفواتير حسب اليوم")}">${AU().head(pid, days, T, w.mode === "jobs" ? U.L("Job · invoice", "البند · الفاتورة") : U.L("Invoice", "الفاتورة"))}${body}${line}</div></div>` +
+      (hidden ? `<p class="t12 muted">${U.L(hidden + " more invoice" + (hidden > 1 ? "s" : "") + " outside these weeks, all received and paid · ", "فواتير أخرى خارج هذه الأسابيع، كلها مستلمة ومدفوعة: " + hidden + " · ")}<button type="button" class="lnk" data-go="${U.esc(X.href(w, { mode: "list" }))}">${U.L("see the list", "عرض القائمة")}</button></p>` : "");
+  };
+
+  X.legend = () => '<div class="au-leg t12">' +
+    `<span><i class="au-sw j1"></i>${U.L("received (colour = job)", "مستلم (اللون = البند)")}</span>` +
+    `<span><i class="au-sw plan"></i>${U.L("ordered, not received yet", "مطلوب، لم يُستلم بعد")}</span>` +
+    `<span><i class="ia-tail lg" aria-hidden="true"></i>${U.L("received, still owed", "مستلم، وما زال مستحقاً")}</span>` +
+    `<span><i class="au-pd lg">✓</i>${U.L("paid that day", "دُفع في ذلك اليوم")}</span>` +
+    `<span><b class="au-k c-stop">↑</b>${U.L("price above usual", "السعر أعلى من المعتاد")}</span>` +
+    `<span><i class="au-sw nowl"></i>${U.L("today", "اليوم")}</span><span class="muted">${U.L("number = invoice total", "الرقم = إجمالي الفاتورة")}</span></div>`;
+
+  /** Filter chips with counts (and what is left to pay / not received). */
+  X.fchips = (infos, w) => '<div class="chips ia-f">' + X.FILTERS.map(([k, l, ar]) => {
+    const list = infos.filter((i) => X.match(k, i)), n = list.length;
+    const amt = k === "unpaid" ? U.sum(list, (i) => i.due) : k === "notrec" ? U.sum(list, (i) => i.total) : 0;
+    const cls = !n || k === "all" ? "" : k === "unpaid" ? " owed" : k === "up" ? " stop" : " warn";
+    return `<button type="button" class="chip${k === w.f ? " on" : ""}${cls}" data-go="${U.esc(X.href(w, { f: k === w.f ? "all" : k }))}" aria-pressed="${k === w.f}">${U.L(l, ar)} <small class="num">${n}${amt ? " · " + U.mw(amt / 100) : ""}</small></button>`;
+  }).join("") + "</div>";
+
   SL.views.invaudit = {
     tab: "audit",
     render(route, pid) {
-      const T = U.today(), f = X.FILTERS.some(([k]) => k === (route.args || [])[0]) ? route.args[0] : "all";
+      const T = U.today(), w = X.where(route);
       const infos = U.sortBy(X.list(pid).map((u) => X.info(u, T)), (i) => (i.u.date || "") + ":" + String(i.u.doc.createdAt || 0).padStart(15, "0"), "desc");
-      const list = infos.filter((i) => X.match(f, i));
-      let h = '<div class="v-audit v-inva">' + AU().switcher("invaudit") + '<div class="hrow au-top"><h2 class="t20">' + U.L("Invoices", "الفواتير") + '</h2><span class="spacer"></span><span class="t12 muted">' + infos.length + " · " + U.mw(U.sum(infos, (i) => i.total) / 100) + U.L(" SAR", " ر.س") + "</span></div>";
-      h += X.tiles(infos, f);
-      h += '<div class="chips ia-f">' + X.FILTERS.map(([k, l, ar]) => `<button type="button" class="chip${k === f ? " on" : ""}" data-go="${U.esc(ui.href("invaudit", k === "all" ? "" : k))}">${U.L(l, ar)}</button>`).join("") + "</div>";
-      if (!list.length) h += `<div class="empty">${infos.length ? U.L("Nothing here · every invoice passes this check.", "لا يوجد شيء هنا · كل الفواتير تجتاز هذا الفحص.") : U.L("No invoices yet.", "لا توجد فواتير بعد.")}</div>`;
-      let lastDay = null;
-      for (const i of list) {
-        if (i.u.date !== lastDay) { lastDay = i.u.date; h += `<div class="ia-day lbl">${U.esc(i.u.date === T ? U.L("Today", "اليوم") : U.dShort(i.u.date))}</div>`; }
-        h += X.card(i);
+      const list = infos.filter((i) => X.match(w.f, i));
+      const seg = ui.seg("", [["supplier", U.L("By supplier", "حسب المورد")], ["jobs", U.L("By job", "حسب البند")], ["list", U.L("List", "قائمة")]], w.mode, { act: "iaMode", label: U.L("Rows", "الصفوف") });
+      let h = '<div class="v-audit v-inva">' + AU().switcher("invaudit") + '<div class="hrow au-top"><h2 class="t20">' + U.L("Invoices", "الفواتير") + '</h2><span class="t12 muted num">' + infos.length + " · " + U.mw(U.sum(infos, (i) => i.total) / 100) + '</span><span class="spacer"></span>' + seg + "</div>";
+      if (w.mode !== "list") {
+        h += `<div class="hrow au-nav"><button type="button" class="td-nav" data-go="${U.esc(X.href(w, { from: U.addDays(w.from, -7) }))}" aria-label="${U.L("A week earlier", "الأسبوع السابق")}">‹</button>` +
+          `<span class="au-range t13">${U.esc(U.dDM(w.days[0]) + " – " + U.dDM(w.days[w.days.length - 1]))}</span><button type="button" class="td-nav" data-go="${U.esc(X.href(w, { from: U.addDays(w.from, 7) }))}" aria-label="${U.L("A week later", "الأسبوع التالي")}">›</button>` +
+          (w.days.includes(T) ? "" : `<button type="button" class="chip" data-go="${U.esc(X.href(w, { from: "" }))}">${U.L("Today", "اليوم")}</button>`) + "</div>";
+      }
+      h += X.fchips(infos, w);
+      if (!infos.length) h += `<div class="empty">${U.L("No invoices yet.", "لا توجد فواتير بعد.")}</div>`;
+      else if (!list.length) h += `<div class="empty">${U.L("Nothing here · every invoice passes this check.", "لا يوجد شيء هنا · كل الفواتير تجتاز هذا الفحص.")}</div>`;
+      else if (w.mode === "list") {
+        let lastDay = null;
+        for (const i of list) {
+          if (i.u.date !== lastDay) { lastDay = i.u.date; h += `<div class="ia-day lbl">${U.esc(i.u.date === T ? U.L("Today", "اليوم") : U.dShort(i.u.date))}</div>`; }
+          h += X.card(i);
+        }
+      } else {
+        h += X.tchart(pid, w, list, T) + X.legend();
+        h += '<p class="t12 muted au-help">' + U.L("Each row is one invoice. The bar starts on the invoice date and turns solid the day it was received; an orange line after it means it is still owed. Tap a row or its bar for the items, prices and the received / paid switches.",
+          "كل صف فاتورة واحدة. يبدأ الشريط بتاريخ الفاتورة ويصبح ممتلئاً يوم الاستلام؛ الخط البرتقالي بعده يعني أنها ما زالت مستحقة. اضغط على الصف أو الشريط لرؤية الأصناف والأسعار ومفتاحي الاستلام والدفع.") + "</p>";
       }
       h += X.watchBlock(pid, T);
       return h + "</div>";
     },
+    after: (el, route, pid) => { if (X.where(route).mode !== "list") SL.views.audit.after(el, route, pid); },
+  };
+  A.iaMode = (d) => { const w = X.where(ui.route); ui.go(X.href(w, { mode: X.MODES.includes(d.val) ? d.val : "supplier" })); };
+
+  /** One invoice: status chips (received, paid switch, document, price flags), its lines vs usual and market. */
+  A.iaOpen = (d) => {
+    const id = d.id;
+    ui.sheet({
+      title: () => { const u = M.unit("c:" + id); if (!u) return U.L("Invoice", "الفاتورة"); const k = u.doc.doc && u.doc.doc.kind; return (k ? ui.kindPill(k) + " " : "") + U.t(u.title); },
+      live: true,
+      wide: true,
+      body: () => {
+        const u = M.unit("c:" + id);
+        if (!u) return '<div class="empty">' + U.L("This invoice is no longer in the ledger.", "هذه الفاتورة لم تعد في الدفتر.") + "</div>";
+        const i = X.info(u, U.today());
+        return `<div class="v-inva ia-sheet"><div class="hrow"><span class="t20 num">${U.m(i.total / 100)}</span><span class="spacer"></span><span class="t12 muted">${U.esc(U.dShort(u.date))} · ${u.jobId ? U.t(M.jobCode(u.jobId)) : '<span class="c-warn">' + U.L("no job", "بدون بند") + "</span>"}</span></div>` +
+          X.chips(i) + X.linesTable(i) + `<button type="button" class="lnk" data-act="openUnit" data-key="${U.esc(u.key)}">${U.L("Open invoice (edit, pay, photo) ›", "فتح الفاتورة (تعديل، دفع، صورة) ›")}</button></div>`;
+      },
+    });
   };
 })(window.SL);
 
