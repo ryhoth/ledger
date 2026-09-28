@@ -8629,14 +8629,21 @@ window.SL = window.SL || {};
     row.deposit = !!u.deposit; row.refund = p.h < 0;
   };
   X.sum = (rows) => { const t = X.blank(); for (const r of rows) for (const k in t) t[k] += r.fx[k]; return t; };
+  /** What Ryan paid (h): out = all cash out of his pocket, back = cash that came back (returns, capital), split into
+   *  toS = cash handed to the float holder (nTop top-ups) and dir = paid straight to a party (dp per party). */
+  X.paidSplit = (rows) => {
+    let out = 0, back = 0, toS = 0, nTop = 0, dir = 0; const dp = { T: 0, P: 0, E: 0 };
+    for (const r of rows) {
+      if (r.fx.me >= 0) { back += r.fx.me; continue; }
+      out -= r.fx.me;
+      if (r.fx.sayed > 0) { toS -= r.fx.me; nTop++; } else { dir -= r.fx.me; for (const k of X.PARTIES) if (r.fx[k] > 0) dp[k] += r.fx[k]; }
+    }
+    return { out, back, toS, nTop, dir, dp };
+  };
   /** The card at the top: per party what they earned, were paid, are owed and got ahead (tap a row = only its events),
    *  then what Ryan paid, the cash Sayed should still hold and what is owed in total. */
   X.summary = (rows, pid, D, f, sayed, fw, holds) => {
-    let out = 0, back = 0;
-    for (const r of rows) if (r.fx.me < 0) out -= r.fx.me; else back += r.fx.me;
-    // what Ryan paid, split: cash handed to the float holder (top-ups) vs paid straight to a party
-    let toS = 0, nTop = 0, dir = 0; const dp = { T: 0, P: 0, E: 0 };
-    for (const r of rows) if (r.fx.me < 0) { if (r.fx.sayed > 0) { toS -= r.fx.me; nTop++; } else { dir -= r.fx.me; for (const k of X.PARTIES) if (r.fx[k] > 0) dp[k] += r.fx[k]; } }
+    const { out, back, toS, nTop, dir, dp } = X.paidSplit(rows);
     const t = X.partyTotals(pid, D), unk = X.unpriced, sy = U.esc(sayed), owed = t.all.owed;
     const cell = (h, cls) => `<td class="r num${h && cls ? " " + cls : ""}">${h ? U.mw(h / 100) : '<span class="zero">–</span>'}</td>`;
     const cells = (x) => cell(x.earned) + cell(x.paid) + cell(x.owed, "c-owed") + cell(x.ahead, "c-prepaid");
@@ -8717,7 +8724,7 @@ window.SL = window.SL || {};
       const SHORT = { P: U.L("Suppl.", "موردون"), E: U.L("Equip", "معدات") }, lab = (k, l) => U.esc(k === "sayed" ? sayed : X.colName(k, l));
       const labH = (k, l) => (SHORT[k] ? `<span class="bl-lg">${lab(k, l)}</span><span class="bl-sm" aria-hidden="true">${SHORT[k]}</span>` : lab(k, l));
       const head = cols.map(([k, l]) => `<th class="r${k === "me" ? " bl-me" : ""}" scope="col">${labH(k, l)}</th>`).join("");
-      let h = '<div class="v-bal"><div class="hrow bl-top"><h2 class="t20">' + U.L("Balances", "الأرصدة") + '</h2><span class="spacer"></span>' + ui.asOfChip() + "</div>";
+      let h = '<div class="v-bal"><div class="hrow bl-top"><h2 class="t20">' + U.L("Balances", "الأرصدة") + '</h2><span class="spacer"></span>' + (SL._pdf && SL._pdf.btn ? SL._pdf.btn() : "") + ui.asOfChip() + "</div>";
       if (!all.length) return h + '<div class="empty">' + U.L("Nothing logged yet.", "لم يُسجَّل شيء بعد.") + "</div></div>";
       h += X.summary(all, pid, D, f, sayed, fw, holds);
       h += '<div class="chips bl-chips" role="group" aria-label="' + U.L("Show", "عرض") + '">' + X.FILTERS.map(([k, l, fn, ar]) => { const n = all.filter(fn).length; return `<button type="button" class="chip${k === f ? " on" : ""}" data-act="balFilter" data-val="${k}" aria-pressed="${k === f}">${U.esc(k === "sayed" ? sayed : U.L(l, ar))} <small class="muted">${n}</small></button>`; }).join("") + "</div>";
@@ -14899,7 +14906,7 @@ window.SL = window.SL || {};
     let h = `<div class="v-report${opts.frozen ? " frozen" : ""}">`;
     if (opts.frozen) h += `<div class="notice v-report-frozen">${U.L("Frozen ", "مجمَّد ")}${U.esc(U.dShort(U.ymd(new Date(opts.frozen.frozenAt || 0))))} · ${U.L("live figures may differ", "قد تختلف الأرقام الحالية")} · <a class="lnk" href="#${U.esc(pid)}~report">${U.L("Live report", "التقرير الحالي")}</a></div>`;
     h += `<div class="v-report-h"><h1 class="t20">${U.t(U.isAr() && d.projectAr ? d.projectAr : d.project)} · ${U.L("Investor report", "تقرير المستثمرين")}</h1>
-      <div class="hrow t13">${!ro && d.live ? ui.asOfChip() : U.L("As of ", "حتى تاريخ ") + U.esc(U.dShort(d.asOf)) + " " + U.esc(String(d.asOf).slice(0, 4))}${ro ? ' <span class="muted">' + U.L("· view only", "· عرض فقط") + "</span>" : ""}</div></div>`;
+      <div class="hrow t13">${!ro && d.live ? ui.asOfChip() : U.L("As of ", "حتى تاريخ ") + U.esc(U.dShort(d.asOf)) + " " + U.esc(String(d.asOf).slice(0, 4))}${ro ? ' <span class="muted">' + U.L("· view only", "· عرض فقط") + "</span>" : ""}<span class="spacer"></span>${d.live && SL._pdf && SL._pdf.btn ? SL._pdf.btn("btn sm sec") : ""}</div></div>`;
     h += `<div class="sec v-report-one">${ui.sech(U.L("In one line", "باختصار"))}<p class="t16">${X.oneLine(d)}</p></div>`;
     h += '<div class="v-report-grid">';
     h += X.moneyIn(d, ro) + X.moneyOut(d);
@@ -15578,6 +15585,780 @@ window.SL = window.SL || {};
   A.adminLang = (ds) => ui.setLang(ds.val === "ar" ? "ar" : "en");
   X.sec.language = () => `<div class="sec">${ui.sech(U.isAr() ? 'اللغة · <span lang="en">Language</span>' : 'Language · <span lang="ar">اللغة</span>')}${ui.seg("lang",
     [["en", '<span lang="en">English</span>'], ["ar", '<span lang="ar">العربية</span>']], SL.lang === "ar" ? "ar" : "en", { act: "adminLang", full: true, label: U.L("Language", "اللغة") })}<p class="t12 muted">${U.L("Saved on this device only. Arabic lays the page out right to left. Names people typed stay as typed.", "يُحفظ على هذا الجهاز فقط. العربية تعرض الصفحة من اليمين إلى اليسار. الأسماء المكتوبة تبقى كما كُتبت.")}</p></div>`;
+})(window.SL);
+
+/* ---- 72-pdf.js ---- */
+/* ---- 72-pdf.js ---- */
+/* 72-pdf: the investor PDF kit. Each A4 page is drawn on a canvas (the browser shapes Arabic and runs it right to left),
+ * then the pages are wrapped in a small PDF written here by hand: one full-page image per page, no library.
+ * 73-pdf-pages.js draws the pages (1 Balances, 2 Invoices, 3 Crews, 4 Equipment rental) and owns the action. */
+
+/* ---- chunk 1: the PDF file (one image per A4 page) ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util;
+  const X = (SL._pdf = SL._pdf || {});
+  X.PW = 595.28; X.PH = 841.89; // A4 in points
+  X.S = 3; // canvas pixels per point (≈ 216 dpi)
+
+  /** Can this browser draw the pages? (No canvas in the headless tests.) */
+  X.canDraw = () => {
+    try { return typeof CanvasRenderingContext2D !== "undefined" && typeof TextEncoder !== "undefined" && !!document.createElement("canvas").getContext("2d"); } catch (e) { return false; }
+  };
+
+  /** A drawn page → {w, h, bytes, filter}: lossless (Flate) where the browser can compress, else a sharp JPEG. */
+  X.encode = async (canvas) => {
+    const w = canvas.width, h = canvas.height;
+    if (typeof CompressionStream === "function") {
+      try {
+        const px = canvas.getContext("2d").getImageData(0, 0, w, h).data, rgb = new Uint8Array(w * h * 3);
+        for (let i = 0, j = 0; i < px.length; i += 4) { rgb[j++] = px[i]; rgb[j++] = px[i + 1]; rgb[j++] = px[i + 2]; }
+        const z = new Blob([rgb]).stream().pipeThrough(new CompressionStream("deflate")); // zlib = PDF FlateDecode
+        return { w, h, bytes: new Uint8Array(await new Response(z).arrayBuffer()), filter: "FlateDecode" };
+      } catch (e) { /* fall back to JPEG */ }
+    }
+    const blob = await new Promise((res) => canvas.toBlob(res, "image/jpeg", 0.93));
+    if (!blob) throw new Error("page image failed");
+    return { w, h, bytes: new Uint8Array(await blob.arrayBuffer()), filter: "DCTDecode" };
+  };
+
+  /** A PDF string of text: plain ASCII in (…), anything else UTF-16BE hex (Arabic titles). */
+  const pdfStr = (s) => {
+    s = String(s == null ? "" : s);
+    if (/^[\x20-\x7e]*$/.test(s)) return "(" + s.replace(/[\\()]/g, "\\$&") + ")";
+    let hex = "FEFF";
+    for (let i = 0; i < s.length; i++) hex += s.charCodeAt(i).toString(16).padStart(4, "0").toUpperCase();
+    return "<" + hex + ">";
+  };
+  const p2 = (n) => String(n).padStart(2, "0");
+  /** "D:20260928134502+03'00'" (local time with its offset, so every reader shows the same time). */
+  const pdfDate = (d) => { const o = -d.getTimezoneOffset(), a = Math.abs(o); return "D:" + d.getFullYear() + [d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()].map(p2).join("") + (o >= 0 ? "+" : "-") + p2((a / 60) | 0) + "'" + p2(a % 60) + "'"; };
+
+  /** pages: [{w, h, bytes, filter}] → the PDF as a Blob. info: {title, author, subject}. */
+  X.pdf = (pages, info) => {
+    info = info || {};
+    const enc = new TextEncoder(), parts = [], off = [];
+    let len = 0;
+    const put = (x) => { const b = typeof x === "string" ? enc.encode(x) : x; parts.push(b); len += b.length; };
+    const obj = (n, head, stream) => {
+      off[n] = len;
+      put(n + " 0 obj\n" + head);
+      if (stream) { put("\nstream\n"); put(stream); put("\nendstream"); }
+      put("\nendobj\n");
+    };
+    put("%PDF-1.4\n"); put(new Uint8Array([0x25, 0xe2, 0xe3, 0xcf, 0xd3, 0x0a])); // binary marker line
+    const n = pages.length, kids = pages.map((_, i) => 4 + 3 * i + " 0 R").join(" ");
+    obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    obj(2, "<< /Type /Pages /Kids [" + kids + "] /Count " + n + " >>");
+    obj(3, "<< /Title " + pdfStr(info.title) + " /Author " + pdfStr(info.author) + " /Subject " + pdfStr(info.subject) + " /Producer (Site Ledger) /CreationDate (" + pdfDate(new Date()) + ") >>");
+    const W = X.PW.toFixed(2), H = X.PH.toFixed(2);
+    pages.forEach((p, i) => {
+      const pg = 4 + 3 * i, ct = pg + 1, im = pg + 2;
+      obj(pg, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + H + "] /Resources << /XObject << /Im" + i + " " + im + " 0 R >> >> /Contents " + ct + " 0 R >>");
+      const draw = enc.encode("q " + W + " 0 0 " + H + " 0 0 cm /Im" + i + " Do Q");
+      obj(ct, "<< /Length " + draw.length + " >>", draw);
+      obj(im, "<< /Type /XObject /Subtype /Image /Width " + p.w + " /Height " + p.h + " /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /" + p.filter + " /Length " + p.bytes.length + " >>", p.bytes);
+    });
+    const size = 4 + 3 * n, xref = len;
+    let x = "xref\n0 " + size + "\n0000000000 65535 f \n";
+    for (let k = 1; k < size; k++) x += String(off[k]).padStart(10, "0") + " 00000 n \n";
+    put(x + "trailer\n<< /Size " + size + " /Root 1 0 R /Info 3 0 R >>\nstartxref\n" + xref + "\n%%EOF\n");
+    return new Blob(parts, { type: "application/pdf" });
+  };
+  X.pdfStr = pdfStr; // for the tests
+})(window.SL);
+
+/* ---- chunk 2: drawing kit. Logical x runs from the reading start: the left edge in English, the right edge in Arabic ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util;
+  const X = SL._pdf;
+  X.MX = 36; X.MT = 30; X.MB = 46; // margins (pt)
+  X.CW = X.PW - 2 * X.MX; // content width
+  // print colours: the app's light theme
+  X.C = { ink: "#1B2429", ink2: "#56626A", ink3: "#7C868C", line: "#D5D7D1", line2: "#B9BCB5", sunk: "#EEEFEB", group: "#F5F5F1",
+    owed: "#A8421A", owedBg: "#F8E9E2", prepaid: "#2C7A57", prepaidBg: "#E2F2E8", float: "#F2C200", floatBg: "#FFF4C2", floatInk: "#6B5500",
+    warn: "#8F5A00", stop: "#C4232B", info: "#36648F", infoBg: "#E4EDF5" };
+  X.JC = ["#7C868C", "#3E6FA8", "#A86A1F", "#3F8452", "#7E57A0", "#2B8585", "#8A7A3A"]; // job colours, as on the Crews screen
+  X.FONT = '"Archivo","IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif';
+  X.FONT_AR = '"IBM Plex Sans Arabic","Archivo",system-ui,-apple-system,sans-serif';
+  /** Canvas font: numbers and English in Archivo; Arabic text in IBM Plex Sans Arabic. */
+  X.font = (size, weight, num) => (weight || 400) + " " + size + "px " + (num || !U.isAr() ? X.FONT : X.FONT_AR);
+  /** Wait (at most 2.5 s) for the app's web fonts, so the canvas doesn't draw in a fallback font. */
+  X.fonts = async () => {
+    if (!document.fonts || !document.fonts.load) return;
+    const want = ["400 10px Archivo", "600 10px Archivo", "700 10px Archivo", '400 10px "IBM Plex Sans Arabic"', '600 10px "IBM Plex Sans Arabic"', '700 10px "IBM Plex Sans Arabic"'];
+    await Promise.race([Promise.all(want.map((f) => document.fonts.load(f, /Arabic/.test(f) ? "عربي" : "Aa1").catch(() => null))), new Promise((r) => setTimeout(r, 2500))]);
+  };
+
+  /** A new blank A4 page on doc, drawn in points. */
+  X.page = (doc) => {
+    const c = document.createElement("canvas");
+    c.width = Math.round(X.PW * X.S); c.height = Math.round(X.PH * X.S);
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, c.width, c.height); // every pixel, before scaling (no grey edge in a JPEG)
+    ctx.setTransform(X.S, 0, 0, X.S, 0, 0);
+    ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+    const pg = { c, ctx, rtl: U.isAr(), y: X.MT, doc };
+    doc.pages.push(pg);
+    return pg;
+  };
+  /** Physical left edge of a box that starts at logical x and is w wide. */
+  X.px = (pg, x, w) => (pg.rtl ? X.PW - x - (w || 0) : x);
+  /** s cut with "…" to fit maxW in the current font. */
+  X.fit = (ctx, s, maxW) => {
+    if (ctx.measureText(s).width <= maxW) return s;
+    let lo = 0, hi = s.length;
+    while (lo < hi) { const mid = (lo + hi + 1) >> 1; if (ctx.measureText(s.slice(0, mid).trimEnd() + "…").width <= maxW) lo = mid; else hi = mid - 1; }
+    return s.slice(0, lo).trimEnd() + "…";
+  };
+  /** Text at logical x, baseline y. o: {size, weight, color, align "start"|"end"|"center", num (a figure: left to right,
+   *  Archivo), maxW}. "start" begins the text at x, "end" ends it at x, on the reading side. Returns the drawn width. */
+  X.text = (pg, s, x, y, o) => {
+    o = o || {};
+    const ctx = pg.ctx;
+    s = String(s == null ? "" : s);
+    if (!s) return 0;
+    ctx.font = X.font(o.size || 9, o.weight, o.num);
+    ctx.fillStyle = o.color || X.C.ink;
+    // a figure, or Latin-led data on an Arabic page ("Noura Al-Subaie…"), runs left to right: a cut keeps its start
+    ctx.direction = o.num || !pg.rtl || X.latinFirst(s) ? "ltr" : "rtl";
+    ctx.textAlign = "left";
+    if (o.maxW) s = X.fit(ctx, s, o.maxW);
+    const w = ctx.measureText(s).width, a = o.align || "start", p = pg.rtl ? X.PW - x : x;
+    ctx.fillText(s, a === "center" ? p - w / 2 : (a === "start") !== pg.rtl ? p : p - w, y);
+    return w;
+  };
+  /** The first strong letter is Latin (not Arabic / Hebrew). */
+  X.latinFirst = (s) => /^[^A-Za-z\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]*[A-Za-z]/.test(s);
+  X.width = (pg, s, o) => { o = o || {}; pg.ctx.font = X.font(o.size || 9, o.weight, o.num); return pg.ctx.measureText(String(s == null ? "" : s)).width; };
+  /** A wrapped paragraph from logical x, w wide; returns the next baseline. */
+  X.para = (pg, s, x, y, w, o) => {
+    o = o || {};
+    const lh = o.lh || (o.size || 9) * 1.5, words = String(s || "").split(/\s+/).filter(Boolean);
+    let line = "";
+    for (const wd of words) {
+      const t = line ? line + " " + wd : wd;
+      if (line && X.width(pg, t, o) > w) { X.text(pg, line, x, y, o); y += lh; line = wd; } else line = t;
+    }
+    if (line) { X.text(pg, line, x, y, o); y += lh; }
+    return y;
+  };
+  X.rect = (pg, x, y, w, h, fill, stroke, lw) => {
+    const ctx = pg.ctx, l = X.px(pg, x, w);
+    if (fill) { ctx.fillStyle = fill; ctx.fillRect(l, y, w, h); }
+    if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw || 0.6; ctx.strokeRect(l, y, w, h); }
+  };
+  /** A rounded box (tiles, day cells); dash = dotted outline (planned). */
+  X.rrect = (pg, x, y, w, h, r, fill, stroke, dash) => {
+    const ctx = pg.ctx, l = X.px(pg, x, w);
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(l, y, w, h, r); else ctx.rect(l, y, w, h);
+    if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+    if (stroke) { ctx.setLineDash(dash ? [1.4, 1.1] : []); ctx.strokeStyle = stroke; ctx.lineWidth = 0.8; ctx.stroke(); ctx.setLineDash([]); }
+  };
+  X.hline = (pg, x, y, w, color, lw) => X.rect(pg, x, y - (lw || 0.6) / 2, w, lw || 0.6, color || X.C.line);
+  X.vline = (pg, x, y, h, color, lw) => X.rect(pg, x - (lw || 0.6) / 2, y, lw || 0.6, h, color || X.C.line);
+
+  /* ---- plain figures for the canvas (the app's U.m / U.mw return HTML or bidi marks) ---- */
+  const grp = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  /** Halalas → whole riyals "12,865" ("−12,865"); 0 → "–". */
+  X.mw = (h) => { const r = Math.floor((Math.abs(h) + 50) / 100); return r ? (h < 0 ? "−" : "") + grp(r) : "–"; };
+  /** Halalas → "12,864.94"; 0 → "–". */
+  X.m2 = (h) => (h ? (h < 0 ? "−" : "") + grp(Math.floor(Math.abs(h) / 100)) + "." + String(Math.abs(h) % 100).padStart(2, "0") : "–");
+  /** Halalas → "3.3k" for narrow day columns (whole riyals under 1,000). */
+  X.mk = (h) => (Math.abs(h) >= 100000 ? (Math.round(h / 10000) / 10).toFixed(1) + "k" : X.mw(h));
+})(window.SL);
+
+/* ---- chunk 3: page frame (band, title, footer), stat tiles, key-value lines, tables that carry on to a new page ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util;
+  const X = SL._pdf;
+  const C = X.C;
+
+  /** The band at the top of every page: "SITE LEDGER · INVESTOR REPORT" and the project · as-of on the far side. */
+  X.band = (pg) => {
+    const d = pg.doc;
+    X.rect(pg, 0, 0, X.PW, 5, C.float);
+    X.text(pg, U.L("SITE LEDGER · INVESTOR REPORT", "دفتر الموقع · تقرير المستثمرين"), X.MX, 22, { size: 7, weight: 700, color: C.ink3 });
+    X.text(pg, d.project + " · " + U.L("as of ", "حتى تاريخ ") + d.asOfTxt, X.PW - X.MX, 22, { size: 7, weight: 600, color: C.ink3, align: "end" });
+    X.hline(pg, X.MX, 29, X.CW, C.line);
+    pg.y = 30;
+  };
+  /** A section's first page: band, big numbered title, a muted line under it. */
+  X.section = (doc, n, title, sub) => {
+    const pg = X.page(doc);
+    X.band(pg);
+    pg.title = title;
+    X.text(pg, String(n), X.MX, 62, { size: 22, weight: 700, color: C.float, num: true });
+    X.text(pg, title, X.MX + 22, 62, { size: 20, weight: 700 });
+    let y = 62 + 16;
+    if (sub) y = X.para(pg, sub, X.MX, y, X.CW, { size: 8.5, color: C.ink2, lh: 12 });
+    pg.y = y + 6;
+    return pg;
+  };
+  /** The next page of a section that ran long. */
+  X.more = (doc, title) => {
+    const pg = X.page(doc);
+    X.band(pg);
+    pg.title = title;
+    X.text(pg, title + U.L(" (continued)", " (تابع)"), X.MX, 50, { size: 11, weight: 700, color: C.ink2 });
+    pg.y = 60;
+    return pg;
+  };
+  /** Footer on every page (once the page count is known). */
+  X.footer = (pg, i, n) => {
+    const y = X.PH - 22, d = pg.doc;
+    X.hline(pg, X.MX, y - 11, X.CW, C.line);
+    X.text(pg, U.L("All amounts SAR incl. VAT · as of ", "كل المبالغ بالريال شاملة الضريبة · حتى تاريخ ") + d.asOfTxt + U.L(" · made ", " · أُعد في ") + d.madeTxt, X.MX, y, { size: 6.5, color: C.ink3 });
+    X.text(pg, U.L("Page " + i + " of " + n, "صفحة " + i + " من " + n), X.PW - X.MX, y, { size: 6.5, weight: 600, color: C.ink3, align: "end" });
+  };
+  /** Room left on the page (pt) above the footer. */
+  X.room = (pg) => X.PH - X.MB - pg.y;
+  /** Make sure h points fit, else start a continued page. Returns the page to draw on. */
+  X.need = (pg, h) => (X.room(pg) >= h ? pg : X.more(pg.doc, pg.title));
+
+  /** A small heading inside a page, with a rule under it. */
+  X.h2 = (pg, s, note, need) => {
+    pg = X.need(pg, need || 84); // the heading plus a table header and two rows: never alone at the foot of a page
+    const y = pg.y + 14;
+    X.text(pg, s, X.MX, y, { size: 11, weight: 700 });
+    if (note) X.text(pg, note, X.PW - X.MX, y, { size: 7.5, color: C.ink3, align: "end" });
+    X.hline(pg, X.MX, y + 5, X.CW, C.ink, 0.9);
+    pg.y = y + 9;
+    return pg;
+  };
+
+  /** A row of stat tiles: [{label, v (halalas) | txt, color, vcolor, sub, num:false (words, not a figure)}]. */
+  X.tiles = (pg, items) => {
+    pg = X.need(pg, 60);
+    const gap = 8, n = items.length, w = (X.CW - gap * (n - 1)) / n, y = pg.y + 6, h = 50;
+    items.forEach((it, i) => {
+      const x = X.MX + i * (w + gap);
+      X.rrect(pg, x, y, w, h, 3, it.bg || C.sunk);
+      X.rect(pg, x, y, 3, h, it.color || C.ink3);
+      X.text(pg, it.label, x + 10, y + 15, { size: 7.2, weight: 600, color: C.ink2, maxW: w - 16 });
+      X.text(pg, it.txt != null ? it.txt : X.mw(it.v), x + 10, y + 33, { size: 15, weight: 700, color: it.vcolor || C.ink, num: it.num !== false, maxW: w - 16 });
+      if (it.sub) X.text(pg, it.sub, x + 10, y + 44, { size: 6.5, color: C.ink3, maxW: w - 16 });
+    });
+    pg.y = y + h + 6;
+    return pg;
+  };
+
+  /** A label · figure line (cash block). o: {sub, indent, bold, color, big}. v in halalas (exact, 2 decimals). */
+  X.kv = (pg, label, v, o) => {
+    o = o || {};
+    const sub = o.sub ? 10 : 0, h = 16 + sub;
+    pg = X.need(pg, h);
+    const x = X.MX + (o.indent ? 14 : 0), y = pg.y + 12;
+    if (o.indent) X.text(pg, U.isAr() ? "↲" : "↳", X.MX + 3, y, { size: 8, color: C.ink3, num: true });
+    X.text(pg, label, x, y, { size: o.indent ? 8.8 : 9.8, weight: o.bold ? 700 : o.indent ? 500 : 600, color: o.indent ? C.ink2 : C.ink, maxW: X.CW * 0.62 });
+    if (o.sub) X.text(pg, o.sub, x, y + 10, { size: 7, color: o.subColor || C.ink3, maxW: X.CW * 0.7 });
+    X.text(pg, o.txt != null ? o.txt : X.m2(v), X.PW - X.MX, y, { size: o.indent ? 9.2 : 10.5, weight: o.indent ? 600 : 700, color: o.color || (o.indent ? C.ink2 : C.ink), num: true, align: "end" });
+    X.hline(pg, x, pg.y + h, X.CW - (x - X.MX), C.line, 0.4);
+    pg.y += h;
+    return pg;
+  };
+
+  /** A table. cols: [{label, w (pt; one col may be "*": the rest), num, align}]. rows: [{cells:[text], kind "row"|"group"|"total",
+   *  colors:[…], weights:[…], nums:[…] (per cell: a figure or words), note (a muted second line under cell 0)}]. Breaks onto continued pages, repeating the header.
+   *  o: {rh (row height), size}. Returns the page it ended on. */
+  X.table = (pg, cols, rows, o) => {
+    o = o || {};
+    const fixed = U.sum(cols.filter((c) => c.w !== "*"), (c) => c.w), star = Math.max(40, X.CW - fixed);
+    const ws = cols.map((c) => (c.w === "*" ? star : c.w)), xs = [];
+    ws.reduce((x, w, i) => { xs[i] = x; return x + w; }, X.MX);
+    const size = o.size || 7.8, pad = 4, rh0 = o.rh || 15;
+    const head = (p) => {
+      const y = p.y;
+      X.rect(p, X.MX, y, X.CW, 15, C.sunk);
+      cols.forEach((c, i) => X.text(p, c.label, c.num ? xs[i] + ws[i] - pad : xs[i] + pad, y + 10.2, { size: 6.6, weight: 700, color: C.ink2, align: c.num ? "end" : "start", maxW: ws[i] - 2 * pad }));
+      p.y = y + 15;
+    };
+    if (X.room(pg) < 15 + rh0 * 2) pg = X.more(pg.doc, pg.title);
+    head(pg);
+    for (const r of rows) {
+      const rh = r.note ? rh0 + 8 : r.kind === "total" ? rh0 + 3 : rh0;
+      if (X.room(pg) < rh) { pg = X.more(pg.doc, pg.title); head(pg); }
+      const y = pg.y;
+      if (r.kind === "group") X.rect(pg, X.MX, y, X.CW, rh, C.group);
+      if (r.kind === "total") { X.rect(pg, X.MX, y, X.CW, rh, C.floatBg); X.hline(pg, X.MX, y, X.CW, C.ink, 0.9); }
+      if (r.fill) X.rect(pg, X.MX, y, X.CW, rh, r.fill);
+      const by = y + (r.kind === "total" ? 11.5 : 10.4);
+      cols.forEach((c, i) => {
+        const v = r.cells[i];
+        if (v == null || v === "") return;
+        const bold = r.kind === "total" || r.kind === "group" ? 700 : (r.weights && r.weights[i]) || (i === 0 ? 600 : 400);
+        const span = r.kind === "group" && i === 0 && r.span ? U.sum(ws.slice(0, r.span)) : ws[i];
+        const num = r.nums && r.nums[i] !== undefined ? r.nums[i] : !!c.num; // a row can mark a cell as words (e.g. "36/يوم")
+        X.text(pg, v, c.num ? xs[i] + ws[i] - pad : xs[i] + pad, by, { size: r.kind === "total" ? size + 0.6 : size, weight: bold, color: (r.colors && r.colors[i]) || C.ink, num, align: c.num ? "end" : "start", maxW: span - 2 * pad });
+      });
+      if (r.note) X.text(pg, r.note, xs[0] + pad, y + 18.5, { size: 6.6, color: r.noteColor || C.ink3, maxW: X.CW - 2 * pad });
+      if (r.kind !== "total") X.hline(pg, X.MX, y + rh, X.CW, C.line, 0.4);
+      pg.y = y + rh;
+    }
+    pg.y += 4;
+    return pg;
+  };
+  /** A muted note (wrapped) under a block. */
+  X.note = (pg, s, color) => {
+    pg = X.need(pg, 20);
+    pg.y = X.para(pg, s, X.MX, pg.y + 10, X.CW, { size: 7.3, color: color || C.ink3, lh: 10.5 }) - 4;
+    return pg;
+  };
+})(window.SL);
+
+/* ---- 73-pdf-pages.js ---- */
+/* ---- 73-pdf-pages.js ---- */
+/* 73-pdf-pages: the investor PDF's pages, from the same model as the screens (figures as of the as-of date):
+ *   1 Balances (work done, paid, owed; by party; cash: to Sayed vs direct; by job) · 2 Invoices (by supplier)
+ *   3 Crews (per crew, and a day chart like the Crews screen) · 4 Equipment rental (lines, days on site, deposits).
+ * A long table carries on to the next page. Action: investorPdf. SL.pdf.build(pid, D) → {blob, pages} (Claude Code). */
+
+/* ---- chunk 1: shared names and page 1, Balances ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = SL._pdf, C = X.C;
+
+  /** "Mon 28 Sep 2026" in the viewer's language (plain text). */
+  X.dLong = (s) => (s ? U.dShort(s) + " " + String(s).slice(0, 4) : "");
+  /** The float holder and the owner, by name, in the viewer's language. */
+  X.sayed = (pid) => { const w = M.wallet(M.defaultWallet(pid)); return U.L((w && w.holder) || "Sayed", (w && ui.holderOf(w)) || "سيد"); };
+  X.owner = () => M.walletName(M.ownerWalletId()) || U.L("Ryan", "ريان");
+  /** Money colours: owed orange, paid ahead green, zero muted. */
+  X.cOwed = (h) => (h ? C.owed : C.ink3);
+  X.cAhead = (h) => (h ? C.prepaid : C.ink3);
+  X.plural = (n, en1, enN, a1, a2, a3, a11) => U.L(n + " " + (n === 1 ? en1 : enN), U.plAr(n, a1, a2, a3, a11));
+
+  X.pBalances = (doc) => {
+    const { pid, D } = doc, B = SL._bal, rows = B.rows(pid, D), t = B.partyTotals(pid, D), a = t.all, sp = B.paidSplit(rows);
+    const sy = X.sayed(pid), me = X.owner(), fw = M.defaultWallet(pid), w0 = M.wallet(fw), isF = !!(w0 && w0.kind === "float");
+    const holds = isF ? M.walletCalc(fw, D).holds : 0, src = M.sources(pid, D);
+    let pg = X.page(doc);
+    X.band(pg);
+    pg.title = U.L("Balances", "الأرصدة");
+    X.text(pg, doc.project, X.MX, 60, { size: 22, weight: 700, maxW: X.CW });
+    X.text(pg, U.L("Investor report · as of ", "تقرير المستثمرين · حتى تاريخ ") + doc.asOfTxt, X.MX, 77, { size: 10, color: C.ink2 });
+    // the whole picture in two sentences
+    const w = X.mw;
+    const hold = holds >= 0 ? U.L(" " + sy + " still holds " + w(holds) + " of it.", " وما زال مع " + sy + " " + w(holds) + " منها.")
+      : U.L(" " + sy + " is short by " + w(-holds) + ".", " وينقص " + sy + " " + w(-holds) + ".");
+    const s1 = U.L("Work done so far is worth " + w(a.earned) + " SAR, of which " + w(a.owed) + " is still owed. " + w(a.paid) + " has been paid in total" + (a.ahead ? ", including " + w(a.ahead) + " paid ahead" : "") + ".",
+      "قيمة الأعمال المنجزة حتى الآن " + w(a.earned) + " ر.س، ما زال منها " + w(a.owed) + " مستحقاً. المدفوع إجمالاً " + w(a.paid) + (a.ahead ? "، منه " + w(a.ahead) + " مدفوع مقدماً" : "") + ".");
+    const s2 = U.L(" " + me + " has paid out " + w(sp.out) + ": " + w(sp.toS) + " as cash to " + sy + ", who pays the crews and suppliers on site, and " + w(sp.dir) + " directly." + (isF ? hold : ""),
+      " دفع " + me + " " + w(sp.out) + ": " + w(sp.toS) + " نقداً إلى " + sy + " الذي يدفع للعمالة والموردين في الموقع، و" + w(sp.dir) + " دفعاً مباشراً." + (isF ? hold : ""));
+    pg.y = X.para(pg, s1 + s2, X.MX, 98, X.CW, { size: 9.6, lh: 14.5 }) - 4;
+    pg = X.tiles(pg, [
+      { label: U.L("Work done (cost to date)", "قيمة العمل المنجز"), v: a.earned, color: C.ink, sub: U.L("crews, suppliers, rentals", "العمالة والموردون والإيجارات") },
+      { label: U.L("Paid", "المدفوع"), v: a.paid, color: C.info, sub: a.ahead ? U.L("incl. " + w(a.ahead) + " paid ahead", "منه " + w(a.ahead) + " مقدماً") : "" },
+      { label: U.L("Owed", "المستحق"), v: a.owed, color: C.owed, vcolor: a.owed ? C.owed : C.ink, sub: U.L("work done, not paid yet", "عمل منجز لم يُدفع بعد") },
+      { label: U.L("Paid ahead", "مدفوع مقدماً"), v: a.ahead, color: C.prepaid, vcolor: a.ahead ? C.prepaid : C.ink, sub: U.L("deposits, work not done yet", "تأمينات وأعمال لم تُنجز بعد") },
+    ]);
+    // by party
+    pg = X.h2(pg, U.L("Who earned what", "حسب الطرف"), U.L("SAR", "ر.س"));
+    const pr = (k, label) => { const x = t[k]; return { cells: [label, w(x.earned), w(x.paid), w(x.owed), w(x.ahead)], colors: [C.ink, C.ink, C.ink, X.cOwed(x.owed), X.cAhead(x.ahead)] }; };
+    pg = X.table(pg, [{ label: "", w: "*" }, { label: U.L("Earned", "قيمة العمل"), w: 82, num: true }, { label: U.L("Paid", "مدفوع"), w: 82, num: true }, { label: U.L("Owed", "مستحق"), w: 82, num: true }, { label: U.L("Ahead", "مقدماً"), w: 82, num: true }], [
+      pr("T", U.L("Tradesmen (crews)", "الحرفيون (العمالة)")), pr("P", U.L("Suppliers (invoices)", "الموردون (الفواتير)")), pr("E", U.L("Equipment renters", "مؤجرو المعدات")),
+      Object.assign(pr("all", U.L("Total", "الإجمالي")), { kind: "total" }),
+    ], { rh: 17, size: 8.6 });
+    const np = X.rentals(pid, D).filter((x) => x.u.noPrice).length; // the same lines page 4 lists
+    if (np) pg = X.note(pg, U.L(X.plural(np, "rental line has", "rental lines have") + " no price yet, so they count 0 until priced (page 4).", X.plural(np, "", "", "إيجار واحد", "إيجاران", "إيجارات", "إيجاراً") + " بلا سعر بعد، فتُحسب 0 حتى تُسعَّر (صفحة 4)."), C.warn);
+    // cash: what the owner paid, split, and what the float holder has left
+    pg = X.h2(pg, U.L("Cash", "النقد"), U.L("SAR", "ر.س"));
+    pg = X.kv(pg, U.L(me + " paid", "دفع " + me), sp.out, { sub: sp.back ? U.L(X.m2(sp.back) + " came back (returns, capital)", "عاد " + X.m2(sp.back) + " (إرجاع نقد، رأس مال)") : U.L("cash to " + sy + " + paid directly", "نقد إلى " + sy + " + دفع مباشر") });
+    pg = X.kv(pg, U.L("To " + sy + " (cash)", "نقداً إلى " + sy), sp.toS, { indent: true, sub: sp.nTop ? X.plural(sp.nTop, "top-up", "top-ups", "دفعة واحدة", "دفعتان", "دفعات", "دفعة") : "" });
+    pg = X.kv(pg, U.L("Paid directly", "دفع مباشر"), sp.dir, { indent: true, sub: B.PARTIES.filter((k) => sp.dp[k]).map((k) => B.colName(k) + " " + w(sp.dp[k])).join(" · ") });
+    if (isF) pg = X.kv(pg, U.L(sy + " has left", "المتبقي مع " + sy), holds, { color: holds < 0 ? C.stop : C.ink, sub: U.L("got " + w(src.given) + " · paid out " + w(src.floatSpent), "استلم " + w(src.given) + " · صرف " + w(src.floatSpent)) });
+    pg = X.kv(pg, U.L("Total owed", "إجمالي المستحقات"), a.owed, { bold: true, color: a.owed ? C.owed : C.ink,
+      sub: !isF ? "" : holds >= a.owed ? U.L(sy + "'s cash covers it", "نقد " + sy + " يغطيها") : U.L("short by " + w(a.owed - holds) + " after " + sy + "'s cash", "ينقص " + w(a.owed - holds) + " بعد نقد " + sy), subColor: isF && holds < a.owed ? C.owed : C.ink3 });
+    // investors' money, when any is recorded
+    if (src.capital + src.loans > 0) {
+      pg = X.h2(pg, U.L("Money in", "النقد الوارد"), U.L("SAR", "ر.س"));
+      for (const [name, h] of Object.entries(src.capByInv).sort((p, q) => q[1] - p[1])) pg = X.kv(pg, name, h);
+      if (src.fronted > 0) pg = X.kv(pg, U.L(me + " fronted · not yet recorded as capital", "موّله " + me + " · لم يُسجَّل رأس مال بعد"), src.fronted, { color: C.warn });
+    }
+    // by job
+    const bj = M.byJob(pid, D), jobs = M.jobs(pid).map((j) => ({ j, x: bj[j.id] || { cost: 0, owed: 0 }, b: U.hal(j.budget) })).filter((r) => r.x.cost || r.x.owed || r.b).sort((p, q) => q.x.cost - p.x.cost);
+    if (jobs.length || (bj[""] && bj[""].cost)) {
+      pg = X.h2(pg, U.L("By job", "حسب البند"), U.L("SAR", "ر.س"));
+      const jr = jobs.map(({ j, x, b }) => ({ cells: [M.jobCode(j.id), U.nm(j) || j.id, (M.STATUS[M.jobStatus(j)] || M.STATUS.active).label, w(x.cost), w(x.owed), b ? w(b) : "–", b ? Math.round((x.cost / b) * 100) + "%" : "–"],
+        colors: [C.ink2, C.ink, C.ink3, C.ink, X.cOwed(x.owed), C.ink3, b && x.cost > b ? C.stop : C.ink3], nums: [true], weights: [700, 600] }));
+      if (bj[""] && (bj[""].cost || bj[""].owed)) jr.push({ cells: ["", U.L("Not on a job", "بدون بند"), "", w(bj[""].cost), w(bj[""].owed), "", ""], colors: [C.ink, C.ink3, C.ink, C.ink, X.cOwed(bj[""].owed)] });
+      const tc = U.sum(Object.values(bj), (x) => x.cost), to = U.sum(Object.values(bj), (x) => x.owed), tb = U.sum(jobs, (r) => r.b);
+      jr.push({ kind: "total", cells: ["", U.L("Total", "الإجمالي"), "", w(tc), w(to), tb ? w(tb) : "", ""], colors: [C.ink, C.ink, C.ink, C.ink, X.cOwed(to)] });
+      pg = X.table(pg, [{ label: U.L("Code", "الرمز"), w: 34 }, { label: U.L("Job", "البند"), w: "*" }, { label: U.L("Status", "الحالة"), w: 70 }, { label: U.L("Cost", "التكلفة"), w: 64, num: true }, { label: U.L("Owed", "مستحق"), w: 58, num: true }, { label: U.L("Budget", "الميزانية"), w: 60, num: true }, { label: "%", w: 34, num: true }], jr);
+    }
+    X.note(pg, U.L("Earned = work done or goods delivered so far (cost to date). Owed = earned but not paid yet. Ahead = paid before the work was done (deposits, prepaid). Pages 2–4 list the invoices, crews and equipment behind these figures.",
+      "قيمة العمل = الأعمال المنجزة أو البضائع المسلَّمة حتى الآن (التكلفة حتى اليوم). المستحق = عمل منجز لم يُدفع بعد. المقدَّم = ما دُفع قبل إنجاز العمل (تأمينات، دفعات مقدمة). الصفحات 2–4 تفصّل الفواتير والعمالة والمعدات وراء هذه الأرقام."));
+  };
+})(window.SL);
+
+/* ---- chunk 2: page 2, Invoices (purchases, services, other costs) by supplier ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model;
+  const X = SL._pdf, C = X.C;
+
+  /** Supplier as shown: the catalog's Arabic name in Arabic, else the name on the invoice. */
+  X.supName = (u) => { const s = u.doc.supplierId && M.suppliers()[u.doc.supplierId]; return (s && U.nm(s)) || String(u.payee || "").trim() || U.L("Other", "أخرى"); };
+  /** What an invoice was for, in a few words (Arabic item names in Arabic when the lines have them). */
+  X.what = (u) => {
+    const c = u.doc, lines = (c.lines || []).filter((l) => l && (l.desc || l.ar));
+    if (U.isAr() && lines.some((l) => l.ar)) return lines.map((l) => l.ar || l.desc).slice(0, 4).join("، ");
+    if (u.kind === "purchase") return c.desc || lines.map((l) => l.desc || l.ar).slice(0, 4).join(", ");
+    return c.desc || u.title || "";
+  };
+
+  X.pInvoices = (doc) => {
+    const { pid, D } = doc, w = X.m2;
+    // what happened as of D (as page 1's Suppliers): dated by then, or delivered or paid by then (a prepayment before the invoice date)
+    const inv = M.unitsFor(pid).filter((u) => !u.archived && (u.kind === "purchase" || u.kind === "service" || u.kind === "other")).map((u) => {
+      const r = M.calc(u, D), name = String(u.doc.supplier || u.payee || "").trim();
+      // grouped by supplier id, else by the name itself (an Arabic-only name has no slug)
+      return { u, r, total: U.hal(u.doc.amount), recv: u.kind === "other" || (!!u.delivered && u.delivered <= D), files: (u.doc.files || []).length, sup: X.supName(u), key: u.doc.supplierId || "n:" + name.toLowerCase() };
+    }).filter((i) => !i.u.date || i.u.date <= D || i.r.inc || i.r.paid);
+    const sum = (list, f) => U.sum(list, f);
+    const T = { total: sum(inv, (i) => i.total), paid: sum(inv, (i) => i.r.paid), owed: sum(inv, (i) => i.r.owed), ahead: sum(inv, (i) => i.r.prepaid), earned: sum(inv, (i) => i.r.inc) };
+    const pend = inv.filter((i) => !i.recv), noDoc = inv.filter((i) => !i.files);
+    let pg = X.section(doc, 2, U.L("Invoices", "الفواتير"),
+      U.L("Purchases, services and other costs, grouped by supplier. A cost counts once it is delivered or performed; paid before that shows as paid ahead (+).",
+        "المشتريات والخدمات والتكاليف الأخرى، مجمَّعة حسب المورد. تُحسب التكلفة عند التسليم أو التنفيذ، وما يُدفع قبل ذلك يظهر مدفوعاً مقدماً (+)."));
+    pg = X.tiles(pg, [
+      { label: U.L("Total on the invoices", "إجمالي الفواتير"), txt: X.mw(T.total), color: C.ink, sub: X.plural(inv.length, "document", "documents", "مستند واحد", "مستندان", "مستندات", "مستنداً") },
+      { label: U.L("Paid", "المدفوع"), txt: X.mw(T.paid), color: C.info },
+      { label: U.L("Owed", "المستحق"), txt: X.mw(T.owed), color: C.owed, vcolor: T.owed ? C.owed : C.ink, sub: T.owed ? X.plural(inv.filter((i) => i.r.owed).length, "invoice", "invoices", "فاتورة واحدة", "فاتورتان", "فواتير", "فاتورة") : "" },
+      { label: U.L("Not delivered yet", "لم يُسلَّم بعد"), txt: X.mw(sum(pend, (i) => i.total)), color: C.warn, sub: pend.length ? X.plural(pend.length, "invoice", "invoices", "فاتورة واحدة", "فاتورتان", "فواتير", "فاتورة") : U.L("everything delivered", "كل شيء مُسلَّم") },
+    ]);
+    if (!inv.length) return X.note(pg, U.L("No invoices yet.", "لا توجد فواتير بعد."));
+    pg = X.h2(pg, U.L("By supplier", "حسب المورد"), U.L("SAR · Doc ✓ = the invoice is on file", "ر.س · ✓ = الفاتورة محفوظة"));
+    const groups = new Map();
+    for (const i of inv) { if (!groups.has(i.key)) groups.set(i.key, []); groups.get(i.key).push(i); }
+    const rows = [];
+    for (const list of [...groups.values()].sort((p, q) => sum(q, (i) => i.total) - sum(p, (i) => i.total))) {
+      const gOwed = sum(list, (i) => i.r.owed);
+      rows.push({ kind: "group", span: 4, cells: [list[0].sup + "  ·  " + list.length, "", "", "", w(sum(list, (i) => i.total)), w(sum(list, (i) => i.r.paid)), gOwed ? w(gOwed) : "", ""], colors: [C.ink, "", "", "", C.ink, C.ink, C.owed] });
+      for (const i of U.sortBy(list, (x) => (x.u.date || "") + String(x.u.doc.createdAt || 0).padStart(15, "0"))) {
+        const no = i.u.doc.doc && i.u.doc.doc.no ? "#" + i.u.doc.doc.no : "";
+        const owedTxt = i.r.owed ? w(i.r.owed) : i.r.prepaid ? "+" + w(i.r.prepaid) : "–";
+        rows.push({ cells: [U.dDM(i.u.date), no, (i.recv ? "" : U.L("Not delivered yet · ", "لم يُسلَّم بعد · ")) + X.what(i.u), M.jobCode(i.u.jobId) || "–", w(i.total), w(i.r.paid), owedTxt, i.files ? "✓" : "–"],
+          colors: [C.ink2, C.ink2, i.recv ? C.ink : C.warn, C.ink2, C.ink, C.ink, i.r.owed ? C.owed : i.r.prepaid ? C.prepaid : C.ink3, i.files ? C.prepaid : C.warn],
+          weights: [400, 600, 400, 600], nums: [false, true, false, true] });
+      }
+    }
+    rows.push({ kind: "total", cells: [U.L("Total", "الإجمالي"), "", "", "", w(T.total), w(T.paid), w(T.owed), ""], colors: [C.ink, "", "", "", C.ink, C.ink, T.owed ? C.owed : C.ink] });
+    pg = X.table(pg, [{ label: U.L("Date", "التاريخ"), w: 42 }, { label: U.L("No.", "الرقم"), w: 62 }, { label: U.L("What", "البيان"), w: "*" }, { label: U.L("Job", "البند"), w: 28 },
+      { label: U.L("Total", "الإجمالي"), w: 58, num: true }, { label: U.L("Paid", "مدفوع"), w: 58, num: true }, { label: U.L("Owed", "مستحق"), w: 54, num: true }, { label: U.L("Doc", "مستند"), w: 26, num: true }], rows);
+    const notes = [U.L("Work delivered so far (Suppliers on page 1): " + X.mw(T.earned) + ".", "قيمة ما سُلِّم حتى الآن (الموردون في صفحة 1): " + X.mw(T.earned) + ".")];
+    if (T.ahead) notes.push(U.L("Paid ahead of delivery: " + X.mw(T.ahead) + ".", "مدفوع قبل التسليم: " + X.mw(T.ahead) + "."));
+    if (noDoc.length) notes.push(U.L(X.plural(noDoc.length, "cost has", "costs have") + " no invoice on file yet.", X.plural(noDoc.length, "", "", "تكلفة واحدة", "تكلفتان", "تكاليف", "تكلفة") + " بلا فاتورة محفوظة بعد."));
+    X.note(pg, notes.join(" "));
+  };
+})(window.SL);
+
+/* ---- chunk 3: page 3, Crews — money per crew, then a day chart like the Crews screen ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model;
+  const X = SL._pdf, C = X.C;
+  const AU = () => SL._audit;
+
+  /** The chart's days: up to three weeks (Sat–Fri) ending with the as-of week, from the first week with a crew day. */
+  X.days = (first, D) => {
+    const end = U.addDays(U.weekStart(D), 6);
+    let from = U.addDays(U.weekStart(D), -14);
+    if (first && first > from && first <= end) from = U.weekStart(first);
+    const out = [];
+    for (let d = from; d <= end; d = U.addDays(d, 1)) out.push(d);
+    return out;
+  };
+  /** Chart header: one column per day (weekday + date; Fridays shaded; the as-of day in red). → {cw, x0} */
+  X.dayHead = (pg, days, lw, label, pid, D) => {
+    const y = pg.y, cw = (X.CW - lw) / days.length, x0 = X.MX + lw;
+    X.rect(pg, X.MX, y, X.CW, 22, C.sunk);
+    const a = U.parse(days[0]), b = U.parse(days[days.length - 1]);
+    X.text(pg, label, X.MX + 4, y + 9.5, { size: 6.6, weight: 700, color: C.ink2 });
+    X.text(pg, U.monthName(a.getMonth()) + (a.getMonth() !== b.getMonth() ? " – " + U.monthName(b.getMonth()) : ""), X.MX + 4, y + 18.5, { size: 6.4, color: C.ink3 });
+    days.forEach((d, i) => {
+      const x = x0 + i * cw, now = d === D;
+      if (!M.isWorkDay(pid, d)) X.rect(pg, x, y, cw, 22, "#E3E4DF");
+      X.text(pg, U.wd2(d), x + cw / 2, y + 9, { size: 5.6, color: now ? C.stop : C.ink3, align: "center" });
+      X.text(pg, String(U.parse(d).getDate()), x + cw / 2, y + 18.5, { size: 7.2, weight: 700, color: now ? C.stop : C.ink2, align: "center", num: true });
+      if (U.dow(d) === 6 && i) X.vline(pg, x, y, 22, C.line2, 0.5);
+    });
+    pg.y = y + 22;
+    return { cw, x0 };
+  };
+  /** Shade the day-off columns and draw week separators over rows y0..y1. */
+  X.dayCols = (pg, days, g, pid, y0, y1) => days.forEach((d, i) => {
+    const x = g.x0 + i * g.cw;
+    if (!M.isWorkDay(pid, d)) X.rect(pg, x, y0, g.cw, y1 - y0, "#F1F2EE");
+    if (U.dow(d) === 6 && i) X.vline(pg, x, y0, y1 - y0, C.line2, 0.5);
+  });
+  /** The as-of line (red) down the chart. */
+  X.nowLine = (pg, days, g, D, y0, y1) => { const i = days.indexOf(D); if (i >= 0) X.vline(pg, g.x0 + (i + 0.5) * g.cw, y0, y1 - y0, C.stop, 0.9); };
+
+  X.pCrews = (doc) => {
+    const { pid, D } = doc, w = X.mw;
+    const units = M.unitsFor(pid).filter((u) => u.kind === "crew");
+    const by = new Map();
+    for (const u of units) {
+      const s = M.crewStats(u, D), r = M.calc(u, D);
+      if (!s.days && !r.paid && !r.inc) continue; // worked or paid by D (a crew with only planned days isn't listed)
+      const x = by.get(u.crewId) || { cid: u.crewId, days: 0, m: 0, l: 0, wages: 0, extra: 0, inc: 0, paid: 0, owed: 0, ahead: 0, last: "" };
+      x.days += s.days; x.m += s.mDays; x.l += s.lDays; x.wages += s.wages; x.extra += s.food + s.other;
+      x.inc += r.inc; x.paid += r.paid; x.owed += r.owed; x.ahead += r.prepaid;
+      for (const d of u.days) if (!d.plan && d.date <= D) x.last = U.maxDate(x.last, d.date); // last day worked by D
+      by.set(u.crewId, x);
+    }
+    const list = [...by.values()].sort((p, q) => q.inc - p.inc), T = { days: 0, m: 0, l: 0, wages: 0, extra: 0, inc: 0, paid: 0, owed: 0, ahead: 0 };
+    for (const x of list) for (const k in T) T[k] += x[k];
+    let pg = X.section(doc, 3, U.L("Crews", "العمالة"),
+      U.L("Daily labor hired on site by " + X.sayed(pid) + ": masters (معلمين) and laborers (عمال) at day rates, plus food and small expenses. Each crew week is paid in cash, mostly from " + X.sayed(pid) + "'s float.",
+        "عمالة يومية يستأجرها " + X.sayed(pid) + " في الموقع: معلمين وعمال بأجرة يومية، مع الأكل والمصاريف الصغيرة. يُدفع كل أسبوع نقداً، غالباً من عهدة " + X.sayed(pid) + "."));
+    pg = X.tiles(pg, [
+      { label: U.L("Crew cost to date", "تكلفة العمالة حتى اليوم"), txt: w(T.inc), color: C.ink, sub: X.plural(list.length, "crew", "crews", "طاقم واحد", "طاقمان", "طواقم", "طاقماً") },
+      { label: U.L("Paid", "المدفوع"), txt: w(T.paid), color: C.info },
+      { label: U.L("Owed", "المستحق"), txt: w(T.owed), color: C.owed, vcolor: T.owed ? C.owed : C.ink },
+      { label: U.L("Days worked", "أيام العمل"), txt: U.L(T.m + " M · " + T.l + " L", T.m + " م · " + T.l + " ع"), num: !U.isAr(), color: C.float, sub: U.L("master-days · laborer-days", "أيام معلمين · أيام عمال") },
+    ]);
+    if (!list.length) return X.note(pg, U.L("No crew days logged yet.", "لا أيام عمالة مسجلة بعد."));
+    pg = X.h2(pg, U.L("By crew", "حسب الطاقم"), U.L("SAR · M = master-days, L = laborer-days", "ر.س · م = أيام معلمين، ع = أيام عمال"));
+    const rows = list.map((x) => {
+      const c = M.crew(x.cid) || {}, tr = M.trade(c.masterTrade);
+      return { cells: [U.nm(c) || x.cid, String(x.days), String(x.m), String(x.l), w(x.wages), w(x.extra), w(x.inc), w(x.paid), x.owed ? w(x.owed) : x.ahead ? "+" + w(x.ahead) : "–"],
+        colors: [C.ink, C.ink2, C.ink2, C.ink2, C.ink, C.ink, C.ink, C.ink, x.owed ? C.owed : x.ahead ? C.prepaid : C.ink3], note: [tr && tr.name ? U.nm(tr) : "", x.last ? U.L("last day ", "آخر يوم ") + U.dDM(x.last) : ""].filter(Boolean).join(" · ") };
+    });
+    rows.push({ kind: "total", cells: [U.L("Total", "الإجمالي"), String(T.days), String(T.m), String(T.l), w(T.wages), w(T.extra), w(T.inc), w(T.paid), w(T.owed)], colors: [C.ink, C.ink, C.ink, C.ink, C.ink, C.ink, C.ink, C.ink, T.owed ? C.owed : C.ink] });
+    pg = X.table(pg, [{ label: U.L("Crew", "الطاقم"), w: "*" }, { label: U.L("Days", "أيام"), w: 30, num: true }, { label: U.L("M", "م"), w: 28, num: true }, { label: U.L("L", "ع"), w: 28, num: true },
+      { label: U.L("Wages", "الأجور"), w: 58, num: true }, { label: U.L("Food, other", "أكل، أخرى"), w: 56, num: true }, { label: U.L("Cost", "التكلفة"), w: 58, num: true }, { label: U.L("Paid", "مدفوع"), w: 58, num: true }, { label: U.L("Owed", "مستحق"), w: 52, num: true }], rows);
+    X.crewChart(pg, pid, D, list.map((x) => x.cid));
+  };
+
+  /** The day chart: a row per crew, a cell per day ("3·2" = masters·laborers, colour = job; dotted = planned; ✕ = didn't
+   *  come); a green bar under a day the crew's pay covers, orange when still owed. Heads and SAR per day at the bottom. */
+  X.crewChart = (pg, pid, D, cids) => {
+    let first = "";
+    for (const u of M.unitsFor(pid)) if (u.kind === "crew") for (const d of u.days) if (!d.plan && d.date <= D) first = U.minDate(first, d.date);
+    const days = X.days(first || D, D), lw = 108, rh = 22, au = AU();
+    // only crews with something in the chart's days (worked, planned or didn't come)
+    const all = cids;
+    cids = all.filter((cid) => days.some((d) => au.st(au.raw(pid, cid, d), d, D)));
+    if (!cids.length) return pg;
+    const need = 22 + rh * cids.length + 30 + 40;
+    pg = X.h2(X.room(pg) < Math.min(need, 260) ? X.more(pg.doc, pg.title) : pg, U.L("Days on site", "أيام الحضور"), U.dDM(days[0]) + " – " + U.dDM(days[days.length - 1]));
+    let g = X.dayHead(pg, days, lw, U.L("CREW", "الطاقم"), pid, D), top = pg.y;
+    const heads = days.map(() => ({ n: 0, h: 0, pn: 0 })), jobsSeen = new Set();
+    for (const cid of cids) {
+      if (X.room(pg) < rh + 8) { X.nowLine(pg, days, g, D, top, pg.y); pg = X.more(pg.doc, pg.title); g = X.dayHead(pg, days, lw, U.L("CREW", "الطاقم"), pid, D); top = pg.y; }
+      const y = pg.y, c = M.crew(cid) || {};
+      X.dayCols(pg, days, g, pid, y, y + rh);
+      X.text(pg, U.nm(c) || cid, X.MX + 4, y + 10, { size: 7.4, weight: 600, maxW: lw - 8 });
+      X.text(pg, U.nm(M.trade(c.masterTrade)) || "", X.MX + 4, y + 18, { size: 6, color: C.ink3, maxW: lw - 8 });
+      days.forEach((d, i) => {
+        const raw = au.raw(pid, cid, d), st = au.st(raw, d, D), x = g.x0 + i * g.cw + 1, cw = g.cw - 2;
+        if (st === "came" || st === "plan" || st === "due") {
+          const jid = au.dayJob(pid, cid, d, raw), col = X.JC[au.jc(pid, jid)] || X.JC[0], came = st === "came";
+          if (jid) jobsSeen.add(jid);
+          const txt = pg.rtl ? (raw.l || 0) + "·" + (raw.m || 0) : (raw.m || 0) + "·" + (raw.l || 0); // masters sit on the right in Arabic, as in the app
+          X.rrect(pg, x, y + 3, cw, rh - 8, 2, came ? col : null, came ? null : col, !came);
+          X.text(pg, txt, x + cw / 2, y + 12.6, { size: cw < 17 ? 5.6 : 6.6, weight: 700, color: came ? "#FFFFFF" : col, align: "center", num: true });
+          if (came) {
+            const paid = au.isPaid(pid, cid, d, D);
+            X.rect(pg, x + 1, y + rh - 3.6, cw - 2, 1.8, paid ? C.prepaid : C.owed);
+            heads[i].n += (raw.m || 0) + (raw.l || 0); heads[i].h += M.dayH(raw, au.rates(pid, cid, d));
+          } else heads[i].pn += (raw.m || 0) + (raw.l || 0);
+        } else if (st === "off") X.text(pg, "✕", x + cw / 2, y + 13, { size: 7, color: C.ink3, align: "center", num: true });
+      });
+      X.hline(pg, X.MX, y + rh, X.CW, C.line, 0.4);
+      pg.y = y + rh;
+    }
+    // totals per day
+    const foot = (label, f) => {
+      const y = pg.y;
+      X.rect(pg, X.MX, y, X.CW, 14, C.sunk);
+      X.text(pg, label, X.MX + 4, y + 9.6, { size: 6.4, weight: 700, color: C.ink2 });
+      days.forEach((d, i) => { const t = f(heads[i]); if (t) X.text(pg, t.s, g.x0 + (i + 0.5) * g.cw, y + 9.6, { size: 6.2, weight: 700, color: t.c || C.ink, align: "center", num: true }); });
+      pg.y = y + 14;
+    };
+    if (X.room(pg) < 30) { X.nowLine(pg, days, g, D, top, pg.y); pg = X.more(pg.doc, pg.title); g = X.dayHead(pg, days, lw, U.L("CREW", "الطاقم"), pid, D); top = pg.y; }
+    foot(U.L("HEADS", "الأفراد"), (x) => (x.n ? { s: String(x.n) } : x.pn ? { s: "(" + x.pn + ")", c: C.ink3 } : null));
+    foot(U.L("SAR / DAY", "ر.س / يوم"), (x) => (x.h ? { s: X.mk(x.h) } : null));
+    X.nowLine(pg, days, g, D, top, pg.y);
+    pg.y += 4;
+    if (cids.length < all.length) pg = X.note(pg, U.L(X.plural(all.length - cids.length, "crew", "crews") + " with no days in these weeks not shown.", X.plural(all.length - cids.length, "", "", "طاقم واحد", "طاقمان", "طواقم", "طاقماً") + " بلا أيام في هذه الأسابيع غير معروضة."));
+    X.legend(pg, [...jobsSeen].map((j) => ({ c: X.JC[AU().jc(pid, j)] || X.JC[0], t: M.jobCode(j) })).concat([
+      { dash: true, t: U.L("planned", "مخطط") }, { bar: C.prepaid, t: U.L("paid", "مدفوع") }, { bar: C.owed, t: U.L("owed", "مستحق") },
+      { x: true, t: U.L("didn't come", "لم يحضر") }, { line: C.stop, t: U.L("as of", "حتى تاريخ") }, { t: U.L("3·2 = masters·laborers", "3·2 = معلمين·عمال") }]));
+    return pg;
+  };
+  /** A one-line legend: [{c (swatch) | dash | bar | x | line, t}]. */
+  X.legend = (pg, items) => {
+    pg = X.need(pg, 16);
+    let x = X.MX, y = pg.y + 9;
+    for (const it of items) {
+      const iw = (it.c || it.dash || it.bar ? 12 : it.x ? 10 : it.line ? 7 : 0) + X.width(pg, it.t, { size: 6.6 }) + 10;
+      if (x > X.MX && x + iw > X.MX + X.CW) { x = X.MX; y += 11; } // wrap to a new line
+      if (it.c) { X.rrect(pg, x, y - 6, 9, 7, 1.5, it.c); x += 12; }
+      else if (it.dash) { X.rrect(pg, x, y - 6, 9, 7, 1.5, null, C.ink3, true); x += 12; }
+      else if (it.bar) { X.rect(pg, x, y - 2, 9, 1.8, it.bar); x += 12; }
+      else if (it.x) { X.text(pg, "✕", x, y, { size: 7, color: C.ink3, num: true }); x += 10; }
+      else if (it.line) { X.vline(pg, x + 2, y - 7, 9, it.line, 0.9); x += 7; }
+      x += X.text(pg, it.t, x, y, { size: 6.6, color: C.ink2 }) + 10;
+    }
+    pg.y = y + 6;
+    return pg;
+  };
+})(window.SL);
+
+/* ---- chunk 4: page 4, Equipment rental — lines, days on site, deposits ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model;
+  const X = SL._pdf, C = X.C;
+  const AU = () => SL._audit;
+
+  /** A rental line's name: "2 × Scaffolding" (Arabic name in Arabic when the catalog has one). */
+  X.eqName = (u) => u.title || U.L("Equipment", "معدات");
+  X.rateTxt = (u) => (u.noPrice ? U.L("no price", "بلا سعر") : X.m2(U.hal(u.rate)).replace(/\.00$/, "") + (u.doc.rateUnit === "month" ? U.L("/mo", "/شهر") : U.L("/day", "/يوم")));
+
+  /** Rental lines to list as of D: on site by then (or no date yet), or paid by then (paid before it came). → [{u, r}] */
+  X.rentals = (pid, D) => M.unitsFor(pid).filter((u) => u.kind === "rental" && !u.deposit && !u.archived).map((u) => ({ u, r: M.calc(u, D) })).filter((x) => !x.u.in || x.u.in <= D || x.r.paid);
+
+  X.pEquip = (doc) => {
+    const { pid, D } = doc, w = X.mw;
+    const lines = X.rentals(pid, D);
+    const ordered = U.sortBy(lines, (x) => (x.u.noPrice ? "1" : "0") + (x.u.in || "9999") + X.eqName(x.u));
+    const T = { inc: U.sum(lines, (x) => x.r.inc), paid: U.sum(lines, (x) => x.r.paid), owed: U.sum(lines, (x) => x.r.owed), ahead: U.sum(lines, (x) => x.r.prepaid) };
+    const deps = M.deposits(pid, D), held = U.sum(deps, (x) => x.heldH), unpriced = lines.filter((x) => x.u.noPrice).length;
+    let pg = X.section(doc, 4, U.L("Equipment rental", "إيجار المعدات"),
+      U.L("Scaffolding, tools and machines rented for the site. A rental costs its day rate for every day on site, the day it came and the day it went back included. A deposit is money held by the rental shop until the equipment goes back.",
+        "السقالات والعدد والمعدات المستأجرة للموقع. يُحسب الإيجار بسعر اليوم عن كل يوم في الموقع، شاملاً يوم الوصول ويوم الإرجاع. التأمين مبلغ يحتفظ به محل التأجير حتى تُعاد المعدات."));
+    pg = X.tiles(pg, [
+      { label: U.L("Rental cost to date", "تكلفة الإيجار حتى اليوم"), txt: w(T.inc), color: C.ink, sub: X.plural(lines.length, "line", "lines", "إيجار واحد", "إيجاران", "إيجارات", "إيجاراً") + (unpriced ? U.L(" · " + unpriced + " with no price yet", " · " + unpriced + " بلا سعر بعد") : "") },
+      { label: U.L("Paid", "المدفوع"), txt: w(SL._bal.partyTotals(pid, D).E.paid), color: C.info, sub: deps.length ? U.L("incl. deposits held", "مع التأمينات المحتجزة") : "" }, // = Equipment renters · Paid on page 1
+      { label: U.L("Owed", "المستحق"), txt: w(T.owed), color: C.owed, vcolor: T.owed ? C.owed : C.ink },
+      { label: U.L("Deposits held", "تأمينات محتجزة"), txt: w(held), color: C.prepaid, vcolor: held ? C.prepaid : C.ink, sub: deps.length ? X.plural(deps.length, "deposit", "deposits", "تأمين واحد", "تأمينان", "تأمينات", "تأميناً") : "" },
+    ]);
+    if (lines.length) {
+      pg = X.h2(pg, U.L("Rental lines", "الإيجارات"), U.L("SAR", "ر.س"));
+      const rows = ordered.map(({ u, r }) => {
+        const np = u.noPrice, days = np ? 0 : r.parts.length;
+        return { cells: [X.eqName(u), u.doc.supplier || "–", u.in ? U.dDM(u.in) : "?", u.out && u.out <= D ? U.dDM(u.out) : !u.in ? "–" : u.in > D ? U.L("not yet", "لم تصل") : U.L("on site", "في الموقع"), np ? "–" : String(days), X.rateTxt(u), np ? "–" : w(r.inc), w(r.paid), r.owed ? w(r.owed) : r.prepaid ? "+" + w(r.prepaid) : "–"],
+          nums: [false, false, false, false, true, !U.isAr()], colors: [C.ink, C.ink2, C.ink2, (u.out && u.out <= D) || !u.in || u.in > D ? C.ink2 : C.prepaid, C.ink2, np ? C.warn : C.ink2, C.ink, C.ink, r.owed ? C.owed : r.prepaid ? C.prepaid : C.ink3], };
+      });
+      rows.push({ kind: "total", cells: [U.L("Total", "الإجمالي"), "", "", "", "", "", w(T.inc), w(T.paid), w(T.owed)], colors: [C.ink, "", "", "", "", "", C.ink, C.ink, T.owed ? C.owed : C.ink] });
+      pg = X.table(pg, [{ label: U.L("Equipment", "المعدات"), w: "*" }, { label: U.L("From", "من"), w: 70 }, { label: U.L("In", "وصل"), w: 42 }, { label: U.L("Back", "أُعيد"), w: 42 },
+        { label: U.L("Days", "أيام"), w: 26, num: true }, { label: U.L("Rate", "السعر"), w: 46, num: true }, { label: U.L("Cost", "التكلفة"), w: 50, num: true }, { label: U.L("Paid", "مدفوع"), w: 48, num: true }, { label: U.L("Owed", "مستحق"), w: 46, num: true }], rows);
+      if (unpriced) pg = X.note(pg, U.L(X.plural(unpriced, "line has", "lines have") + " no price yet: " + (unpriced === 1 ? "it counts" : "they count") + " 0 until the rate is set, so the rental cost will go up.",
+        X.plural(unpriced, "", "", "إيجار واحد", "إيجاران", "إيجارات", "إيجاراً") + " بلا سعر بعد: تُحسب 0 حتى يُحدَّد السعر، لذلك سترتفع تكلفة الإيجار."), C.warn);
+      pg = X.eqChart(pg, pid, D, ordered.filter((x) => x.u.in && x.u.in <= D).map((x) => x.u));
+    } else pg = X.note(pg, U.L("No equipment rented yet.", "لا معدات مستأجرة بعد."));
+    if (deps.length) {
+      pg = X.h2(pg, U.L("Deposits", "التأمينات"), U.L("SAR", "ر.س"));
+      const rows = deps.map((d) => ({ cells: [d.supplier || U.L("Rental shop", "محل التأجير"), U.dDM(d.date), M.walletName(d.walletId), w(d.paidH), d.refundedH ? w(d.refundedH) : "–", w(d.heldH)],
+        colors: [C.ink, C.ink2, C.ink2, C.ink, C.ink2, d.heldH ? C.prepaid : C.ink3] }));
+      rows.push({ kind: "total", cells: [U.L("Total", "الإجمالي"), "", "", w(U.sum(deps, (d) => d.paidH)), w(U.sum(deps, (d) => d.refundedH)), w(held)], colors: [C.ink, "", "", C.ink, C.ink, held ? C.prepaid : C.ink] });
+      pg = X.table(pg, [{ label: U.L("Rental shop", "محل التأجير"), w: "*" }, { label: U.L("Paid on", "دُفع في"), w: 60 }, { label: U.L("Paid by", "دفعها"), w: 70 }, { label: U.L("Amount", "المبلغ"), w: 64, num: true }, { label: U.L("Returned", "أُعيد"), w: 64, num: true }, { label: U.L("Held", "محتجز"), w: 64, num: true }], rows);
+    }
+    return pg;
+  };
+
+  /** Days on site: a bar per rental line over the chart's days (colour = job; faded after the as-of day while still out;
+   *  grey dotted = no price yet). */
+  X.eqChart = (pg, pid, D, us) => {
+    if (!us.length) return pg;
+    const first = U.sortBy(us, (u) => u.in)[0].in, days = X.days(first, D), lw = 128, rh = 15, end = days[days.length - 1];
+    const all = us;
+    us = all.filter((u) => days.some((d) => u.onSite(d)));
+    if (!us.length) return pg;
+    pg = X.h2(X.room(pg) < 120 ? X.more(pg.doc, pg.title) : pg, U.L("Days on site", "أيام التواجد في الموقع"), U.dDM(days[0]) + " – " + U.dDM(end));
+    let g = X.dayHead(pg, days, lw, U.L("EQUIPMENT", "المعدات"), pid, D), top = pg.y;
+    const jobsSeen = new Set();
+    for (const u of us) {
+      if (X.room(pg) < rh + 20) { X.nowLine(pg, days, g, D, top, pg.y); pg = X.more(pg.doc, pg.title); g = X.dayHead(pg, days, lw, U.L("EQUIPMENT", "المعدات"), pid, D); top = pg.y; }
+      const y = pg.y, on = days.map((d) => u.onSite(d));
+      X.dayCols(pg, days, g, pid, y, y + rh);
+      X.text(pg, X.eqName(u), X.MX + 4, y + 10.2, { size: 6.8, weight: 600, maxW: lw - 8 });
+      const i0 = on.indexOf(true), i1 = on.lastIndexOf(true);
+      if (i0 >= 0) {
+        const col = u.noPrice ? C.ink3 : X.JC[AU().jc(pid, u.jobId)] || X.JC[0];
+        if (u.jobId) jobsSeen.add(u.jobId);
+        const iD = days.indexOf(D), past = iD < 0 ? (D > end ? i1 : -1) : Math.min(i1, iD);
+        if (u.noPrice) X.rrect(pg, g.x0 + i0 * g.cw + 1, y + 4, (i1 - i0 + 1) * g.cw - 2, rh - 8, 2, null, col, true);
+        else {
+          if (past >= i0) X.rrect(pg, g.x0 + i0 * g.cw + 1, y + 4, (past - i0 + 1) * g.cw - 2, rh - 8, 2, col);
+          if (i1 > past) X.rrect(pg, g.x0 + Math.max(i0, past + 1) * g.cw + 1, y + 4, (i1 - Math.max(i0, past + 1) + 1) * g.cw - 2, rh - 8, 2, col + "55");
+          X.text(pg, X.mw(u.daily), g.x0 + i0 * g.cw + 3, y + 10, { size: 5.6, weight: 700, color: "#FFFFFF", num: true });
+        }
+      }
+      X.hline(pg, X.MX, y + rh, X.CW, C.line, 0.4);
+      pg.y = y + rh;
+    }
+    X.nowLine(pg, days, g, D, top, pg.y);
+    pg.y += 4;
+    if (us.length < all.length) pg = X.note(pg, U.L(X.plural(all.length - us.length, "line", "lines") + " not on site in these weeks not shown.", X.plural(all.length - us.length, "", "", "إيجار واحد", "إيجاران", "إيجارات", "إيجاراً") + " خارج الموقع في هذه الأسابيع غير معروضة."));
+    return X.legend(pg, [...jobsSeen].map((j) => ({ c: X.JC[AU().jc(pid, j)] || X.JC[0], t: M.jobCode(j) })).concat([
+      { c: X.JC[1] + "55", t: U.L("still out (after the as-of day)", "ما زالت مستأجرة (بعد تاريخ التقرير)") }, { dash: true, t: U.L("no price yet", "بلا سعر بعد") }, { line: C.stop, t: U.L("as of", "حتى تاريخ") }, { t: U.L("number = SAR a day", "الرقم = ر.س في اليوم") }]));
+  };
+})(window.SL);
+
+/* ---- chunk 5: build the file, the action, the button ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._pdf;
+
+  /** Draw every page and wrap them in a PDF → {blob, pages}. In the viewer's language, figures as of D. */
+  X.build = async (pid, D) => {
+    await X.fonts();
+    const p = M.project(pid) || {};
+    const doc = { pid, D, pages: [], project: (U.isAr() && p.ar) || p.name || pid, asOfTxt: X.dLong(D), madeTxt: X.dLong(U.ymd(new Date())) };
+    X.pBalances(doc); X.pInvoices(doc); X.pCrews(doc); X.pEquip(doc);
+    const n = doc.pages.length, out = [];
+    doc.pages.forEach((pg, i) => X.footer(pg, i + 1, n));
+    for (const pg of doc.pages) { out.push(await X.encode(pg.c)); pg.c.width = 0; pg.c.height = 0; } // free each canvas once encoded
+    const blob = X.pdf(out, { title: doc.project + " · " + U.L("Investor report", "تقرير المستثمرين") + " · " + D, author: X.owner(),
+      subject: U.L("Balances, invoices, crews and equipment rental", "الأرصدة والفواتير والعمالة وإيجار المعدات") });
+    return { blob, pages: n };
+  };
+  /** "Tal Ryan investor report 2026-09-28.pdf" ("… (Arabic).pdf" in Arabic). */
+  X.fileName = (pid, D) => {
+    const p = M.project(pid) || {}, base = String(p.name || "Site Ledger").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+    return base + " investor report " + D + (U.isAr() ? " (Arabic)" : "") + ".pdf";
+  };
+  let can = null;
+  /** The "Investor PDF" button, where this view can draw pages and save files ("" elsewhere). */
+  X.btn = (cls) => {
+    if (can === null) can = X.canDraw();
+    if (!can || !SL.S.downloads || (SL._admin && SL._admin.dlGone)) return "";
+    return `<button type="button" class="${cls || "chip"} pdf-btn" data-act="investorPdf"${X.busy ? " disabled" : ""} title="${U.L("A PDF for investors: balances, invoices, crews and equipment", "ملف PDF للمستثمرين: الأرصدة والفواتير والعمالة والمعدات")}">${X.busy ? U.L("Making PDF…", "جارٍ إنشاء PDF…") : U.L("⤓ Investor PDF", "⤓ PDF للمستثمرين")}</button>`;
+  };
+
+  A.investorPdf = async () => {
+    if (X.busy) return;
+    if (!X.canDraw()) return ui.toast(U.L("The PDF can't be made in this view.", "لا يمكن إنشاء ملف PDF في هذا العرض."));
+    if (!SL.S.downloads) return ui.toast(U.L("Downloads aren't available here.", "التنزيل غير متاح هنا."));
+    const pid = ui.pid(), D = ui.D();
+    X.busy = true; ui.render();
+    try {
+      const r0 = await X.build(pid, D);
+      const r = await SL.store.download(X.fileName(pid, D), r0.blob);
+      if (r && r.ok) ui.toast(U.L("Investor PDF ready · " + r0.pages + " pages · as of " + U.dShort(D), "ملف PDF للمستثمرين جاهز · " + U.plAr(r0.pages, "صفحة واحدة", "صفحتان", "صفحات", "صفحة") + " · حتى تاريخ " + U.dShort(D)));
+      else {
+        const o = SL._admin && SL._admin.dlOutcome ? SL._admin.dlOutcome(r) : { msg: U.L("Not saved.", "لم يُحفظ.") };
+        if (o.gone && SL._admin) SL._admin.dlGone = true; // saving can't run in this view: the button goes (as the JSON backup's)
+        if (o.msg) ui.toast(U.esc(o.msg));
+      }
+    } catch (e) {
+      console.warn("[pdf]", e);
+      ui.toast(U.L("Couldn't make the PDF. Try again.", "تعذّر إنشاء ملف PDF. حاول مرة أخرى."));
+    } finally { X.busy = false; ui.render(); }
+  };
+
+  /** For Claude Code: SL.pdf.build(pid, D) → {blob, pages}. */
+  SL.pdf = { build: (pid, D) => X.build(pid || ui.pid(), D || ui.D()), fileName: X.fileName };
 })(window.SL);
 
 /* ---- 99-boot.js ---- */
