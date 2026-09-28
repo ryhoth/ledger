@@ -1367,7 +1367,6 @@ html[dir=rtl] .v-timeline .tl-trk .rl.np{background:repeating-linear-gradient(45
 .v-bal .bl .bl-tot .bl-d{background:var(--float-bg)}
 .v-bal .t11{font-size:var(--t-11)}
 .v-bal .bl-foot{margin:0}
-.v-bal .bl tfoot .bl-tot th,.v-bal .bl tfoot .bl-tot td{border-top:2px solid var(--line-2);border-bottom:0}
 .v-bal .bl-sum .kv > span small{display:block;font-size:var(--t-11);font-weight:400}
 .v-bal .bl-sum .kv .v{font-size:var(--t-16);font-weight:700}
 @media (max-width:600px){
@@ -8726,7 +8725,11 @@ window.SL = window.SL || {};
       h += `<div class="bl-tools"><input id="bl-q" class="inp" type="search" placeholder="${U.L("Search: supplier, crew, job, amount", "بحث: مورد، طاقم، بند، مبلغ")}" aria-label="${U.L("Search events", "بحث في الحركات")}" value="${U.esc(X.q)}" autocomplete="off"><button type="button" class="lnk bl-hlp" data-act="toggle" data-k="bl.help" aria-expanded="${help}">${help ? U.L("Hide help", "إخفاء الشرح") : U.L("How to read", "طريقة القراءة")}</button></div>`;
       if (help) h += '<p class="t12 muted bl-help">' + U.L('Money starts with <b class="bl-me">Me</b> and moves right: Me → ' + sy + ' → whoever was paid, so every row balances. Me and ' + sy + ': cash in <b>+</b> / out <b>−</b>; the small <b>= n</b> under ' + sy + "'s amounts is what he should hold after it. Trades, suppliers and equipment: <b class=\"c-owed\">−</b> when they work or deliver (we owe them), <b class=\"c-prepaid\">+</b> when they are paid. Their balance: <b class=\"c-owed\">−</b> we still owe, <b class=\"c-prepaid\">+</b> paid ahead. Proof: <b>doc</b> = a document backs it (tap to open) · <b>none</b> = nothing on paper (" + nDoc + " of " + all.length + " events have one).",
         `المال يبدأ من <b class="bl-me">${me}</b> ويتحرك إلى اليسار: ${me} ${arr} ${sy} ${arr} من استلم الدفعة، فيتوازن كل سطر. ${me} و${sy}: نقد داخل <b>+</b> / خارج <b>−</b>؛ الرقم الصغير <b>${U.ltr("= n")}</b> تحت مبالغ ${sy} هو ما يجب أن يكون معه بعدها. الحرفيون والموردون والمعدات: <b class="c-owed">−</b> عندما يعملون أو يسلّمون (لهم علينا)، <b class="c-prepaid">+</b> عندما يُدفع لهم. رصيدهم: <b class="c-owed">−</b> ما زال لهم علينا، <b class="c-prepaid">+</b> مدفوع مقدماً. المستند: <b>مستند</b> = يوجد مستند يدعمه (اضغط لفتحه) · <b>لا يوجد</b> = لا شيء على ورق (${nDoc} من ${all.length} حركة لها مستند).`) + "</p>";
-      h += '<div class="bl-box"><div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-pc">' + U.L("Proof", "مستند") + '</th><th scope="col" class="bl-d">' + U.L("Description", "الوصف") + "</th>" + head + "</tr></thead><tbody>";
+      h += '<div class="bl-box"><div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-pc">' + U.L("Proof", "مستند") + '</th><th scope="col" class="bl-d">' + U.L("Description", "الوصف") + "</th>" + head + "</tr></thead>";
+      // the Balance row sits right under the column names, above the events (in its own tbody: the search never hides it)
+      const tot = '<tr class="bl-tot"><td class="bl-pc"></td><th scope="row" class="bl-d">' + U.L("Balance", "الرصيد") + '<span class="t11 muted">' + (f === "all" ? U.L("all events", "كل الحركات") : U.L("all events, not just these", "كل الحركات، لا هذه فقط")) + (ui.isPast() ? U.L(" · as of ", " · حتى تاريخ ") + U.esc(U.dShort(D)) : "") + "</span></th>" +
+        cols.map(([k]) => X.cell(t[k], k)).join("") + "</tr>";
+      h += '<tbody class="bl-totb">' + tot + "</tbody><tbody>";
       let day = null;
       for (const r of rows) {
         if (r.date !== day) {
@@ -8741,8 +8744,7 @@ window.SL = window.SL || {};
           cols.map(([k]) => X.cell(r.fx[k], k, r.sayedAfter)).join("") + "</tr>";
       }
       h += `<tr class="bl-none"${rows.length ? " hidden" : ""}><td colspan="${cols.length + 2}" class="muted t13">${rows.length ? U.L("No event matches the search · ", "لا توجد حركة تطابق البحث · ") : f === "open" ? U.L("Everything is settled. ", "كل شيء مسوّى. ") : U.L("Nothing here. ", "لا يوجد شيء هنا. ")}<button type="button" class="lnk" data-act="balClear">${U.L("Show all", "عرض الكل")}</button></td></tr>`;
-      h += '</tbody><tfoot><tr class="bl-tot"><td class="bl-pc"></td><th scope="row" class="bl-d">' + U.L("Balance", "الرصيد") + '<span class="t11 muted">' + (f === "all" ? U.L("all events", "كل الحركات") : U.L("all events, not just these", "كل الحركات، لا هذه فقط")) + (ui.isPast() ? U.L(" · as of ", " · حتى تاريخ ") + U.esc(U.dShort(D)) : "") + "</span></th>" +
-        cols.map(([k]) => X.cell(t[k], k)).join("") + "</tr></tfoot></table></div></div>";
+      h += "</tbody></table></div></div>";
       if (cols.length < X.COLS.length) h += `<p class="t12 muted bl-hid">${U.L("Not shown (nothing in them): ", "غير معروضة (فارغة): ")}${X.COLS.filter((c) => !cols.includes(c)).map(([k, l]) => lab(k, l).replace(/\.$/, "")).join(U.L(", ", "، "))}.</p>`;
       return h + "</div>";
     },
