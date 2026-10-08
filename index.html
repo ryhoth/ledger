@@ -354,6 +354,12 @@ img{max-width:100%}[hidden]{display:none!important}
   --gutter:16px; --gap:16px;
   --r-ctl:3px; --r-pill:2px; --r-sheet:10px;
   --hdr-h:44px; --tab-h:56px;
+  /* motion (spec part 1 › Motion). JS reads durations through SL.motion.ms(). */
+  --mo-1:150ms; --mo-2:200ms; --mo-3:300ms; --mo-4:450ms; --mo-5:500ms; --mo-shimmer:1400ms;
+  --mo-ease-out:cubic-bezier(.33,1,.68,1);   /* easeOutCubic; SL.motion.ease(p) mirrors it */
+  --mo-ease-in:cubic-bezier(.4,0,1,1);
+  --mo-hi:color-mix(in srgb,var(--float) 30%,var(--paper));   /* "this just changed"; opaque on purpose */
+  --mo-press:color-mix(in srgb,var(--ink) 9%,transparent);    /* pressed tint on light controls */
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
@@ -624,7 +630,7 @@ table.t tfoot td{font-weight:700;border-top:2px solid var(--ink);border-bottom:0
 
 /* ---------- sheet, toast, menu ---------- */
 .scrim{position:fixed;inset:0;background:var(--scrim);z-index:40}
-.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;background:var(--paper);border-radius:var(--r-sheet) var(--r-sheet) 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.18);transform:translateY(0);transition:transform .2s ease-out;max-width:720px;margin:0 auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:41;max-height:92vh;max-height:92dvh;display:flex;flex-direction:column;background:var(--paper);border-radius:var(--r-sheet) var(--r-sheet) 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.18);transform:translateY(0);transition:transform var(--mo-2) var(--mo-ease-out);max-width:720px;margin:0 auto}
 .sheet.enter{transform:translateY(105%)}
 .sheet .sh-h{display:flex;align-items:center;gap:8px;padding:12px var(--gutter) 8px;border-bottom:1px solid var(--line)}
 .sheet .sh-h h2{flex:1;font-size:var(--t-16);font-weight:700;min-width:0}
@@ -2393,6 +2399,118 @@ html[dir=rtl] .v-settings-kv{grid-template-columns:auto minmax(0,1fr)}
 .v-settings .sech .btn.sm::after,.v-report .sech .act::after{content:"";position:absolute;inset:-6px -4px}
 .v-settings .row.tap{min-height:44px;cursor:pointer}
 
+/* ---- 80-motion.css ---- */
+/* Motion (spec part 1 › Motion). Every animation's rest state is the element's own style; --mo-t carries the clock across re-renders. */
+@keyframes mo-hi{0%,30%{background-color:var(--mo-hi)}}          /* hold, then fade to the element's own background */
+@keyframes mo-fade-in{from{opacity:0}}
+.mo-hi,tr.mo-hi>*{animation:mo-hi var(--mo-5) ease-out backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+tr.mo-hi{animation:none}                                         /* table rows: the cells carry it (sticky cells have their own background) */
+
+/* ---------- A1 odometer: float chip, Pay card and rail card Holds (25-motion.js) ---------- */
+.chip-float,.odo{font-variant-numeric:tabular-nums} .odo{font-kerning:none}
+.odo-v{display:inline-flex;align-items:baseline;direction:ltr;unicode-bidi:isolate}   /* RTL keeps digit order (inline-block cells are bidi neutrals) */
+.odo-v .h{display:inline-flex;align-items:baseline}
+.odo-c{display:block;height:1.2em;height:1lh;clip-path:inset(0 -2px)}                  /* clip-path, not overflow: keeps the baseline */
+.odo-s{display:flex;flex-direction:column} .odo-s>span{display:block;height:1.2em;height:1lh}
+.odo-s.up{transform:translateY(-50%);animation:mo-odo-up var(--mo-4) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+.odo-s.dn{animation:mo-odo-dn var(--mo-4) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+.odo-k.odo-in{animation:mo-fade-in var(--mo-4) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+@keyframes mo-odo-up{from{transform:translateY(0)}} @keyframes mo-odo-dn{from{transform:translateY(-50%)}}
+.chip-float.mo-pulse{animation:mo-ring var(--mo-5) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+.chip-float.mo-x{animation:mo-x-ok var(--mo-3) linear backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+.chip-float.short.mo-x{animation-name:mo-x-short}
+.chip-float.mo-pulse.mo-x{animation:mo-ring var(--mo-5) var(--mo-ease-out) backwards,mo-x-ok var(--mo-3) linear backwards;animation-delay:calc(0ms - var(--mo-t,0ms)),calc(0ms - var(--mo-t,0ms))}
+.chip-float.short.mo-pulse.mo-x{animation-name:mo-ring,mo-x-short}
+@keyframes mo-ring{from{box-shadow:0 0 0 0 color-mix(in srgb,var(--float) 75%,transparent)}to{box-shadow:0 0 0 6px transparent}}
+@keyframes mo-x-ok{from{background-color:var(--stop-bg)}} @keyframes mo-x-short{from{background-color:var(--float-bg)}}
+/* text colour switches together with the "short" word appearing; colour is never animated */
+
+/* ---------- A2 toast: rise, fade out, Undo window as a draining bar, success check ---------- */
+.toast.in{animation:mo-rise var(--mo-2) var(--mo-ease-out)} @keyframes mo-rise{from{opacity:0;transform:translateY(8px)}}
+.toast.out{opacity:0;transition:opacity var(--mo-1) linear}   /* keeps pointer events: a tap during the fade hits the toast (no-op), never the row below */
+.toast-bar{position:absolute;inset-inline:0;bottom:0;height:2px;background:var(--on-ink-accent);border-radius:0 0 var(--r-ctl) var(--r-ctl);transform-origin:0 50%;animation:mo-drain var(--toast-ms,6000ms) linear forwards;pointer-events:none}
+html[dir=rtl] .toast-bar{transform-origin:100% 50%}            /* drains toward the reading start */
+@keyframes mo-drain{to{transform:scaleX(0)}} @keyframes mo-dim{to{opacity:.25}}
+.toast .tk-ok{flex:none;display:inline-grid;place-items:center;width:16px;height:16px}
+.toast .tk-ok svg{display:block;animation:mo-draw var(--mo-2) var(--mo-ease-out) var(--mo-1) backwards}   /* follows the stroke in both languages: a check mark is not mirrored */
+@keyframes mo-draw{from{clip-path:inset(0 100% 0 0)}}
+
+/* ---------- A3 sheets: scrim fade, exit that never blocks taps, phone grab handle + drag ---------- */
+.scrim{transition:opacity var(--mo-2) linear} .scrim.enter,.scrim.leaving{opacity:0}
+.scrim.leaving{pointer-events:none}   /* the page is tappable at once; the leaving sheet still takes taps (no-ops) so a double tap never hits what it slides off */
+.sheet.leaving{transition-timing-function:var(--mo-ease-in)} .sheet.leaving.from-drag{transition-timing-function:var(--mo-ease-out)}
+.sheet.dragging,.scrim.dragging{transition:none}
+.sh-grab{display:none}
+@media (max-width:767px){
+  .sheet .sh-grab{display:block;flex:none;height:14px;position:relative;touch-action:none}
+  .sheet .sh-grab::before{content:"";position:absolute;top:6px;left:50%;width:36px;height:4px;margin-left:-18px;border-radius:2px;background:var(--line-2)}
+  .sheet .sh-h{padding-top:2px;touch-action:none}                     /* only the header and handle start a drag; .sh-b keeps native scroll */
+  .sheet::after{content:"";position:absolute;left:0;right:0;top:100%;height:24px;background:var(--paper)}   /* skirt under the rubber band */
+}
+
+/* ---------- A4 press feedback (:active, so it survives any re-render). Rows get the tint only, never a scale. ---------- */
+:where(.btn,.chip,.chip-float,.chip-flags,.chip-lang,.tabs button,.digits button,.seg button,.menu button,.row.tap,.lnk,.hdr .back,.hdr .more,.sheet .x,.ph-btn){-webkit-tap-highlight-color:transparent}
+@media (prefers-reduced-motion:no-preference){
+  :where(.btn,.chip,.chip-float,.chip-flags,.chip-lang,.tabs .plus,.digits button,.ph-btn){transition:transform var(--mo-1) var(--mo-ease-out)}
+  :where(.btn,.chip,.chip-float,.chip-flags,.chip-lang,.tabs .plus,.digits button,.ph-btn):active:not(:disabled){transform:scale(.97);transition-duration:0s}
+  :where(.btn.block):active:not(:disabled){transform:scale(.985)}
+}
+/* background tints need real specificity (base rules like .btn.sec{background:transparent} would beat :where) */
+.btn:not(.sec):not(.ghost):not(.danger):not(.float):active:not(:disabled){background-color:color-mix(in srgb,var(--ink) 86%,var(--paper))}
+.btn.float:active:not(:disabled),.tabs .plus:active{background-color:color-mix(in srgb,var(--float) 88%,#000)}
+.btn.sec:active:not(:disabled),.btn.ghost:active:not(:disabled),.btn.danger:active:not(:disabled),.chip:not(.on):active,.chip-lang:active,.chip-flags:active,.seg button:not(.on):active,.menu button:active,.row.tap:active,.hdr .back:active,.hdr .more:active,.sheet .x:active,.tabs button:not(.plus):active{background-color:var(--mo-press)}
+.lnk:active{opacity:.6}
+/* their tap highlight is off: a press tint that holds under reduced motion too (the scale above is motion) */
+.chip.on:active,.seg button.on:active{background-color:color-mix(in srgb,var(--ink) 86%,var(--paper))}
+.chip-float:active{box-shadow:inset 0 0 0 99px var(--mo-press)}
+.ph-btn:active{opacity:.7}
+
+/* ---------- reduced motion: nothing moves (colour flashes stay). Never a blanket *{animation:none}: B's shimmer rule is its own. ---------- */
+@media (prefers-reduced-motion:reduce){
+  .sheet,.scrim{transition:none}
+  .odo-s,.odo-k,.chip-float{animation:none!important}
+  .toast.in{animation-name:mo-fade-in} .toast-bar{animation-name:mo-dim} .toast .tk-ok svg{animation:none}
+}
+
+/* ---- 81-motion-data.css ---- */
+/* ---------- B motion (26-motion-data.js): new rows print in, money bars slide, skeleton shimmer ---------- */
+/* B1: a new row prints top-down (300 ms) on the yellow wash, which then fades (mo-hi, 500 ms). Table rows only flash (.mo-hi). */
+@keyframes mo-reveal{from{clip-path:inset(0 0 100% 0)}to{clip-path:inset(0)}}
+.mo-new{animation:mo-reveal var(--mo-3) var(--mo-ease-out) backwards,mo-hi var(--mo-5) ease-out backwards;animation-delay:calc(0ms - var(--mo-t,0ms)),calc(var(--mo-3) - var(--mo-t,0ms))}
+/* B2: a segment slides from its old start and unclips from the inline end (never scaleX: it would squash the hatch and dots) */
+@keyframes mo-seg{from{transform:translateX(var(--mo-dx,0));clip-path:var(--mo-clip,inset(0))}to{transform:none;clip-path:inset(0)}}
+@keyframes mo-mark{from{transform:translateX(var(--mo-dx,0px))}}
+.mo-seg{animation:mo-seg var(--mo-4) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+.mo-mark{animation:mo-mark var(--mo-4) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+/* B3: a light band sweeps for ~500 ms (36% of the cycle), then rests: the only infinite loop. --mo-ph phase-locks it (mo.skel). */
+.skel{position:relative;overflow:hidden}
+.skel::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--paper) 70%,transparent),transparent);transform:translateX(-100%);animation:mo-shim var(--mo-shimmer) linear infinite;animation-delay:var(--mo-ph,0ms);pointer-events:none}
+html[dir=rtl] .skel::after{transform:translateX(100%);animation-name:mo-shim-rtl}
+@keyframes mo-shim{0%{transform:translateX(-100%)}36%,100%{transform:translateX(100%)}}
+@keyframes mo-shim-rtl{0%{transform:translateX(100%)}36%,100%{transform:translateX(-100%)}}
+
+/* ---------- reduced motion: no reveal, slide or sweep; new rows still flash yellow once ---------- */
+@media (prefers-reduced-motion:reduce){
+  .mo-new{animation:mo-hi var(--mo-5) ease-out backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+  .mo-seg,.mo-mark{animation:none} .skel::after{animation:none;display:none}
+}
+
+/* ---- 82-motion-pay.css ---- */
+/* ---------- C motion (27-motion-pay.js): crew cell sheet digit echo and day slide. The paid flash is the shared .mo-hi. ---------- */
+/* C1: the tapped digit's node was replaced by the refresh, so the press is echoed on the new one (an "on" digit keeps its ink: scale only) */
+@keyframes mo-press{from{transform:scale(.94);background-color:var(--mo-hi)}} @keyframes mo-press-on{from{transform:scale(.94)}}
+.digits button.mo-press{animation:mo-press var(--mo-1) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+.digits button.on.mo-press{animation-name:mo-press-on}
+/* the day changed (auto-advance, ‹ ›, arrow keys): the boxes and the total come in from the side the day lies on */
+@keyframes mo-from-end{from{transform:translateX(14px);opacity:.3}} @keyframes mo-from-start{from{transform:translateX(-14px);opacity:.3}}
+.mo-in-next{animation:mo-from-end var(--mo-2) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+.mo-in-prev{animation:mo-from-start var(--mo-2) var(--mo-ease-out) backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+html[dir=rtl] .mo-in-next{animation-name:mo-from-start} html[dir=rtl] .mo-in-prev{animation-name:mo-from-end}
+.mo-fade{animation:mo-fade-in var(--mo-1) linear backwards;animation-delay:calc(0ms - var(--mo-t,0ms))}
+
+/* ---------- reduced motion: no echo, slide or fade (the JS adds none either); the edited cells' yellow flash stays ---------- */
+@media (prefers-reduced-motion:reduce){.digits button.mo-press,.digits button.on.mo-press,.mo-in-next,.mo-in-prev,html[dir=rtl] .mo-in-next,html[dir=rtl] .mo-in-prev,.mo-fade{animation:none}}
+
 </style>
 <nav class="rail" id="rail" aria-label="Sections"></nav>
 <div class="app" id="app">
@@ -2860,6 +2978,7 @@ window.SL = window.SL || {};
     if (opts.refund && u.kind === "crew") return { ok: false, code: "bad_amount", message: tl("a crew week can't take a refund", "لا استرداد على أسبوع طاقم") };
     const key = "p" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
     const t = payTarget(u);
+    if (SL.motion && SL.motion.expectPaid) SL.motion.expectPaid(u.key, key);   // the paid flash (27-motion-pay) finds it when it lands
     const pay = { date: opts.date || U.today(), amount: U.round2(opts.amount), walletId: opts.walletId, at: Date.now() };
     if (opts.refund) { pay.amount = -Math.abs(pay.amount); pay.refund = true; }
     if (opts.note) pay.note = opts.note;
@@ -2869,6 +2988,7 @@ window.SL = window.SL || {};
     return Object.assign(r, { ref: { coll: t.coll, id: t.id, key, crewId: u.kind === "crew" ? u.crewId : undefined } });
   };
   store.voidPay = (ref) => {
+    if (SL.motion && SL.motion.paidCancel) SL.motion.paidCancel(ref.key);   // a voided payment never flashes as just paid (27-motion-pay)
     const body = ref.coll === "timesheets" && ref.crewId ? { crews: { [ref.crewId]: { payments: { [ref.key]: { void: true, voidAt: Date.now() } } } } } : { payments: { [ref.key]: { void: true, voidAt: Date.now() } } };
     return store.patch(ref.coll, ref.id, body);
   };
@@ -4501,6 +4621,7 @@ window.SL = window.SL || {};
     if (rendering) { pending = true; return; }
     rendering = true;
     try { renderNow(); } catch (e) { console.error(e); const v = document.getElementById("view"); if (v) v.innerHTML = '<div class="notice">' + U.L("Something went wrong drawing this screen: ", "حدث خطأ أثناء عرض هذه الشاشة: ") + enText(U.esc(e.message)) + ' · <button class="lnk" data-go="#today">' + U.L("Back to Today", "العودة إلى اليوم") + "</button></div>"; }
+    if (SL.motion) { try { SL.motion.afterRender(); } catch (e) { console.error(e); } }
     rendering = false;
     if (pending) { pending = false; render(); }
     ui.sheets.forEach((sh) => { if (sh.live) sh.refresh(); });
@@ -4518,6 +4639,7 @@ window.SL = window.SL || {};
     const s = S(), r = ui.route, pid = ui.pid();
     document.body.classList.toggle("desk", window.innerWidth >= 1100);
     const view = document.getElementById("view");
+    if (s.ready || s.noRuntime) view.removeAttribute("aria-busy"); else view.setAttribute("aria-busy", "true");
     chromeLabels();
     if (s.noRuntime) {
       document.getElementById("hdr").innerHTML = '<span class="pname"><span>' + U.L("Site Ledger", "دفتر الموقع") + "</span></span>";
@@ -4527,7 +4649,7 @@ window.SL = window.SL || {};
     }
     if (!s.ready) {
       document.getElementById("hdr").innerHTML = '<span class="pname"><span>' + U.L("Site Ledger", "دفتر الموقع") + "</span></span>";
-      view.innerHTML = Array.from({ length: 7 }, () => '<div class="skel"></div>').join("") + (Date.now() - (ui.bootAt || 0) > 800 ? '<p class="t12 muted">' + U.L("Loading ledger…", "جارٍ تحميل الدفتر…") + "</p>" : "");
+      view.innerHTML = Array.from({ length: 7 }, (_, i) => '<div class="skel" aria-hidden="true"' + (SL.motion && SL.motion.skel ? SL.motion.skel(i) : "") + "></div>").join("") + (Date.now() - (ui.bootAt || 0) > 800 ? '<p class="t12 muted">' + U.L("Loading ledger…", "جارٍ تحميل الدفتر…") + "</p>" : "");
       return;
     }
     const name = r.name;
@@ -4569,9 +4691,10 @@ window.SL = window.SL || {};
     if (!ro) {
       const wid = M.defaultWallet(pid), w = M.wallet(wid), wc = M.walletCalc(wid, U.today());
       if (w) {
-        const short = wc.left < 0;
-        const who = U.esc(holderOf(w)), fig = short ? U.L("short ", "ناقص ") + U.mw(-wc.left / 100) : U.mw(wc.holds / 100);
-        h += '<button class="chip-float' + (short ? " short" : "") + '" data-go="' + ui.href("pay") + '" title="' + U.L("Cash " + who + " should be holding", "النقد الذي يجب أن يكون لدى " + who) + '" aria-label="' + U.L(who + "'s float " + fig, "عهدة " + who + " " + fig) + '"><span class="nm">' + who + " </span>" + fig + "</button>";
+        const short = wc.left < 0, shown = short ? -wc.left : wc.holds;
+        const who = U.esc(holderOf(w)), pre = short ? U.L("short ", "ناقص ") : "", fig = pre + U.mw(shown / 100);
+        // the figure may roll (SL.motion); the aria-label and title always carry the final value
+        h += '<button class="chip-float' + (short ? " short" : "") + '" data-odo-host data-odo-hold="' + wc.holds + '" data-go="' + ui.href("pay") + '" title="' + U.L("Cash " + who + " should be holding", "النقد الذي يجب أن يكون لدى " + who) + '" aria-label="' + U.L(who + "'s float " + fig, "عهدة " + who + " " + fig) + '"><span class="nm">' + who + ' </span><span class="fig">' + pre + ui.odo("chip." + wid, shown, short ? "short" : "ok", U.mw(shown / 100)) + "</span></button>";
       }
       const fc = ui.flagCounts(pid);
       if (fc.stop + fc.check) h += '<button class="chip-flags' + (fc.stop ? " hasstop" : "") + '" data-go="' + ui.href("flags") + '" aria-label="' + U.L("Flags: " + fc.stop + " stop, " + fc.check + " check", "التنبيهات: عاجل " + fc.stop + "، للتحقق " + fc.check) + '">' + (fc.stop ? '<span class="s">▲' + fc.stop + "</span>" : "") + (fc.check ? '<span class="c">△' + fc.check + "</span>" : "") + "</button>";
@@ -4593,6 +4716,8 @@ window.SL = window.SL || {};
     U.lsSet("sl.lang", SL.lang);
     U.applyLang();
     SL.S.ver++;
+    document.querySelectorAll("#layer .leaving").forEach((n) => n.remove());   // a desktop drawer mid-exit must not jump sides
+    if (SL.motion) SL.motion.hush();
     render();
   };
   A.setLang = (d) => ui.setLang(d.val);
@@ -4664,14 +4789,15 @@ window.SL = window.SL || {};
     const holds = c.holds, owed = c.owedVia, left = c.left;
     const who = U.esc(holderOf(w)), L = U.L;
     let gauge;
-    if (holds <= 0) gauge = '<div class="fgauge" role="img" aria-label="' + L(who + " holds nothing", "لا شيء في يد " + who) + '"></div>'; // §3.8: empty bar
-    else if (owed > holds) { gauge = '<div class="fgauge"><i class="claimed" style="width:' + Math.max(50, 100 - Math.min(50, ((owed - holds) / holds) * 100)) + '%"></i><i class="short" style="width:' + Math.min(50, ((owed - holds) / holds) * 100) + '%"></i></div>'; }
-    else gauge = '<div class="fgauge"><i class="claimed" style="width:' + (owed / holds) * 100 + '%"></i><i class="free" style="width:' + ((holds - owed) / holds) * 100 + '%"></i></div>';
+    const mb = ' data-mb="fg:' + U.esc(wid) + '"';   // bar identity for SL.motion (segments slide on change)
+    if (holds <= 0) gauge = '<div class="fgauge"' + mb + ' role="img" aria-label="' + L(who + " holds nothing", "لا شيء في يد " + who) + '"></div>'; // §3.8: empty bar
+    else if (owed > holds) { gauge = '<div class="fgauge"' + mb + '><i class="claimed" data-s="claimed" style="width:' + Math.max(50, 100 - Math.min(50, ((owed - holds) / holds) * 100)) + '%"></i><i class="short" data-s="short" style="width:' + Math.min(50, ((owed - holds) / holds) * 100) + '%"></i></div>'; }
+    else gauge = '<div class="fgauge"' + mb + '><i class="claimed" data-s="claimed" style="width:' + (owed / holds) * 100 + '%"></i><i class="free" data-s="free" style="width:' + ((holds - owed) / holds) * 100 + '%"></i></div>';
     const lastCount = Object.values(w.counts || {}).filter((c) => c && !c.void && c.date).sort((a, b) => (b.at || 0) - (a.at || 0))[0];
     const unpriced = f.underCount ? L(" (" + f.underCount + " rentals unpriced, not counted)", " (إيجارات بلا سعر غير محسوبة: " + f.underCount + ")") : "";
     return `<div class="card float">
       <div class="hrow"><span class="lbl" style="color:var(--float-ink)">${L(U.esc(holderOf(w).toUpperCase()) + "'S FLOAT", "عهدة " + who)}</span><span class="spacer"></span>${lastCount ? '<span class="t12 muted">' + L("counted ", "آخر جرد ") + U.esc(U.dDM(lastCount.date)) + "</span>" : '<span class="t12 muted">' + L("never counted", "لم تُجرد بعد") + "</span>"}</div>
-      <div class="kv"><span>${holds <= 0 ? L(who + " holds", "في يد " + who) : L("Holds (expected)", "في اليد (متوقع)")}</span><span class="v t20${holds < 0 ? " c-stop" : ""}">${holds <= 0 ? (holds === 0 ? L("nothing", "لا شيء") : L("short by ", "ناقص ") + U.m(-holds / 100)) : U.m(holds / 100)}</span>
+      <div class="kv"><span>${holds <= 0 ? L(who + " holds", "في يد " + who) : L("Holds (expected)", "في اليد (متوقع)")}</span><span class="v t20${holds < 0 ? " c-stop" : ""}">${holds <= 0 ? (holds === 0 ? L("nothing", "لا شيء") : L("short by ", "ناقص ") + ui.odo("rail." + wid, -holds, "neg", U.m(-holds / 100))) : ui.odo("rail." + wid, holds, "pos", U.m(holds / 100))}</span>
       <span>${L("Owed via float", "مستحق من العهدة")}</span><span class="v c-owed">${U.m(owed / 100)}</span>
       <span>${left < 0 ? L("Short by", "ناقص") : L("Left after paying", "يتبقى بعد الدفع")}</span><span class="v ${left < 0 ? "c-stop" : ""}">${U.m(Math.abs(left) / 100)}</span></div>
       ${gauge}
@@ -4695,32 +4821,36 @@ window.SL = window.SL || {};
     const layer = document.getElementById("layer");
     const scrim = document.createElement("div"); scrim.className = "scrim";
     const el = document.createElement("div"); el.className = "sheet enter" + (cfg.wide ? " wide" : ""); el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true");
-    const sh = { cfg, state: cfg.state || {}, el, scrim, live: !!cfg.live, acts: cfg.acts || {}, err: "", isBusy: false, confirmDiscard: false };
+    const sh = { cfg, state: cfg.state || {}, el, scrim, live: !!cfg.live, acts: cfg.acts || {}, err: "", isBusy: false, confirmDiscard: false, closed: false };
+    if (SL.motion) SL.motion.sheetIn(sh);
     sh.refresh = () => {
       const ae = document.activeElement, fid = ae && el.contains(ae) ? ae.id : null;
       let s0 = null, s1 = null; try { if (fid && ae.selectionStart != null) { s0 = ae.selectionStart; s1 = ae.selectionEnd; } } catch (e) {}
       const bodyEl = el.querySelector(".sh-b"), st = bodyEl ? bodyEl.scrollTop : 0;
       const title = typeof cfg.title === "function" ? cfg.title(sh) : cfg.title;
       const foot = sh.confirmDiscard ? '<span class="t13" style="align-self:center">' + U.L("Discard changes?", "تجاهل التغييرات؟") + '</span><button class="btn sec" data-act="keepEditing">' + U.L("Keep editing", "متابعة التعديل") + '</button><button class="btn danger" data-act="discard">' + U.L("Discard", "تجاهل") + "</button>" : cfg.foot ? cfg.foot(sh) : "";
-      el.innerHTML = `<div class="sh-h"><h2>${title || ""}</h2><button class="x" data-act="close" aria-label="${U.L("Close", "إغلاق")}">×</button></div>` +
+      el.innerHTML = `<div class="sh-grab" aria-hidden="true"></div><div class="sh-h"><h2>${title || ""}</h2><button class="x" data-act="close" aria-label="${U.L("Close", "إغلاق")}">×</button></div>` +
         (sh.note ? `<div class="sh-note">${sh.note}</div>` : "") +
         `<div class="sh-b">${cfg.body(sh)}</div>` +
         (foot || sh.err ? `<div class="sh-f">${sh.err ? '<div class="notsaved" style="flex-basis:100%">' + U.esc(sh.err) + "</div>" : ""}${foot}</div>` : "");
       const nb = el.querySelector(".sh-b"); if (nb) nb.scrollTop = st;
       if (fid) { const f = el.querySelector("#" + CSS.escape(fid)); if (f) { f.focus({ preventScroll: true }); try { if (s0 != null) f.setSelectionRange(s0, s1); } catch (e) {} } }
       if (cfg.after) cfg.after(sh);
+      if (SL.motion) SL.motion.afterSheet(sh);
     };
     sh.out = (name, html) => U.$$('[data-out="' + name + '"]', el).forEach((x) => (x.innerHTML = html));
     sh.set = (k, v) => { setPath(sh.state, k, v); sh.refresh(); };
     sh.error = (m) => { sh.err = m || ""; sh.refresh(); };
     sh.busy = (on) => { sh.isBusy = on; U.$$(".sh-f .btn", el).forEach((b) => (b.disabled = !!on)); };
     sh.close = (force) => {
+      if (sh.closed) return;                                              // idempotent: onClose runs once
       if (!force && cfg.dirty && cfg.dirty(sh) && !sh.confirmDiscard) { sh.confirmDiscard = true; sh.refresh(); return; }
-      el.classList.add("enter"); scrim.remove(); setTimeout(() => el.remove(), 200);
-      ui.sheets = ui.sheets.filter((x) => x !== sh);
+      sh.closed = true; ui.sheets = ui.sheets.filter((x) => x !== sh);
+      if (SL.motion) SL.motion.sheetOut(sh); else { el.classList.add("enter"); scrim.remove(); setTimeout(() => el.remove(), 200); }
       if (cfg.onClose) cfg.onClose(sh);
       document.body.style.overflow = ui.sheets.length ? "hidden" : "";
       if (sh.returnFocus && sh.returnFocus.focus) try { sh.returnFocus.focus({ preventScroll: true }); } catch (e) {}
+      if (!ui.sheets.length && SL.motion) SL.motion.uncovered();
     };
     sh.returnFocus = document.activeElement;
     scrim.addEventListener("click", () => sh.close());
@@ -4728,8 +4858,8 @@ window.SL = window.SL || {};
     ui.sheets.push(sh);
     document.body.style.overflow = "hidden";
     sh.refresh();
-    requestAnimationFrame(() => el.classList.remove("enter"));
-    setTimeout(() => { const f = el.querySelector("[autofocus]") || el.querySelector(".x"); if (f) f.focus({ preventScroll: true }); }, 60);
+    (window.requestAnimationFrame || setTimeout)(() => { if (sh.closed) return; el.classList.remove("enter"); scrim.classList.remove("enter"); });
+    setTimeout(() => { if (sh.closed) return; const f = el.querySelector("[autofocus]") || el.querySelector(".x"); if (f) f.focus({ preventScroll: true }); }, 60);
     return sh;
   };
   ui.topSheet = () => ui.sheets[ui.sheets.length - 1] || null;
@@ -4739,19 +4869,31 @@ window.SL = window.SL || {};
   ui.getPath = getPath; ui.setPath = setPath;
 
   /* ================= toast ================= */
-  let toastT = null, toastN = 0;
-  /** ui.toast("Paid …", {undo: async () => {...}, ms}) */
+  let toastT = null, toastN = 0, toastOut = null;
+  const TICK = '<span class="tk-ok" aria-hidden="true"><svg viewBox="0 0 16 16" width="14" height="14" focusable="false"><path d="M3.2 8.6 6.5 11.8 12.8 4.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>';
+  /** Fade the toast out (150 ms; reduced motion keeps the fade: it is not movement). A newer toast cancels it (toastN).
+   *  Its Undo stays live until the fade ends: a button you can still see and tap still works. */
+  function hideToast() {
+    const t = document.getElementById("toast"); if (!t || t.hidden) { ui._undo = null; return; }
+    if (!SL.motion) { t.hidden = true; t.classList.remove("in", "out"); ui._undo = null; return; }
+    const n = toastN; t.classList.remove("in"); t.classList.add("out");
+    clearTimeout(toastOut); toastOut = setTimeout(() => { if (n === toastN) { t.hidden = true; t.classList.remove("out"); ui._undo = null; } }, SL.motion.ms("mo-1", 150));
+  }
+  /** ui.toast(html, {undo, ms, ok}). ok (default: !!undo) draws a check; an Undo toast shows its window as a draining bar. */
   ui.toast = (html, opts) => {
     opts = opts || {}; toastN++;
-    const t = document.getElementById("toast");
-    t.innerHTML = "<span>" + html + "</span>" + (opts.undo ? '<button data-act="undoToast">' + U.L("Undo", "تراجع") + "</button>" : "");
+    const t = document.getElementById("toast"), ms = opts.ms || (opts.undo ? 6000 : 2600), ok = opts.ok != null ? !!opts.ok : !!opts.undo;
+    const entering = t.hidden || t.classList.contains("out");
+    clearTimeout(toastOut); t.classList.remove("out");
+    t.innerHTML = (ok ? TICK : "") + "<span>" + html + "</span>" + (opts.undo ? '<button data-act="undoToast">' + U.L("Undo", "تراجع") + '</button><i class="toast-bar" aria-hidden="true" style="--toast-ms:' + ms + 'ms"></i>' : "");
     t.hidden = false; ui._undo = opts.undo || null;
-    clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; ui._undo = null; }, opts.ms || (opts.undo ? 6000 : 2600));
+    if (entering && SL.motion) SL.motion.replay(t, "in");   // rise (a fade under reduced motion); a toast replacing a visible one swaps in place, its bar restarts (new <i>)
+    clearTimeout(toastT); toastT = setTimeout(hideToast, ms);
   };
   /** Run the toast's undo. "Undone" only when it worked: an undo may return a store result (or an array of them),
    *  and one that reports its own failure (toasts an error) is left to say so. */
   A.undoToast = async () => {
-    const u = ui._undo; ui._undo = null; document.getElementById("toast").hidden = true;
+    const u = ui._undo; ui._undo = null; clearTimeout(toastT); hideToast();   // an undo that voids payments cancels their flash (store.voidPay)
     if (!u) return;
     const n0 = toastN;
     let res;
@@ -4766,6 +4908,7 @@ window.SL = window.SL || {};
   document.addEventListener("click", async (ev) => {
     if (ev.target.closest && ev.target.closest("select[data-pickseg],select[data-pickact]")) return; // acts on change
     const el = actOf(ev.target); if (!el) return;
+    if (el.closest(".sheet.leaving")) return;   // a sheet sliding away is done (jsdom and old browsers have no inert)
     // a real link inside a tappable row (e.g. the receipt icon on Balances) opens the link, not the row
     const link = ev.target.closest("a[href]"); if (link && link !== el && el.contains(link)) return;
     const sh = ui.sheets.find((s) => s.el.contains(el));
@@ -4850,6 +4993,11 @@ window.SL = window.SL || {};
   ui.m = (h) => U.m(h / 100);
   ui.mw = (h) => U.mw(h / 100);
   ui.mz = (h) => (h === 0 ? '<span class="zero">–</span>' : U.m(h / 100));
+  /** A figure SL.motion may roll from its previous value (key: stable id; n: shown value in halalas, sets roll direction; mode: rolls only between equal modes). html is always the final figure. */
+  ui.odo = (key, n, mode, html) => '<span class="odo" data-odo="' + U.esc(key) + '" data-odo-n="' + Math.round(n) + '" data-odo-mode="' + U.esc(mode || "") + '">' + html + "</span>";
+  /** Motion identity of a row (grammar in 25-motion.js). Not data-k: that is A.toggle's. */
+  ui.mo = (k) => (k ? ' data-mo="' + U.esc(k) + '"' : "");
+  ui.dayKey = (pid, cid, date) => "ts:" + SL.store.tsId(pid, U.weekStart(date)) + ":" + cid + "@" + date;
   ui.sevGlyph = (sev) => (sev === "stop" ? '<i class="fg stop" aria-label="' + U.L("Stop", "عاجل") + '">▲</i>' : sev === "check" ? '<i class="fg check" aria-label="' + U.L("Check", "للتحقق") + '">△</i>' : '<i class="fg note" aria-label="' + U.L("Note", "ملاحظة") + '">○</i>');
   /** A flag's title or detail as HTML. Arabic: plain escaped text with the page's right-to-left base (15-flags already
    *  isolates each Latin data piece with X.iso), so a detail that starts with "Noura …" keeps its start on the right and
@@ -4861,21 +5009,22 @@ window.SL = window.SL || {};
   ui.sw = (state) => `<i class="sw ${state === "none" ? "none" : state}" aria-hidden="true"></i>`;
 
   /**
-   * Compact money bar. t = {paidOff, owed, prepaid} (h). opts: {scale, committed, budget, label}
-   * Segments are % of scale; the today tick sits at cost = paidOff + owed.
+   * Compact money bar. t = {paidOff, owed, prepaid} (h). opts: {scale, committed, budget, label, id}
+   * Segments are % of scale; the today tick sits at cost = paidOff + owed. opts.id (unique on the screen) lets SL.motion
+   * slide the segments when the same bar changes (data-mb / data-s / data-p).
    */
   ui.moneyBar = (t, opts) => {
     opts = opts || {};
     const committed = opts.committed || 0, budget = opts.budget || 0;
     const scale = opts.scale || Math.max(t.paidOff + t.owed + t.prepaid + committed, budget) || 1;
     const pc = (h) => Math.max(0, Math.min(100, (h / scale) * 100));
-    const seg = (cls, h) => (h > 0 ? `<i class="seg ${cls} w" style="width:${pc(h).toFixed(2)}%"></i>` : "");
+    const seg = (cls, h) => (h > 0 ? `<i class="seg ${cls} w" data-s="${cls}" style="width:${pc(h).toFixed(2)}%"></i>` : "");
     const cost = t.paidOff + t.owed;
     const over = budget > 0 && cost > budget;
     const pl = (h) => U.unbidi(U.m(h / 100, { plain: true }));
     const label = opts.label || U.L(`Paid off ${pl(t.paidOff)}, Owed ${pl(t.owed)}${t.prepaid ? ", Prepaid " + pl(t.prepaid) : ""}${committed ? ", Committed " + pl(committed) : ""}`,
       `مسدد ${pl(t.paidOff)}، مستحق ${pl(t.owed)}${t.prepaid ? "، مدفوع مقدماً " + pl(t.prepaid) : ""}${committed ? "، ملتزم به " + pl(committed) : ""}`);
-    return `<div class="mbar${over ? " over" : ""}" role="img" aria-label="${U.esc(label)}">${seg("paid", t.paidOff)}${seg("owed", t.owed)}${cost > 0 ? `<b class="tick" style="inset-inline-start:calc(${pc(cost).toFixed(2)}% - 1px)"></b>` : ""}${seg("prepaid", t.prepaid)}${seg("committed", committed)}${budget ? `<b class="budget" style="inset-inline-start:${pc(budget).toFixed(2)}%"></b>` : ""}</div>`;
+    return `<div class="mbar${over ? " over" : ""}"${opts.id ? ` data-mb="${U.esc(opts.id)}"` : ""} role="img" aria-label="${U.esc(label)}">${seg("paid", t.paidOff)}${seg("owed", t.owed)}${cost > 0 ? `<b class="tick" data-p="${pc(cost).toFixed(2)}" style="inset-inline-start:calc(${pc(cost).toFixed(2)}% - 1px)"></b>` : ""}${seg("prepaid", t.prepaid)}${seg("committed", committed)}${budget ? `<b class="budget" data-p="${pc(budget).toFixed(2)}" style="inset-inline-start:${pc(budget).toFixed(2)}%"></b>` : ""}</div>`;
   };
   /** Legend line: non-zero states with swatch + word + number; zeros folded into one faint line. */
   ui.legend = (t, opts) => {
@@ -4937,7 +5086,7 @@ window.SL = window.SL || {};
     const stop = flag.includes("fg stop");
     // §3.4: an estimate's amount reads "~" with a dotted underline; §3.9: an unreviewed amount gets a dotted --info underline
     const money = u.noPrice && !r.paid ? '<span class="unk">?</span>' : u.est ? '<span class="est">' + U.ltr("~" + U.m(amt / 100)) + "</span>" : U.m(amt / 100);
-    return `<div class="row tap${stop ? " stopped" : ""}${opts.cls ? " " + opts.cls : ""}" data-act="${opts.act || "openUnit"}" data-key="${U.esc(u.key)}" role="button" tabindex="0">
+    return `<div class="row tap${stop ? " stopped" : ""}${opts.cls ? " " + opts.cls : ""}" data-act="${opts.act || "openUnit"}" data-key="${U.esc(u.key)}"${ui.mo(u.key)} role="button" tabindex="0">
       ${ui.sw(st)}<span class="t${unrev ? " unrev" : ""}">${ui.mono(u.cat)} ${U.t(opts.title || u.title)}</span>
       <span class="a num${unrev ? " unrev-amt" : ""}">${money}</span><span class="f">${flag}</span>
       <span class="m">${ui.unitMeta(u, D)}${opts.extraMeta ? " · " + opts.extraMeta : ""}</span><span class="w">${ui.stateWords(u, D)}</span></div>`;
@@ -5048,7 +5197,7 @@ window.SL = window.SL || {};
       const after = isFloat ? U.L(" · " + U.esc(w.holder || w.name) + " now ", " · في يد " + U.esc(holderOf(w)) + " الآن ") + U.mw(M.walletCalc(w.id, U.today()).holds / 100) : "";
       const why = U.esc(String(refs.error).replace(/^Not saved: /, "").replace(/^لم يُحفظ: /, ""));
       const notSaved = failed ? U.L(" · " + failed + " not saved (" + why + ")", " · " + failed + " لم يُحفظ (" + why + ")") : "";
-      ui.toast(U.L("Paid ", "تم دفع ") + U.t(label) + " " + U.m(total / 100) + (isFloat ? U.L(" from float", " من العهدة") : U.L(" (Ryan)", " (" + U.esc(M.walletName(M.ownerWalletId())) + ")")) + notSaved + after, { undo, ms: failed ? 10000 : undefined });
+      ui.toast(U.L("Paid ", "تم دفع ") + U.t(label) + " " + U.m(total / 100) + (isFloat ? U.L(" from float", " من العهدة") : U.L(" (Ryan)", " (" + U.esc(M.walletName(M.ownerWalletId())) + ")")) + notSaved + after, { undo, ms: failed ? 10000 : undefined, ok: !failed });
     }, 50);
     return refs;
   };
@@ -5065,10 +5214,431 @@ window.SL = window.SL || {};
     });
     SL.store.onChange(render);
     onHash();
-    setInterval(() => { const t = U.today(); if (t !== ui._today) { if (ui.asOf === ui._today) ui.asOf = t; ui._today = t; SL.S.ver++; render(); } }, 60000);
+    setInterval(() => { const t = U.today(); if (t !== ui._today) { if (ui.asOf === ui._today) ui.asOf = t; ui._today = t; SL.S.ver++; if (SL.motion) SL.motion.hush(); render(); } }, 60000);
     ui._today = U.today();
     setTimeout(render, 900);
   };
+})(window.SL);
+
+/* ---- 25-motion.js ---- */
+/* 25-motion.js — SL.motion: the shared motion core. Motion is decoration on DOM that ui.render / sheet.refresh just
+ * built: passes run after each render, compare with state kept under stable string keys (never DOM nodes) and add
+ * classes plus the --mo-t clock. Nothing waits for an animation. Spec: docs/spec-part1-visual.md › Motion.
+ *
+ * Keys (data-mo, emitted only through ui.mo(k)): cost unit "c:<costId>" · crew-week unit "ts:<pid>_<sat>:<crewId>" ·
+ * payment "<unitKey>#<payId>" · crew day "<crewWeekUnitKey>@<YYYY-MM-DD>" (ui.dayKey) · cash "cash:<id>" · quote "q:<id>" ·
+ * inbox "in:<id>" · Pay's "Paid this week" line "paidweek". Several elements may share a key (they flash together).
+ * Never build a CSS selector from a key: scan [data-mo] and compare getAttribute.
+ *
+ * Passes get ctx {first, settled, hushed, same, covered, uncover, anim, red, now, scr}; see onRender / afterRender. */
+(function (SL) {
+  "use strict";
+  const U = SL.util, ui = SL.ui, mo = (SL.motion = {});
+  let mq = null;
+  mo.reduced = () => { try { if (!mq && typeof window.matchMedia === "function") mq = window.matchMedia("(prefers-reduced-motion: reduce)"); } catch (e) {} return !!(mq && mq.matches); };
+  mo.on = () => !mo.reduced();
+  mo.now = () => (window.performance && typeof performance.now === "function" ? performance.now() : Date.now());
+  const tok = {};
+  /** A duration token in ms ("mo-4" → 450), read once from :root; dflt when unreadable (jsdom). */
+  mo.ms = (name, dflt) => { if (!(name in tok)) { let v = NaN; try { v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--" + name)); } catch (e) {} tok[name] = v > 0 ? v : dflt; } return tok[name]; };
+  mo.ease = (p) => { p = Math.min(1, Math.max(0, p)); return 1 - Math.pow(1 - p, 3); };
+  mo.rtl = () => document.documentElement.dir === "rtl";
+  mo.ascii = (s) => /^[0-9.,\s]+$/.test(String(s));
+  /** Restart a class animation on a node that persists across renders (the toast). */
+  mo.replay = (el, cls) => { if (!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  /** Add cls with the shared clock (--mo-t = ms since t0; negative = not started). The class is removed by timer after
+   *  `total` (animationend never fires in jsdom, and a row hidden then shown again would replay). --mo-t is left in
+   *  place: another class on the same node may still be using it. */
+  mo.paint = (el, cls, t0, total) => {
+    if (!el || !el.classList) return;
+    const e = Math.round(mo.now() - t0); if (e >= total) return;
+    el.style.setProperty("--mo-t", e + "ms"); el.classList.add(cls);
+    const tk = (el._moTk = el._moTk || {}), n = (tk[cls] = (tk[cls] || 0) + 1);
+    setTimeout(() => { if (tk[cls] === n) el.classList.remove(cls); }, total - e + 80);
+  };
+  mo.docKey = (k) => String(k).split(/[#@]/)[0];
+  mo.payKey = (uk, payId) => uk + "#" + payId;
+  mo.screenKey = () => (ui.pid() || "") + "~" + ui.route.name + "." + ui.route.args.join(".");
+  /** Pending marks: key → {at, kind "new"|"edit"}; "new" wins. Consumed by the row pass (26-motion-data). */
+  mo.pending = new Map();
+  mo.mark = (k, kind) => { if (!k) return; const p = mo.pending.get(k); mo.pending.set(k, { at: mo.now(), kind: kind === "new" || (p && p.kind === "new") ? "new" : "edit" }); };
+  mo.unmark = (k) => { mo.pending.delete(k); };
+  mo.uncoveredAt = 0;
+  /** A change made under a sheet still plays when the sheet closes within this long of it (rows, figures, bars). */
+  mo.GRACE = 1500;
+
+  const R = [], SH = [];
+  /** Register a pass: fn(ctx) after every render (and once more when the last sheet closes); fn(sh, ctx) after a sheet refresh. */
+  mo.onRender = (fn) => R.push(fn);
+  mo.onSheet = (fn) => SH.push(fn);
+  const run = (list, ...a) => list.forEach((fn) => { try { fn(...a); } catch (e) { console.error("[motion]", e); } });
+  let readyAt = 0, lastScr = null, hush = false;
+  /** The next render only rebaselines (day tick, language switch). */
+  mo.hush = () => { hush = true; };
+  const base = (x) => { const now = mo.now(); return Object.assign({ now, red: mo.reduced(), covered: ui.sheets.length > 0, settled: readyAt > 0 && now - readyAt >= 1000 }, x); };
+  /** Called by ui.render after every renderNow. The first ready render only takes baselines (rule 6). */
+  mo.afterRender = () => {
+    const S = SL.S; if (!S || !S.ready || S.noRuntime) return;
+    const first = !readyAt; if (first) readyAt = mo.now();
+    const scr = mo.screenKey(), same = scr === lastScr, hushed = hush; lastScr = scr; hush = false;
+    const c = base({ first, same, scr, hushed, uncover: false }); c.anim = !first && !hushed && c.settled;
+    run(R, c);
+  };
+  /** The last sheet closed (no re-render): replay the passes against the live DOM so what changed under the scrim plays now.
+   *  On a microtask, so close-then-open stays covered. */
+  mo.uncovered = () => { Promise.resolve().then(() => {
+    if (!readyAt || ui.sheets.length) return;                        // close-then-open: still covered
+    mo.uncoveredAt = mo.now();
+    const scr = mo.screenKey(), c = base({ first: false, same: scr === lastScr, scr, hushed: false, uncover: true, covered: false });
+    c.anim = c.settled; run(R, c);
+  }); };
+  mo.afterSheet = (sh) => { if (!readyAt || sh.closed) return; const c = base({ uncover: false }); c.anim = c.settled; run(SH, sh, c); };
+  try { document.addEventListener("touchstart", () => {}, { passive: true }); } catch (e) {}   // iOS applies :active only with a touch listener
+
+  /* ================= A3 sheets: scrim fade, exit that never blocks taps, phone drag-to-dismiss ================= */
+  mo.sheetIn = (sh) => {
+    const layer = document.getElementById("layer"), old = layer ? layer.querySelectorAll(".scrim.leaving") : [];
+    if (old.length) old.forEach((s) => s.remove()); else if (mo.on()) sh.scrim.classList.add("enter");   // close-then-open: one continuous scrim
+    wireDrag(sh);
+  };
+  mo.sheetOut = (sh) => {
+    const el = sh.el, scrim = sh.scrim;
+    if (!mo.on()) { el.remove(); scrim.remove(); return; }
+    el.classList.remove("dragging"); scrim.classList.remove("dragging"); el.style.transform = ""; scrim.style.opacity = "";   // same frame: transitions start from the dragged offset
+    el.classList.add("enter", "leaving"); scrim.classList.add("leaving"); el.setAttribute("aria-hidden", "true");
+    // its content is inert; the sheet box itself is not (inert hit-tests like pointer-events:none): a second tap on a
+    // footer button lands on the sliding sheet (a no-op, 20-ui's click guard), never on the tab bar under it
+    for (const ch of el.children) ch.setAttribute("inert", "");
+    setTimeout(() => { el.remove(); scrim.remove(); }, mo.ms("mo-2", 200) + 60);
+  };
+  function wireDrag(sh) {                                   // phones only; listeners live on the persistent sh.el
+    const el = sh.el, scrim = sh.scrim; if (!window.PointerEvent) return;
+    const phone = () => { try { return window.matchMedia("(max-width: 767px)").matches; } catch (e) { return false; } };
+    let g = null;
+    el.addEventListener("pointerdown", (ev) => {
+      const t = ev.target;
+      if (g || sh.closed || ui.topSheet() !== sh || !ev.isPrimary || (ev.pointerType === "mouse" && ev.button !== 0)) return;
+      if (!t || !t.closest || !t.closest(".sh-grab,.sh-h") || t.closest("input,select,textarea,a[href]") || !phone()) return;
+      g = { id: ev.pointerId, x0: ev.clientX, y0: ev.clientY, on: false, h: el.offsetHeight || 1, off: 0, pts: [[ev.timeStamp, ev.clientY]] };
+    });
+    el.addEventListener("pointermove", (ev) => {
+      if (!g || ev.pointerId !== g.id) return; if (sh.closed) { g = null; return; }
+      const dy = ev.clientY - g.y0, dx = ev.clientX - g.x0;
+      if (!g.on) { if (Math.abs(dy) < 8 || Math.abs(dy) < Math.abs(dx) * 1.2) return; g.on = true; try { el.setPointerCapture(g.id); } catch (e) {} el.classList.add("dragging"); scrim.classList.add("dragging"); }
+      g.off = dy >= 0 ? dy : -16 * (1 - 1 / (1 + -dy / 60));            // rubber band upward, max 16 px
+      el.style.transform = "translate3d(0," + g.off.toFixed(1) + "px,0)";
+      scrim.style.opacity = String(1 - Math.min(1, Math.max(0, g.off) / g.h) * 0.85);
+      g.pts.push([ev.timeStamp, ev.clientY]); while (g.pts.length > 2 && ev.timeStamp - g.pts[0][0] > 100) g.pts.shift();
+    });
+    const end = (ev) => {
+      if (!g || ev.pointerId !== g.id) return; const d = g; g = null; if (!d.on) return;   // under 8 px: a tap, its click goes through
+      // swallow only the click this drag may synthesize (mouse; touch within the browser's slop): it comes before any
+      // new pointerdown, so the next real tap disarms it (on touch a real drag makes no click)
+      let tm = 0;
+      const disarm = () => { clearTimeout(tm); el.removeEventListener("click", stop, true); el.removeEventListener("pointerdown", disarm, true); };
+      const stop = (e) => { e.stopPropagation(); e.preventDefault(); disarm(); };
+      el.addEventListener("click", stop, true); el.addEventListener("pointerdown", disarm, true); tm = setTimeout(disarm, 400);
+      const [t0, y0] = d.pts[0], [t1, y1] = d.pts[d.pts.length - 1], v = t1 > t0 ? (y1 - y0) / (t1 - t0) : 0;
+      if (ev.type === "pointerup" && (d.off > d.h * 0.25 || (v > 0.5 && d.off > 24))) { el.classList.add("from-drag"); sh.close(); }   // same path as ×: a dirty sheet asks first
+      if (!sh.closed) { el.classList.remove("dragging", "from-drag"); scrim.classList.remove("dragging"); el.style.transform = ""; scrim.style.opacity = ""; }
+    };
+    el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  }
+
+  /* ================= A1 odometer: float chip, Pay card and rail card "Holds" (ui.odo) ================= */
+  /* No DOM references are kept. Keys not seen are pruned (only when uncovered), so navigating back never rolls a stale value.
+   * The roll runs only when the mode is unchanged and the visible text changed; its direction follows the shown number.
+   * The chip's ring fires only when holds rose (top-up, a voided float payment); a mode flip (ok ⇄ short) swaps the figure
+   * and crossfades the background. Under a sheet the figure shows its new value at once (dimmed); the sheet closing rolls
+   * it from the value before only within mo.GRACE of the change, so a figure never goes back to a value it has left. */
+  const odo = new Map();   // key → {t, n, mode, hold, a:{t0,to,from,dir,pulse,x}|null, prev?, at?} (prev/at: changed under a sheet)
+  mo.onRender((c) => {
+    const W = Math.max(mo.ms("mo-4", 450), mo.ms("mo-5", 500)), seen = new Set();
+    for (const id of ["hdr", "view", "rrail"]) { const root = document.getElementById(id); if (!root) continue;
+      for (const el of root.querySelectorAll("[data-odo]")) {
+        const key = el.getAttribute("data-odo"); if (seen.has(key)) continue; seen.add(key);
+        if (el.querySelector(".odo-v")) continue;                          // already drawn on this DOM (uncover replay)
+        const box = el.querySelector("bdi.mn") || el, t = U.unbidi(box.textContent).trim();
+        const n = +el.getAttribute("data-odo-n") || 0, mode = el.getAttribute("data-odo-mode") || "";
+        const host = el.closest("[data-odo-host]"), hold = host ? +host.getAttribute("data-odo-hold") || 0 : 0, p0 = odo.get(key);
+        if (p0 && p0.a && p0.a.to === t && p0.mode === mode && c.now - p0.a.t0 < W) { draw(box, host, p0.a, c.now); continue; }  // re-rendered mid-roll
+        if (c.covered && p0) {                                            // under a sheet: remember what it showed before this change, and when
+          if (p0.t !== t || p0.mode !== mode) odo.set(key, { t, n, mode, hold, a: null, prev: { t: p0.t, n: p0.n, mode: p0.mode, hold: p0.hold }, at: c.now });
+          continue;
+        }
+        const p = p0 && p0.prev && c.now - p0.at <= mo.GRACE ? p0.prev : p0;   // an older change under the sheet: shown already, no roll
+        let a = null;
+        if (p && c.anim && !c.red && (p.t !== t || p.mode !== mode))
+          a = { t0: c.now, to: t, from: p.mode === mode ? p.t : "", dir: n >= p.n ? 1 : -1, pulse: !!host && hold > p.hold, x: !!host && p.mode !== mode };
+        odo.set(key, { t, n, mode, hold, a }); if (a) draw(box, host, a, c.now);
+      } }
+    if (!c.covered) for (const k of [...odo.keys()]) if (!seen.has(k)) odo.delete(k);
+  });
+  function draw(box, host, a, now) {
+    const R = mo.ms("mo-4", 450), ago = now - a.t0;
+    if (a.from && mo.ascii(a.from) && mo.ascii(a.to) && ago < R) {         // rule 5: per-digit roll only on ASCII figures
+      const plain = box.innerHTML, h = !!box.querySelector(".h");
+      box.innerHTML = '<span class="sr">' + U.esc(a.to) + '</span><span class="odo-v" aria-hidden="true" style="--mo-t:' + Math.round(ago) + 'ms">' + cols(a.from, a.to, a.dir, h) + "</span>";
+      setTimeout(() => { if (box.isConnected && box.querySelector(".odo-v")) box.innerHTML = plain; }, R - ago + 60);   // back to the exact plain figure
+    }
+    if (host && a.pulse) mo.paint(host, "mo-pulse", a.t0, mo.ms("mo-5", 500));
+    if (host && a.x) mo.paint(host, "mo-x", a.t0, mo.ms("mo-3", 300));
+  }
+  /** Columns in the NEW value's layout, right-aligned against the old one. Separators are static (a new one fades in); NBSP keeps a baseline. */
+  function cols(from, to, dir, h) {
+    const out = []; let i = from.length - 1;
+    for (let j = to.length - 1; j >= 0; j--, i--) {
+      const c = to[j], p = i >= 0 ? from[i] : "";
+      if (!/\d/.test(c)) { out.push('<span class="odo-k' + (p === c ? "" : " odo-in") + '">' + U.esc(c) + "</span>"); continue; }
+      const q = /\d/.test(p) ? p : "&nbsp;";
+      out.push(p === c ? '<span class="odo-c"><span class="odo-s"><span>' + c + "</span></span></span>"
+        : dir > 0 ? '<span class="odo-c"><span class="odo-s up"><span>' + q + "</span><span>" + c + "</span></span></span>"
+                  : '<span class="odo-c"><span class="odo-s dn"><span>' + c + "</span><span>" + q + "</span></span></span>");
+    }
+    out.reverse();
+    const k = h ? to.lastIndexOf(".") : -1;   // keep U.m's smaller .h cents
+    return k < 0 ? out.join("") : out.slice(0, k).join("") + '<span class="h">' + out.slice(k).join("") + "</span>";
+  }
+})(window.SL);
+
+/* ---- 26-motion-data.js ---- */
+/* 26-motion-data.js — Group B motion: new rows print in, changed rows flash (pending marks), money bars slide, skeleton
+ * phase. Rows carry data-mo keys (grammar in 25-motion.js), bars carry data-mb (+ data-s per segment, data-p per marker),
+ * all emitted by the screens through ui.mo / ui.moneyBar / the float gauges. Nothing here holds DOM across renders.
+ * Rules (spec part 1 › Motion): nothing on load, navigation or a language switch; bars never grow from zero on first show;
+ * table rows flash only (no clip on sticky cells); reduced motion keeps the yellow flash and nothing else. */
+(function (SL) {
+  "use strict";
+  const M = SL.model, mo = SL.motion; if (!mo) return;
+  const BULK = 40, CAP = 12, GRACE = mo.GRACE, MAXAGE = 20000;
+  /** Skeleton shimmer phase-locked to the wall clock: the up-to-12 loading re-renders never restart the sweep; 70 ms cascade. */
+  mo.skel = (i) => (mo.reduced() ? "" : ' style="--mo-ph:' + Math.round(i * 70 - (Date.now() % mo.ms("mo-shimmer", 1400))) + 'ms"');
+
+  /* ---- data keys (grammar: 25-motion.js) → arrivals since the previous pass ---- */
+  let keys = null, kVer = -1;
+  function dataKeys() {
+    const out = new Set(), S = SL.S;
+    for (const u of M.units()) {
+      out.add(u.key);
+      for (const p of u.payments) if (!p.void) out.add(mo.payKey(u.key, p.id));
+      if (u.kind === "crew") for (const d of u.days) if (!d.plan) out.add(u.key + "@" + d.date);
+    }
+    for (const c of M.cash()) out.add("cash:" + c.id);
+    for (const id of Object.keys(S.quotes || {})) out.add("q:" + id);
+    for (const id of Object.keys(S.inbox || {})) out.add("in:" + id);
+    return out;
+  }
+  /** Keys that exist now and did not at the previous call (the first call only takes the baseline). */
+  function arrivals() {
+    if (keys && kVer === SL.S.ver) return [];
+    const next = dataKeys(), out = [];
+    if (keys) for (const k of next) if (!keys.has(k)) out.push(k);
+    keys = next; kVer = SL.S.ver;
+    return out.length > BULK ? [] : out;          // a reconnect or bulk import: nothing prints
+  }
+
+  /* ---- B1 rows: pending marks → .mo-new (reveal + flash) / .mo-hi (flash) on #view ---- */
+  const fl = new Map();   // key → {t0, reveal}: flashes in flight, so a re-render mid-flash carries on with the same clock
+  mo.onRender((c) => {
+    const arr = arrivals();                                             // always: keeps the baseline current
+    if (c.first || c.hushed || !c.same) { mo.pending.clear(); fl.clear(); return; }
+    if (c.anim) for (const k of arr) mo.mark(k, "new");
+    const now = c.now, tNew = mo.ms("mo-3", 300) + mo.ms("mo-5", 500), tHi = mo.ms("mo-5", 500);
+    for (const [k, p] of mo.pending) if (now - p.at > MAXAGE || (!c.covered && now - Math.max(p.at, mo.uncoveredAt) > GRACE)) mo.pending.delete(k);
+    for (const [k, f] of fl) if (now - f.t0 > tNew) fl.delete(k);
+    if (c.covered || !c.anim || (!mo.pending.size && !fl.size)) return;   // under a sheet: marks wait for uncovered()
+    const view = document.getElementById("view"); if (!view) return;
+    let n = 0; const shown = new Set();
+    for (const el of view.querySelectorAll("[data-mo]")) {
+      const k = el.getAttribute("data-mo"); let f = fl.get(k);
+      if (!f) { const p = mo.pending.get(k); if (!p) continue;
+        f = { t0: now, reveal: p.kind === "new" && !c.red && k.indexOf("@") < 0 && n++ < CAP }; fl.set(k, f); }
+      shown.add(k);
+      const rev = f.reveal && !el.closest("table");
+      mo.paint(el, rev ? "mo-new" : "mo-hi", f.t0, rev ? tNew : tHi);
+    }
+    for (const k of shown) mo.pending.delete(k);   // a mark made while its key is still flashing joins that flash (no second flash)
+  });
+
+  /* ---- B2 bars: segments slide (translate + clip from the inline end; never scaleX, which squashes the hatch/dots) ---- */
+  const near = (a, b) => Math.abs((a || 0) - (b || 0)) < 0.05;
+  /** {segs: {cls: [start%, width%]}, tick, budget} from the bar's inline widths and data-p positions. */
+  function readGeo(bar) {
+    const g = { segs: {}, tick: null, budget: null }; let s = 0;
+    for (const ch of bar.children) {
+      const p = ch.getAttribute("data-p"); if (p != null) { g[ch.classList.contains("budget") ? "budget" : "tick"] = parseFloat(p) || 0; continue; }
+      const k = ch.getAttribute("data-s"); if (!k) continue;
+      const w = parseFloat(ch.style.width) || 0; g.segs[k] = [s, w]; s += w;
+    }
+    return g;
+  }
+  function sameGeo(a, b) {
+    for (const k of new Set([...Object.keys(a.segs), ...Object.keys(b.segs)])) { const x = a.segs[k] || [0, 0], y = b.segs[k] || [0, 0]; if (!near(x[0], y[0]) || !near(x[1], y[1])) return false; }
+    return near(a.tick, b.tick) && near(a.budget, b.budget);
+  }
+  /** Where a slide from a to b stands at eased progress p (a new target mid-slide starts from here). */
+  function lerpGeo(a, b, p) {
+    const g = { segs: {}, tick: b.tick == null ? null : (a.tick || 0) + ((b.tick || 0) - (a.tick || 0)) * p, budget: b.budget == null ? null : (a.budget || 0) + ((b.budget || 0) - (a.budget || 0)) * p };
+    for (const k of new Set([...Object.keys(a.segs), ...Object.keys(b.segs)])) { const x = a.segs[k] || [(b.segs[k] || [0])[0], 0], y = b.segs[k] || [x[0], 0]; g.segs[k] = [x[0] + (y[0] - x[0]) * p, x[1] + (y[1] - x[1]) * p]; }
+    return g;
+  }
+  function applyBar(x, W, rtl, BAR) {
+    const sg = rtl ? -1 : 1;
+    for (const ch of x.bar.children) {
+      const k = ch.getAttribute("data-s");
+      if (k) {
+        const to = x.to.segs[k]; if (!to || to[1] <= 0) continue;
+        const fr = x.from.segs[k] || [to[0], 0];
+        if (near(fr[0], to[0]) && fr[1] >= to[1] - 0.05) continue;       // shrank in place or unchanged: snap
+        // the offset in px of the bar (a % would resolve against the segment's rendered width, which min-width can inflate)
+        const dx = ((fr[0] - to[0]) / 100) * W * sg, cl = Math.min(100, Math.max(0, ((to[1] - fr[1]) / to[1]) * 100));
+        ch.style.setProperty("--mo-dx", dx.toFixed(1) + "px");
+        ch.style.setProperty("--mo-clip", rtl ? "inset(0 0 0 " + cl.toFixed(2) + "%)" : "inset(0 " + cl.toFixed(2) + "% 0 0)");
+        mo.paint(ch, "mo-seg", x.t0, BAR);
+      } else if (W > 0 && ch.getAttribute("data-p") != null) {
+        const w = ch.classList.contains("budget") ? "budget" : "tick", p0 = x.from[w], p1 = x.to[w];
+        if (p0 == null || p1 == null || near(p0, p1)) continue;
+        ch.style.setProperty("--mo-dx", (((p0 - p1) / 100) * W * sg).toFixed(1) + "px");
+        mo.paint(ch, "mo-mark", x.t0, BAR);
+      }
+    }
+  }
+  const geo = new Map(), flights = new Map(), cov = new Map();   // screen|bar → last geometry · slide in flight {from, to, t0} · changed under a sheet {from, at}
+  mo.onRender((c) => {
+    const BAR = mo.ms("mo-4", 450), reset = c.first || c.hushed || !c.same, seen = new Set(), todo = [];
+    for (const [id, pre] of [["view", c.scr], ["rrail", "rr"]]) {
+      const root = document.getElementById(id); if (!root) continue;
+      for (const bar of root.querySelectorAll("[data-mb]")) {
+        const key = pre + "|" + bar.getAttribute("data-mb"); if (seen.has(key)) continue; seen.add(key);
+        const to = readGeo(bar), f = flights.get(key);
+        if (reset) { geo.set(key, to); flights.delete(key); cov.delete(key); continue; }
+        let from = null, t0 = c.now;
+        if (f && c.now - f.t0 < BAR) {
+          if (sameGeo(f.to, to)) { from = f.from; t0 = f.t0; }                         // re-rendered mid-slide: carry on
+          else from = lerpGeo(f.from, f.to, mo.ease((c.now - f.t0) / BAR));          // new target mid-slide: start where it is
+        } else if (c.covered && geo.has(key)) {          // under a sheet the bar shows its new shape at once: remember the one before, and when
+          const g0 = geo.get(key); if (!sameGeo(g0, to)) { cov.set(key, { from: g0, at: c.now }); geo.set(key, to); }
+          continue;
+        } else { const v = cov.get(key); cov.delete(key); from = v && c.now - v.at <= GRACE ? v.from : geo.get(key) || null; }   // uncovered() slides only a recent change
+        geo.set(key, to);
+        if (!from || sameGeo(from, to) || !c.anim || c.red) { flights.delete(key); continue; }   // no "first show" growth
+        todo.push({ bar, key, from, to, t0 });
+      }
+    }
+    if (!c.covered) for (const k of [...geo.keys()]) if (!seen.has(k)) { geo.delete(k); flights.delete(k); cov.delete(k); }
+    const W = todo.map((x) => x.bar.clientWidth || 0);   // reads before writes (0 without layout: segments only unclip)
+    const rtl = mo.rtl();
+    todo.forEach((x, i) => { applyBar(x, W[i], rtl, BAR); flights.set(x.key, { from: x.from, to: x.to, t0: x.t0 }); });
+  });
+})(window.SL);
+
+/* ---- 27-motion-pay.js ---- */
+/* 27-motion-pay.js — Group C motion. C2: the payment the user just made flashes where it shows (its unit's rows and
+ * status lines, the new payment line, Pay's "Paid this week" line), in the view through 26's row pass (pending marks)
+ * and inside an open live sheet here. C1: the crew cell sheet (30-today A.cellSheet) echoes the tapped digit, slides the
+ * boxes when the day changes, and the days it edited flash on the grid once their write lands (when it closes, if it is
+ * still open then). Keys: 25-motion.js. */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, mo = SL.motion; if (!mo) return;
+
+  /* ---- C2 paid flash. SL.store.pay registers each payment by its id before writing (05-store), so every pay path
+   * (Pay screen, Pay all, crew screen, Crews grid, item and pay sheets) is covered by one line. ---- */
+  const reg = new Map();   // payId → {uk, pk, at, readyAt, wk}; kept while its marks wait, so a void cancels only its own
+  mo._reg = reg;
+  mo.expectPaid = (unitKey, payId) => { if (unitKey && payId) reg.set(payId, { uk: unitKey, pk: mo.payKey(unitKey, payId), at: mo.now(), readyAt: 0 }); };
+  /** These payments are being voided (SL.store.voidPay: an Undo, a void): nothing they marked may still flash. The unit
+   *  and "Paid this week" keep their marks when another payment that landed still holds them. */
+  mo.paidCancel = (ids) => {
+    for (const id of [].concat(ids == null ? [] : ids)) {
+      const e = reg.get(id); if (!e) continue;
+      reg.delete(id); mo.unmark(e.pk);
+      const rest = [...reg.values()].filter((x) => x.readyAt);
+      if (!rest.some((x) => x.uk === e.uk)) mo.unmark(e.uk);
+      if (e.wk && !rest.some((x) => x.wk)) mo.unmark("paidweek");
+    }
+  };
+  // registered at load, before ui.start's render listener: the marks are set before the render pass reads them
+  SL.store.onChange(() => {
+    if (!reg.size) return;
+    try {
+      const now = mo.now(), T = U.today();
+      for (const [id, e] of reg) {
+        if (e.readyAt) { if (now - e.readyAt > 1500 && !mo.pending.has(e.pk) && !mo.pending.has(e.uk)) reg.delete(id); continue; }
+        const u = M.unit(e.uk), p = u && u.payments.find((x) => x.id === id && !x.void);
+        if (p) {
+          e.readyAt = now; mo.mark(e.uk); mo.mark(e.pk);
+          if (p.h >= 0 && p.date >= U.weekStart(T) && p.date <= T) { e.wk = true; mo.mark("paidweek"); }   // only when it counts in Pay's "Paid this week"
+        } else if (now - e.at > 6000) reg.delete(id);                                    // the write failed or took longer than 6 s
+      }
+    } catch (err) { console.error("[motion]", err); }
+  });
+  // an open live sheet (the item sheet, the crew day sheet) shows the payment land: its status line and new payment line flash
+  mo.onSheet((sh, c) => {
+    if (!reg.size || !c.anim) return;
+    const T = mo.ms("mo-5", 500);
+    for (const e of reg.values()) {
+      if (!e.readyAt || c.now - e.readyAt >= T) continue;
+      for (const el of sh.el.querySelectorAll("[data-mo]")) { const k = el.getAttribute("data-mo"); if (k === e.uk || k === e.pk) mo.paint(el, "mo-hi", e.readyAt, T); }
+    }
+  });
+
+  /* ---- C1 cell sheet ---- */
+  /** After every refresh of the cell sheet (its cfg.after): echo the tapped digit on the new strip, slide the boxes and
+   *  total in when auto-advance, ‹ › or the arrow keys change the day, fade the title. A refresh mid-animation carries
+   *  it on with the same clock; any other refresh (food, job, plan, an error) animates nothing. */
+  mo.cell = (sh) => {
+    const s = sh.state, cur = { date: s.date, field: s.field }, prev = sh._moShown, fx = sh._moFx;
+    sh._moShown = cur; sh._moFx = null;
+    if (!prev || !mo.on()) { sh._moSl = sh._moPr = null; return; }                 // the sheet's first paint (rule 6); reduced motion
+    const now = mo.now(), q = (sel) => sh.el.querySelector(sel), P = mo.ms("mo-1", 150), D = mo.ms("mo-2", 200);
+    if (fx && fx.digit != null) sh._moPr = { d: fx.digit, t0: now };
+    const pr = sh._moPr;
+    if (pr && now - pr.t0 < P) { for (const b of sh.el.querySelectorAll(".digits button[data-d]")) if (b.getAttribute("data-d") === pr.d) mo.paint(b, "mo-press", pr.t0, P); }
+    else sh._moPr = null;
+    if (prev.date !== cur.date) sh._moSl = { cls: cur.date > prev.date ? "mo-in-next" : "mo-in-prev", t0: now };
+    const sl = sh._moSl;
+    if (sl && now - sl.t0 < D) { mo.paint(q(".cs-boxes"), sl.cls, sl.t0, D); mo.paint(q(".cs-sum"), sl.cls, sl.t0, D); mo.paint(q(".sh-h h2"), "mo-fade", sl.t0, P); }
+    else sh._moSl = null;
+    // M → L on the same day: the highlight changes at once (a gliding slab would cover the value just typed)
+  };
+  /* ---- C1 edited days. Store writes are not optimistic (SL.S shows a day only when its snapshot arrives), so a day is
+   * marked when SL.S shows what was written, never at the tap: the grid cell flashes once, on the new value. While a sheet
+   * covers the view the mark waits (26's row pass). ---- */
+  const days = new Map();   // dayKey → {sh, ts, cid, date, want, at, was, ok}: the latest write per day, not landed yet
+  /** SL.S holds the record written (want null: the day removed). Only the fields written are compared (maps merge). */
+  const shows = (e) => {
+    const ts = (SL.S.timesheets || {})[e.ts], b = ts && ts.crews && ts.crews[e.cid], d = (b && b.days && b.days[e.date]) || null;
+    if (!e.want) return !d;
+    return !!d && Object.keys(e.want).every((f) => { const a = d[f], v = e.want[f]; return a === v || (a == null && v == null) || (typeof v === "number" && U.num(a) === v) || (typeof v === "boolean" && !!a === v); });
+  };
+  const land = (k, e) => { if (days.get(k) === e) days.delete(k); mo.mark(k); };
+  SL.store.onChange(() => {   // registered at load, before ui.start's render listener (as above)
+    if (!days.size) return;
+    try {
+      const now = mo.now();
+      for (const [k, e] of days) { if (shows(e) && (!e.was || e.ok)) land(k, e); else if (now - e.at > 20000) days.delete(k); }
+    } catch (err) { console.error("[motion]", err); }
+  });
+  /** A sheet is writing a crew day (k: ui.dayKey; want: the record written, null = removed). → a token for cellSaved. */
+  mo.cellEdit = (sh, k, want) => {
+    const m = /^ts:([^:]+):(.+)@([^@]+)$/.exec(String(k)); if (!m) return null;
+    const e = { sh, ts: m[1], cid: m[2], date: m[3], want: want || null, at: mo.now(), ok: false };
+    e.was = shows(e);                                    // already showing it (nothing to see change): lands when the write is ok
+    days.set(k, e); (sh._moDays = sh._moDays || new Set()).add(k);
+    return { k, e };
+  };
+  /** That write resolved. A failure forgets the day (nothing flashes) unless a later write to it is still in flight; ok
+   *  lands it now when SL.S already shows it. */
+  mo.cellSaved = (t, ok) => {
+    if (!t) return; const { k, e } = t;
+    if (days.get(k) !== e) return;                       // landed already, or a later write to the day took over
+    if (!ok) { days.delete(k); if (e.sh._moDays) e.sh._moDays.delete(k); mo.unmark(k); return; }
+    e.ok = true; if (shows(e)) land(k, e);
+  };
+  /** The sheet closed: re-mark the days it saved that have landed, so a long session's first edits flash too (marks age
+   *  out after 20 s). A day still in flight marks itself when it lands. */
+  mo.cellDone = (sh) => { for (const k of sh._moDays || []) if (!days.has(k)) mo.mark(k); };
 })(window.SL);
 
 /* ---- 30-today.js ---- */
@@ -5259,7 +5829,7 @@ window.SL = window.SL || {};
     const nameBtn = `<button type="button" class="td-name" data-go="${U.esc(ui.href("crew", cid, sat))}">${X.crewLabel(cid)}</button>`;
     if (!rec) {
       const us = c.usual || {}, fut = date > U.today();
-      return `<div class="td-crew idle" id="td-crew-${U.esc(cid)}">
+      return `<div class="td-crew idle" id="td-crew-${U.esc(cid)}"${ui.mo(ui.dayKey(pid, cid, date))}>
         <span class="td-st faint" aria-hidden="true">·</span>${nameBtn}<span class="td-amt muted t12">${U.L("not planned today", "غير مخطط اليوم")}</span>
         <div class="td-ctl"><span class="t12 muted">${code ? "<b>" + U.esc(code) + "</b> · " : ""}${U.L("usual", "المعتاد")} ${X.heads2(us.m, us.l)}${U.num(rates.food) ? " " + X.plusFood() : ""}</span>
         ${ro ? "" : `<button type="button" class="btn sm sec td-came" data-act="tdCame" data-cid="${U.esc(cid)}" data-date="${date}">${fut ? U.L("Plan usual", "خطط المعتاد") : U.L("Came today", "حضر اليوم")}</button>`}</div></div>`;
@@ -5280,7 +5850,7 @@ window.SL = window.SL || {};
     const jobCtl = ro ? `<span class="td-job">${code ? U.esc(code) : '<span class="c-warn">⊘</span>'}</span>`
       : `<button type="button" class="td-job" id="td-${U.esc(cid)}-job" data-act="tdJob" data-cid="${U.esc(cid)}" data-date="${date}" aria-label="${U.L("Job for this day", "البند لهذا اليوم")}">${code ? U.esc(code) : '<span class="c-warn">⊘ ' + U.L("no job", "بدون بند") + "</span>"} ▾</button>`;
     const rmLab = plan ? U.L("Remove the plan", "إلغاء الخطة") : U.L("Didn't come: remove this day", "لم يحضر: احذف هذا اليوم");
-    return `<div class="td-crew${plan ? " plan" : ""}" id="td-crew-${U.esc(cid)}">
+    return `<div class="td-crew${plan ? " plan" : ""}" id="td-crew-${U.esc(cid)}"${ui.mo(ui.dayKey(pid, cid, date))}>
       <span class="td-st${plan ? " c-committed" : ""}" title="${plan ? U.L("Planned", "مخطط") : U.L("Confirmed", "مؤكد")}">${plan ? "○" : "●"}</span>${nameBtn}<span class="td-amt num">${amt}</span>
       <div class="td-ctl">${cell("m", X.stepVal(cid, date, "m", rec))}${cell("l", X.stepVal(cid, date, "l", rec))}${foodCtl}${jobCtl}${plan ? '<span class="t12 c-committed td-pw">' + U.L("Planned", "مخطط") + "</span>" : ""}${ro ? "" : `<button type="button" class="td-rm" id="td-${U.esc(cid)}-rm" data-act="tdRemove" data-cid="${U.esc(cid)}" data-date="${date}" aria-label="${rmLab}">✕ ${plan ? U.L("Remove", "إزالة") : U.L("Didn't come", "لم يحضر")}</button>`}</div></div>`;
   };
@@ -5521,8 +6091,9 @@ window.SL = window.SL || {};
       inner = `<span class="num">${X.pair(rec.m, rec.l)}</span>${U.num(rec.food) ? '<i class="wk-food" title="' + U.L("food", "أكل") + '"></i>' : ""}${j}`;
     } else inner = '<span class="faint">' + (fri ? "" : "·") + "</span>";
     const lab = U.esc(X.crewName(cid)) + " " + U.esc(U.dShort(d)) + (rec ? " " + U.num(rec.m) + U.L(" masters ", " معلمين ") + U.num(rec.l) + U.L(" laborers", " عمال") + (rec.plan ? U.L(" planned", " مخطط") : "") : U.L(" empty", " فارغ"));
-    return ro ? `<td class="${cls}"><span class="wk-in" aria-label="${lab}">${inner}</span></td>`
-      : `<td class="${cls}"><button type="button" class="wk-in" id="wk-${U.esc(cid)}-${d}" data-act="cellSheet" data-cid="${U.esc(cid)}" data-date="${d}" data-field="m" aria-label="${lab}">${inner}</button></td>`;
+    const mk = ui.mo(ui.dayKey(pid, cid, d));
+    return ro ? `<td class="${cls}"${mk}><span class="wk-in" aria-label="${lab}">${inner}</span></td>`
+      : `<td class="${cls}"${mk}><button type="button" class="wk-in" id="wk-${U.esc(cid)}-${d}" data-act="cellSheet" data-cid="${U.esc(cid)}" data-date="${d}" data-field="m" aria-label="${lab}">${inner}</button></td>`;
   };
 
   X.weekMatrix = (pid, sat, ro) => {
@@ -5646,8 +6217,10 @@ window.SL = window.SL || {};
     sh.err = "";
     if (!noRefresh) sh.refresh();
     s.pending = (s.pending || 0) + 1;
+    const mo = SL.motion, mk = mo && mo.cellEdit ? mo.cellEdit(sh, ui.dayKey(s.pid, s.cid, date), val) : null;   // the grid cell flashes when this write lands
     return X.write(s.pid, s.cid, { [date]: val }, true).then((r) => {
       s.pending--;
+      if (mk) mo.cellSaved(mk, r.ok);
       if (!r.ok) { if (ui.sheets.includes(sh)) sh.error(U.L("Not saved · ", "لم يُحفظ · ") + SL.store.errText(r) + " · " + U.dShort(date)); return false; }
       s.saved = (s.saved || 0) + 1;
       return true;
@@ -5667,6 +6240,7 @@ window.SL = window.SL || {};
     else C.goDay(sh, C.nextWork(s.pid, s.date, 1), "m");
   };
   C.digit = (sh, d) => {
+    if (d !== "big") sh._moFx = { digit: String(d) };   // SL.motion.cell echoes it on the refreshed strip
     if (d === "big") { sh.state.big = true; sh.state.bigVal = ""; sh.refresh(); setTimeout(() => { const f = sh.el.querySelector("#cs-big"); if (f) f.focus(); }, 30); return; }
     return C.setVal(sh, U.num(d));
   };
@@ -5737,7 +6311,8 @@ window.SL = window.SL || {};
         if (f === "foodAmt" && evType === "change") return C.setFoodAmt(sh, v);
       },
       // "+ New job" sets state.job on this sheet from the job sheet above it: apply it once
-      after: (sh) => { const s = sh.state; if (s.job && s.job !== s._jobSeen) { s._jobSeen = s.job; setTimeout(() => C.setJob(sh, s.job), 0); } },
+      after: (sh) => { const s = sh.state; if (s.job && s.job !== s._jobSeen) { s._jobSeen = s.job; setTimeout(() => C.setJob(sh, s.job), 0); } if (SL.motion && SL.motion.cell) SL.motion.cell(sh); },
+      onClose: (sh) => { if (SL.motion && SL.motion.cellDone) SL.motion.cellDone(sh); },   // the days it saved flash on the grid
       acts: {
         cellDigit: (d, el, ev, sh) => C.digit(sh, d.d),
         csBigSet: (d, el, ev, sh) => { const v = U.num(sh.state.bigVal); if (!(v >= 0)) return; return C.setVal(sh, v); },
@@ -5748,7 +6323,9 @@ window.SL = window.SL || {};
           const s = sh.state;
           if (s.date > U.today()) return C.save(sh, null);
           s.recs[s.date] = null; sh.err = ""; sh.refresh();
-          return SL.store.setDays(s.pid, U.weekStart(s.date), s.cid, { [s.date]: { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false, other: 0, otherNote: "" } }).then((r) => { if (!r.ok && ui.sheets.includes(sh)) sh.error(U.L("Not saved · ", "لم يُحفظ · ") + SL.store.errText(r)); });
+          const off = { m: 0, l: 0, food: 0, plan: false, off: true, job: "", rm: null, rl: null, est: false, other: 0, otherNote: "" };
+          const mo = SL.motion, mk = mo && mo.cellEdit ? mo.cellEdit(sh, ui.dayKey(s.pid, s.cid, s.date), off) : null;
+          return SL.store.setDays(s.pid, U.weekStart(s.date), s.cid, { [s.date]: off }).then((r) => { if (mk) mo.cellSaved(mk, r.ok); if (!r.ok && ui.sheets.includes(sh)) sh.error(U.L("Not saved · ", "لم يُحفظ · ") + SL.store.errText(r)); });
         },
       },
       onKey: (sh, ev) => {
@@ -6006,9 +6583,10 @@ window.SL = window.SL || {};
     const job = raw ? `<span class="${raw.job && raw.job !== bj ? "ovr" : ""}">${U.esc(jid ? M.jobCode(jid) : "⊘")}</span>` : `<span class="faint${pend !== bj ? " ovr" : ""}">${U.esc(pend ? M.jobCode(pend) : "")}</span>`;
     const tick = conf ? "✓" : plan ? "○" : "";
     const dl = `<span class="c-d">${X.dLabel(date)}</span>`;
-    if (ro) return `<div class="${cls}">${dl}<span class="c-tk">${tick}</span><span class="c-n num">${cnt(raw && raw.m)}</span><span class="c-n num">${cnt(raw && raw.l)}</span><span class="c-f num">${food}</span><span class="c-j">${job}</span><span class="c-a num r">${amt}</span></div>`;
+    const mk = ui.mo(ui.dayKey(pid, cid, date));
+    if (ro) return `<div class="${cls}"${mk}>${dl}<span class="c-tk">${tick}</span><span class="c-n num">${cnt(raw && raw.m)}</span><span class="c-n num">${cnt(raw && raw.l)}</span><span class="c-f num">${food}</span><span class="c-j">${job}</span><span class="c-a num r">${amt}</span></div>`;
     const tl = conf ? U.L("Clear ", "مسح ") : plan ? (date <= T ? U.L("Confirm ", "تأكيد ") : U.L("Remove plan ", "إزالة الخطة ")) : U.L("Came, usual team ", "حضر الفريق المعتاد ");
-    return `<div class="${cls}">${dl}` +
+    return `<div class="${cls}"${mk}>${dl}` +
       `<button class="c-tk" id="${idb}tick" data-act="crewTick"${ds} aria-label="${U.esc(tl + U.dShort(date))}">${tick}</button>` +
       `<button class="c-n num" id="${idb}m" data-act="crewCell" data-field="m"${ds} aria-label="${U.L("Masters ", "معلمين ")}${U.esc(U.dShort(date))}">${cnt(raw && raw.m)}</button>` +
       `<button class="c-n num" id="${idb}l" data-act="crewCell" data-field="l"${ds} aria-label="${U.L("Laborers ", "عمال ")}${U.esc(U.dShort(date))}">${cnt(raw && raw.l)}</button>` +
@@ -6043,12 +6621,12 @@ window.SL = window.SL || {};
     const plans = u.days.filter((d) => d.plan);
     const fd = s.food ? U.mw(s.food / 100) : "–", oth = s.other ? " · " + U.L("other ", "مصاريف أخرى ") + U.mw(s.other / 100) : "";
     let h = `<div class="sec c-tot">` + ui.sech(U.L("Week", "الأسبوع"), s.days ? U.L(`${s.mDays} M-days · ${s.lDays} L-days · food ${fd}${oth}`, `أيام المعلمين ${s.mDays} · أيام العمال ${s.lDays} · أكل ${fd}${oth}`) : U.L("no confirmed days", "لا أيام مؤكدة"));
-    h += ui.moneyBar(t);
+    h += ui.moneyBar(t, { id: "wk" });
     const w = [`${U.L("Cost", "التكلفة")} <b class="num">${ui.mz(t.cost)}</b>`, `${U.L("Paid off", "مسدد")} <b class="num">${ui.mz(t.paidOff)}</b>`];
     w.push(t.owed ? `<span class="c-owed">${U.L("Owed", "مستحق")} <b class="num">${ui.m(t.owed)}</b></span>` : `${U.L("Owed", "مستحق")} <b class="num"><span class="zero">–</span></b>`);
     if (t.prepaid) w.push(`<span class="c-prepaid">${U.L("Prepaid", "مدفوع مقدماً")} <b class="num">${ui.m(t.prepaid)}</b></span>`);
     if (u.est) w.push(`<span class="muted">${U.L("~ est.", "~ تقديري")}</span>` + (ui.readOnlyUI() ? "" : ` <button class="lnk" id="crew-estok" data-act="crewEstOk" data-cid="${U.esc(u.crewId)}" data-sat="${U.esc(u.weekStart)}">${U.L("Confirm amounts", "تأكيد المبالغ")}</button>`));
-    h += `<div class="c-words t13">${w.join(" · ")}<span class="c-fl">${ui.flagSlot(u.key)}</span></div>`;
+    h += `<div class="c-words t13"${ui.mo(u.key)}>${w.join(" · ")}<span class="c-fl">${ui.flagSlot(u.key)}</span></div>`;
     if (plans.length) {
       const pd = plans.map((d) => U.esc(U.wd(d.date))).join(U.L(", ", "، ")), pm = ui.mw(U.sum(plans, (d) => d.h));
       h += `<div class="t12 c-committed">${U.L(`planned ${pd} (${pm}) not counted`, `مخطط ${pd} (${pm}) غير محسوب`)}</div>`;
@@ -6102,7 +6680,7 @@ window.SL = window.SL || {};
       if (u && !past && M.calc(u, D).owed > 0) h += `<span class="t12 muted c-first">${U.L("Confirm first, then pay", "أكّد أولاً، ثم ادفع")}</span>`;
     } else if (u && past) {
       const r = M.calc(u, D);
-      if (r.owed > 0) h = `<span class="c-paid t13"><span class="c-owed">${U.L("Owed", "مستحق")} <b class="num">${ui.m(r.owed)}</b></span></span>` +
+      if (r.owed > 0) h = `<span class="c-paid t13"${ui.mo(u.key)}><span class="c-owed">${U.L("Owed", "مستحق")} <b class="num">${ui.m(r.owed)}</b></span></span>` +
         `<span class="t12 muted c-past">${U.L("Viewing as of ", "عرض حتى تاريخ ")}${U.esc(U.dShort(ui.D()))}${U.L(" · no paying", " · لا دفع")}</span><button class="lnk" id="crew-asoftoday" data-act="asOfToday">${U.L("Back to today", "العودة إلى اليوم")}</button>`;
     } else if (u) {
       const r = M.calc(u, D);
@@ -6111,7 +6689,7 @@ window.SL = window.SL || {};
         h = `<button class="btn${fl ? " float" : ""}" id="crew-pay" data-act="crewPay" data-key="${U.esc(u.key)}">${U.L("Pay ", "ادفع ")}${ui.mw(r.owed)} ${fl ? U.L("from float", "من العهدة") : U.L("(Ryan)", "(" + U.esc(M.walletName(M.ownerWalletId())) + ")")}</button>` +
           `<button class="lnk" id="crew-otherpay" data-act="crewOtherPay" data-key="${U.esc(u.key)}">${U.L("Other pay ›", "دفع آخر ›")}</button>`;
       } else if (r.inc > 0 || r.paid > 0) {
-        h = `<span class="c-paid t13">${ui.sw(r.prepaid ? "prepaid" : "paid")} ${r.prepaid ? `<span class="c-prepaid">${U.L("Prepaid", "مدفوع مقدماً")} ${ui.m(r.prepaid)}</span>` : U.L("Paid off", "مسدد")}</span>` +
+        h = `<span class="c-paid t13"${ui.mo(u.key)}>${ui.sw(r.prepaid ? "prepaid" : "paid")} ${r.prepaid ? `<span class="c-prepaid">${U.L("Prepaid", "مدفوع مقدماً")} ${ui.m(r.prepaid)}</span>` : U.L("Paid off", "مسدد")}</span>` +
           `<button class="lnk" id="crew-otherpay" data-act="crewOtherPay" data-key="${U.esc(u.key)}">${U.L("Other pay ›", "دفع آخر ›")}</button>`;
       }
     }
@@ -6996,7 +7574,7 @@ window.SL = window.SL || {};
     return `<div class="sec v-prj-strip">
       <button type="button" class="v-prj-hero" data-act="toggle" data-k="prj.ident" aria-expanded="${open}" aria-label="${U.L("Cost to date; tap for the identity", "التكلفة حتى اليوم؛ اضغط للتفصيل")}">
         <span class="lbl">${U.L("Cost to date · SAR", "التكلفة حتى اليوم · ر.س")}</span><span class="t28 num">${ui.m(t.cost)}</span></button>
-      ${ui.moneyBar(t, { committed, budget: X.budgetH(p) })}
+      ${ui.moneyBar(t, { committed, budget: X.budgetH(p), id: "prj" })}
       ${ui.legend(t, { committed })}
       <div class="v-prj-ident${open ? " open" : ""}">${ui.identity(t)}</div></div>`;
   };
@@ -7050,14 +7628,14 @@ window.SL = window.SL || {};
       <span class="t"><span class="v-prj-gl" title="${U.esc(X.stLabel(st))}">${g}</span> <b class="v-prj-code" dir="ltr">${U.esc(j.code || M.jobCode(j.id) || "")}</b> ${U.t(X.jobNm(j))}</span>
       <span class="a num">${t.cost || !t.noPrice ? X.mx(t.cost) : '<span class="unk">?</span>'}</span><span class="f">${ui.flagSlot("job:" + j.id)}</span>
       <span class="m">${X.statusWords(j, D, t)}</span><span class="w">${X.owedWord(t, true)}</span>
-      <div class="v-prj-bar">${ui.moneyBar(t, { scale, committed: commH, budget: X.budgetH(j) })}</div></div>`;
+      <div class="v-prj-bar">${ui.moneyBar(t, { scale, committed: commH, budget: X.budgetH(j), id: "job:" + j.id })}</div></div>`;
   };
 
   /** Equipment deposits in the "No job" bucket (by nature on no job): not counted as untagged costs; alone they get a plain row. */
   X.njDeposits = (nj) => (nj && nj.unitKeys ? [...nj.unitKeys].filter((k) => (M.unit(k) || {}).deposit).length : 0);
   X.depNoJobRow = (nj, scale) => `<div class="row nosw v-prj-nojob"><span class="t">${U.L("Equipment deposits", "تأمينات المعدات")} <span class="muted t12">${U.L("held by rental shops", "لدى محلات التأجير")}</span></span>
         <span class="a num">${X.mx(nj.cost)}</span><span class="f"></span><span class="m">${X.owedWord(nj, true)}</span><span class="w"></span>
-        <div class="v-prj-bar">${ui.moneyBar(nj, { scale })}</div></div>`;
+        <div class="v-prj-bar">${ui.moneyBar(nj, { scale, id: "dep" })}</div></div>`;
   X.jobsBlock = (pid, D) => {
     const bj = M.byJob(pid, D), comm = M.committed(pid).byJob || {}, ro = X.noWrite();
     const jobs = M.jobs(pid), tOf = (id) => bj[id] || Z();
@@ -7085,7 +7663,7 @@ window.SL = window.SL || {};
       h += `<div class="row nosw v-prj-nojob"><span class="t"><span class="c-warn">⊘</span> ${U.L("No job", "بدون بند")} <span class="muted t12">${U.L(`${n} cost${n === 1 ? "" : "s"}`, U.plAr(n, "تكلفة واحدة", "تكلفتان", "تكاليف", "تكلفة"))}</span></span>
         <span class="a num">${X.mx(nj.cost)}</span><span class="f"></span><span class="m">${X.owedWord(nj, true)}</span>
         <span class="w">${ro ? "" : `<button class="btn sm sec" data-act="tagUntagged" id="prj-tag">${U.L("Tag", "حدد البند")}</button>`}</span>
-        <div class="v-prj-bar">${ui.moneyBar(nj, { scale })}</div></div>`;
+        <div class="v-prj-bar">${ui.moneyBar(nj, { scale, id: "nojob" })}</div></div>`;
     }
     if (empties.length) h += `<div class="t12 faint v-prj-empties">${empties.join(" · ")}</div>`;
     return h + "</div>";
@@ -7140,7 +7718,7 @@ window.SL = window.SL || {};
     return `<div class="sec v-prj-strip v-job-strip">
       <button type="button" class="v-prj-hero" data-act="toggle" data-k="${U.esc(k)}" aria-expanded="${open}" aria-label="${U.L("Cost to date; tap for the identity", "التكلفة حتى اليوم؛ اضغط للتفصيل")}">
         <span class="lbl">${U.L("Cost to date · SAR", "التكلفة حتى اليوم · ر.س")}</span><span class="t20 num">${ui.m(t.cost)}</span></button>
-      ${ui.moneyBar(t, { committed: comm, budget: X.budgetH(j) })}
+      ${ui.moneyBar(t, { committed: comm, budget: X.budgetH(j), id: "job" })}
       ${ui.legend(t, { committed: comm })}
       <div class="v-prj-ident${open ? " open" : ""}">${ui.identity(t)}</div></div>`;
   };
@@ -7578,7 +8156,7 @@ window.SL = window.SL || {};
     if (u.pendingDelivery) s += ' · <span class="c-warn">' + (svc ? U.L("not performed yet", "لم يتم التنفيذ بعد") : U.L("not delivered yet", "لم يتم التسليم بعد")) + "</span>";
     else if (u.kind === "purchase" || u.kind === "service") s += ' · <span class="muted">' + (svc ? U.L("performed ", "تم التنفيذ ") : U.L("delivered ", "تم التسليم ")) + U.esc(U.dShort(u.delivered)) + "</span>";
     if (u.est) s += ' · <span class="est">' + U.ltr("~" + ui.m(r.inc)) + "</span> " + U.L("est.", "تقديري");
-    return '<div class="lg-status t13">' + s + "</div>";
+    return '<div class="lg-status t13"' + ui.mo(u.key) + ">" + s + "</div>";
   };
 
   /** Evidence as words: doc kind · Photo ✓ / No photo · Original with … · review state. */
@@ -7642,7 +8220,7 @@ window.SL = window.SL || {};
       const later = p.date && p.date > D;
       if (p.h < 0) return X.refundPay(u, p, later);
       const line = '<span class="d">' + U.esc(p.date ? U.dShort(p.date) : U.L("no date", "بلا تاريخ")) + '</span><span class="w">' + U.t(M.walletName(p.walletId)) + (!ro && p.note && !/^migrated from v1/i.test(p.note) ? ' <span class="muted">· ' + U.t(p.note) + "</span>" : "") + '</span><span class="num">' + ui.m(p.h) + "</span>";
-      return '<div class="lg-pay' + (p.void ? " void" : "") + (later ? " later" : "") + '">' + (p.void ? "<s>" + line + "</s>" : line) + (p.void ? '<span class="t12 muted">' + U.L("void", "ملغى") + "</span>" : later ? '<span class="t12 muted">' + U.L("after as-of", "بعد التاريخ") + "</span>" : "<span></span>") + "</div>";
+      return '<div class="lg-pay' + (p.void ? " void" : "") + (later ? " later" : "") + '"' + ui.mo(u.key + "#" + p.id) + ">" + (p.void ? "<s>" + line + "</s>" : line) + (p.void ? '<span class="t12 muted">' + U.L("void", "ملغى") + "</span>" : later ? '<span class="t12 muted">' + U.L("after as-of", "بعد التاريخ") + "</span>" : "<span></span>") + "</div>";
     }).join("") + "</div>";
   };
   /** A refund (a negative payment, e.g. a deposit returned): "Deposit returned · back to Sayed" −200. */
@@ -7651,7 +8229,7 @@ window.SL = window.SL || {};
     const lab = (u.deposit ? U.L("Deposit returned", "أُرجع التأمين") : U.L("Refund", "استرداد")) + " · " + U.L("back to", "أُعيد إلى") + " " + U.t(M.walletName(p.walletId)) + note;
     const line = '<span class="d">' + U.esc(p.date ? U.dShort(p.date) : U.L("no date", "بلا تاريخ")) + '</span><span class="w">' + lab + '</span><span class="num">' + ui.m(p.h) + "</span>";
     const tail = p.void ? '<span class="t12 muted">' + U.L("void", "ملغى") + "</span>" : later ? '<span class="t12 muted">' + U.L("after as-of", "بعد التاريخ") + "</span>" : "<span></span>";
-    return '<div class="lg-pay rf' + (p.void ? " void" : "") + (later ? " later" : "") + '">' + (p.void ? "<s>" + line + "</s>" : line) + tail + "</div>";
+    return '<div class="lg-pay rf' + (p.void ? " void" : "") + (later ? " later" : "") + '"' + ui.mo(u.key + "#" + p.id) + ">" + (p.void ? "<s>" + line + "</s>" : line) + tail + "</div>";
   };
 })(window.SL);
 
@@ -8551,13 +9129,13 @@ window.SL = window.SL || {};
         for (const d of u.days) {
           if (d.plan || d.date > D || !d.h) continue;
           const fx = X.blank(); fx[party] = -d.h;
-          rows.push(Object.assign({}, base, { date: d.date, seq: 0, fx, title: U.L(U.t(u.title) + " came", bd(U.t(X.unitName(u))) + " · حضر"),
+          rows.push(Object.assign({}, base, { mo: u.key + "@" + d.date, date: d.date, seq: 0, fx, title: U.L(U.t(u.title) + " came", bd(U.t(X.unitName(u))) + " · حضر"),
             meta: [X.ml(d.m, d.l) + (d.food ? U.L(" +food", " + أكل") : ""), U.esc(M.jobCode(d.job))].filter(Boolean).join(" · ") }));
         }
       } else if (u.pendingDelivery) {
         if (u.date && u.date > D) continue;
         const w = u.kind === "service" ? "performed" : "delivered", sv = u.kind === "service";
-        rows.push(Object.assign({}, base, { date: u.date, seq: 0, fx: X.blank(), pending: sv ? U.L("Performed", "تم التنفيذ") : U.L("Delivered", "تم التسليم"),
+        rows.push(Object.assign({}, base, { mo: u.key, date: u.date, seq: 0, fx: X.blank(), pending: sv ? U.L("Performed", "تم التنفيذ") : U.L("Delivered", "تم التسليم"),
           title: U.L(U.t(u.title) + " · not " + w + " yet", bd(U.t(u.title)) + (sv ? " · لم يُنفَّذ بعد" : " · لم يُسلَّم بعد")),
           meta: [U.esc(M.jobCode(u.jobId)), r.paid ? U.L("paid ahead: Prepaid until " + w, sv ? "مدفوع مقدماً حتى التنفيذ" : "مدفوع مقدماً حتى التسليم") : U.L("not paid either", "ولم يُدفع أيضاً")].filter(Boolean).join(" · ") }));
       } else if (r.inc) {
@@ -8572,7 +9150,7 @@ window.SL = window.SL || {};
             U.L(n + " day" + (n > 1 ? "s" : ""), U.plAr(n, "يوم واحد", "يومين", "أيام", "يوماً")) + " × " + U.mw(u.daily / 100), U.esc(M.jobCode(u.jobId))].filter(Boolean);
         } else if (u.kind === "purchase") title += U.L(" delivered", " · تم التسليم");
         else if (u.kind === "service") title += U.L(" performed", " · تم التنفيذ");
-        rows.push(Object.assign({}, base, { date: at, seq: 0, fx, title, meta: meta.join(" · ") }));
+        rows.push(Object.assign({}, base, { mo: u.key, date: at, seq: 0, fx, title, meta: meta.join(" · ") }));
       }
       for (const p of u.payments) {
         if (p.void || !p.date || p.date > D) continue;
@@ -8583,7 +9161,7 @@ window.SL = window.SL || {};
         // "Sayed paid Noura" + "#293", not "Noura … #293" again
         const what = u.kind === "crew" ? U.L("wk ", "أسبوع ") + U.dDM(u.weekStart) : payee && title.startsWith(payee) ? title.slice(payee.length).replace(/^[\s·:,–-]+/, "") : title;
         const shown = bd(U.t(u.kind === "crew" ? crewNm(u.crewId, payee) : payee));
-        rows.push(Object.assign({}, base, { date: p.date, seq: 1, at: p.at || 0, payId: p.id, wid: p.walletId, fx,
+        rows.push(Object.assign({}, base, { mo: u.key + "#" + p.id, date: p.date, seq: 1, at: p.at || 0, payId: p.id, wid: p.walletId, fx,
           title: U.L(who + " paid " + U.t(payee), pk === "me" ? "دفعت إلى " + shown : bd(who) + " دفع إلى " + shown),
           meta: [bd(U.t(what)), note].filter(Boolean).join(" · ") }));
         if (u.deposit || p.h < 0) X.depositRow(rows[rows.length - 1], u, p, note);
@@ -8600,7 +9178,7 @@ window.SL = window.SL || {};
       else if (c.type === "capital") { fx.me = h; title = (c.capitalKind === "loan" ? U.L("Loan from ", "قرض من ") : U.L("Capital from ", "رأس مال من ")) + (c.investor ? bd(U.t(c.investor)) : U.L("investor", "مستثمر")); }
       else continue;
       const meta = []; if (c.note && !ui.readOnlyUI()) meta.push(bd(U.t(c.note)));
-      rows.push({ files: (c.files || []).slice(), capital: c.type === "capital", cashId: c.id, wid: c.walletId || "", date: c.date, seq: 1, at: c.createdAt || 0, title, meta: meta.join(" · "), fx, open: false });
+      rows.push({ mo: "cash:" + c.id, files: (c.files || []).slice(), capital: c.type === "capital", cashId: c.id, wid: c.walletId || "", date: c.date, seq: 1, at: c.createdAt || 0, title, meta: meta.join(" · "), fx, open: false });
     }
     // newest first. Within a day: cash handed to Sayed goes at the bottom (it comes first, as on the Float page), then
     // the latest group on top; a cost's payment sits right above its delivery
@@ -8747,7 +9325,7 @@ window.SL = window.SL || {};
         const act = r.key ? ` class="tap${r.pending ? " bl-pend" : ""}" data-act="openUnit" data-key="${U.esc(r.key)}" role="button" tabindex="0"`
           : r.cashId ? ` class="tap" data-go="${U.esc(r.capital ? ui.href("capital") : ui.href("float", r.wid || M.defaultWallet(pid)))}" role="link" tabindex="0"` : "";
         const bad = X.leak(r);
-        h += `<tr${act} data-d="${U.esc(r.date)}" data-q="${U.esc(X.qText(r))}"${bad ? ' data-leak="1"' : ""}><td class="bl-pc">${X.proof(r.files)}</td><th scope="row" class="bl-d${bad ? " bl-leak" : ""}"><span class="bl-t">${r.title}</span>${r.meta ? '<span class="t11 muted">' + r.meta + "</span>" : ""}${r.pending && !ui.readOnlyUI() && !ui.isPast() ? `<button type="button" class="btn sm bl-dlv" data-act="markDelivered" data-id="${U.esc(r.key.slice(2))}">✓ ${r.pending}</button>` : ""}${bad ? '<span class="t11 c-stop">' + U.L("▲ doesn't balance by " + U.mw(bad / 100) + ": money from nowhere", "▲ غير متوازن بفارق " + U.mw(bad / 100) + ": مبلغ بلا مصدر") + "</span>" : ""}</th>` +
+        h += `<tr${act}${ui.mo(r.mo)} data-d="${U.esc(r.date)}" data-q="${U.esc(X.qText(r))}"${bad ? ' data-leak="1"' : ""}><td class="bl-pc">${X.proof(r.files)}</td><th scope="row" class="bl-d${bad ? " bl-leak" : ""}"><span class="bl-t">${r.title}</span>${r.meta ? '<span class="t11 muted">' + r.meta + "</span>" : ""}${r.pending && !ui.readOnlyUI() && !ui.isPast() ? `<button type="button" class="btn sm bl-dlv" data-act="markDelivered" data-id="${U.esc(r.key.slice(2))}">✓ ${r.pending}</button>` : ""}${bad ? '<span class="t11 c-stop">' + U.L("▲ doesn't balance by " + U.mw(bad / 100) + ": money from nowhere", "▲ غير متوازن بفارق " + U.mw(bad / 100) + ": مبلغ بلا مصدر") + "</span>" : ""}</th>` +
           cols.map(([k]) => X.cell(r.fx[k], k, r.sayedAfter)).join("") + "</tr>";
       }
       h += `<tr class="bl-none"${rows.length ? " hidden" : ""}><td colspan="${cols.length + 2}" class="muted t13">${rows.length ? U.L("No event matches the search · ", "لا توجد حركة تطابق البحث · ") : f === "open" ? U.L("Everything is settled. ", "كل شيء مسوّى. ") : U.L("Nothing here. ", "لا يوجد شيء هنا. ")}<button type="button" class="lnk" data-act="balClear">${U.L("Show all", "عرض الكل")}</button></td></tr>`;
@@ -8963,7 +9541,7 @@ window.SL = window.SL || {};
     const tag = X.ro() ? "span" : "button";
     if (busy(st) && inJob(d, date)) label += X.extraLabel(d);
     const act = X.ro() ? "" : ` type="button" data-act="auDay" data-cid="${U.esc(cid)}" data-date="${date}"${ctx.onlyJob !== undefined ? ` data-job="${U.esc(ctx.onlyJob)}"` : ""}`;
-    return `<${tag} class="${cls.join(" ")}"${act} aria-label="${U.esc(label)}">${inner}</${tag}>`;
+    return `<${tag} class="${cls.join(" ")}"${act}${ui.mo(ui.dayKey(pid, cid, date))} aria-label="${U.esc(label)}">${inner}</${tag}>`;
   };
 
   /** Row label: name (+ "? n" to answer), then trade · M-days · L-days · cost counted in the visible range. */
@@ -9124,9 +9702,11 @@ window.SL = window.SL || {};
     const s = sh.state, k = X.key(s), cid = s.cid, date = s.date;
     if (!has(s.orig, k)) s.orig[k] = X.full(X.raw(s.pid, cid, date));
     s.recs[k] = rec; sh.err = ""; sh.refresh();
+    const mo = SL.motion, mk = mo && mo.cellEdit ? mo.cellEdit(sh, ui.dayKey(s.pid, cid, date), rec) : null;   // the grid cell flashes when this write lands
     const c = M.crew(cid);
     if (rec && X.heads(rec) > 0 && c && c.active === false) SL.store.catalogPut("crews", cid, { active: true }); // back on site
     const p = SL.store.setDays(s.pid, U.weekStart(date), cid, { [date]: rec }).then((r) => {
+      if (mk) mo.cellSaved(mk, r.ok);
       if (r.ok) { s.saved[k] = true; return true; }
       delete s.recs[k];
       const msg = U.L("Not saved · ", "لم يُحفظ · ") + X.dn(cid) + " " + U.dShort(date) + " · " + SL.store.errText(r).replace(/^(Not saved: |لم يُحفظ: )/, "");
@@ -9270,6 +9850,7 @@ window.SL = window.SL || {};
       },
       onClose: (sh) => {
         const s = sh.state;
+        if (SL.motion && SL.motion.cellDone) SL.motion.cellDone(sh);
         for (const j of s.jobsUsed) ui.rememberJob(pid, j); // chip order stays put while the sheet is open
         // wait for every write, then only claim (and offer to undo) what really saved
         Promise.all(s.pending).then(() => {
@@ -9317,8 +9898,8 @@ window.SL = window.SL || {};
     const r = M.calc(u, T);
     if (!r.inc && !r.paid) return "";
     const wk = X.dn(u.crewId) + U.L(" · week of ", " · أسبوع ") + U.dDM(u.weekStart) + ": ";
-    const sw = (cls, on, text) => X.ro() ? `<span class="au-pay ${cls}">${U.esc(text)}</span>` :
-      `<button type="button" class="au-pay ${cls}${on ? " on" : ""}" data-act="auPaid" data-ts="${U.esc(u.tsId)}" data-cid="${U.esc(u.crewId)}" data-to="${on ? "off" : "on"}" role="switch" aria-checked="${on}" aria-label="${U.esc(wk + text)}"><i class="au-psw" aria-hidden="true"></i>${U.esc(text)}</button>`;
+    const sw = (cls, on, text) => X.ro() ? `<span class="au-pay ${cls}"${ui.mo(u.key)}>${U.esc(text)}</span>` :
+      `<button type="button" class="au-pay ${cls}${on ? " on" : ""}"${ui.mo(u.key)} data-act="auPaid" data-ts="${U.esc(u.tsId)}" data-cid="${U.esc(u.crewId)}" data-to="${on ? "off" : "on"}" role="switch" aria-checked="${on}" aria-label="${U.esc(wk + text)}"><i class="au-psw" aria-hidden="true"></i>${U.esc(text)}</button>`;
     const out = [];
     if (r.paid) out.push(sw("ok", true, (r.prepaid ? U.L("Prepaid ", "مدفوع مقدماً ") : U.L("Paid ", "مسدد ")) + U.mw(r.paid / 100)));
     if (r.owed) out.push(sw("owed", false, (r.paid ? U.L("Owed ", "مستحق ") : U.L("Unpaid ", "غير مدفوع ")) + U.mw(r.owed / 100)));
@@ -9421,8 +10002,8 @@ window.SL = window.SL || {};
   X.amtOf = (v) => { const n = typeof v === "number" ? v : U.parseNum(v); return n > 0 ? n : 0; };
   /** Made in the last 15 minutes: one tap undoes it. An older payment asks first ("Void…" → Void / Keep in the row). */
   X.recent = (at) => U.num(at) > 0 && Date.now() - U.num(at) < 15 * 60000;
-  X.payLine = (s, p, ro) => {
-    const h = `<div class="au-prow"><span class="num">${U.esc(U.dDM(p.date))}</span><b class="num">${U.m(p.h / 100)}</b><span class="muted au-pvia">${X.via(p.walletId)}${p.note ? " · " + U.t(p.note) : ""}</span>`;
+  X.payLine = (s, p, ro, u) => {
+    const h = `<div class="au-prow"${ui.mo(u && u.key + "#" + p.id)}><span class="num">${U.esc(U.dDM(p.date))}</span><b class="num">${U.m(p.h / 100)}</b><span class="muted au-pvia">${X.via(p.walletId)}${p.note ? " · " + U.t(p.note) : ""}</span>`;
     if (ro) return h + "</div>";
     const id = U.esc(p.id), amt = U.unbidi(U.m(p.h / 100, { plain: true }));
     if (X.recent(p.at)) return h + `<button type="button" class="lnk au-pundo" data-act="auPayUndo" data-id="${id}" aria-label="${U.esc(U.L("Undo the payment of ", "تراجع عن دفعة ") + amt)}">${U.L("Undo", "تراجع")}</button></div>`;
@@ -9439,7 +10020,7 @@ window.SL = window.SL || {};
       (r.prepaid > 0 ? `<span class="c-prepaid">${U.L("Prepaid", "مدفوع مقدماً")}</span><span class="v c-prepaid">${U.m(r.prepaid / 100)}</span>`
         : `<span${r.owed ? ' class="c-owed"' : ""}>${U.L("Owed", "مستحق")}</span><span class="v${r.owed ? " c-owed" : ""}">${r.owed ? U.m(r.owed / 100) : '<span class="zero">–</span>'}</span>`) + "</div>";
     if (cs.plannedH) h += `<div class="t12 c-committed">(${U.mw(cs.plannedH / 100)}) ${U.L("planned, not counted until they come", "مخطط، لا يُحسب حتى يحضروا")}</div>`;
-    if (pays.length) h += '<div class="au-plist">' + pays.map((p) => X.payLine(s, p, ro)).join("") + "</div>";
+    if (pays.length) h += '<div class="au-plist">' + pays.map((p) => X.payLine(s, p, ro, u)).join("") + "</div>";
     if (ro) return h + "</section>";
     const fw = X.fw(), rw = M.ownerWalletId(), pd = payDraft(s, u), w = pd.w || fw || rw;
     if (!r.owed && !pd.open) return h + `<button type="button" class="lnk au-pahead" data-act="auPayOpen">${U.L("Pay ahead ›", "ادفع مقدماً ›")}</button></section>`;
@@ -10180,7 +10761,7 @@ window.SL = window.SL || {};
   X.card = (i) => {
     const u = i.u, k = "ia:" + u.key, open = ui.isOpen(k, false);
     const kind = u.doc.doc && u.doc.doc.kind;
-    return `<div class="ia-card${open ? " open" : ""}${i.up ? " up" : ""}">` +
+    return `<div class="ia-card${open ? " open" : ""}${i.up ? " up" : ""}"${ui.mo(u.key)}>` +
       `<button type="button" class="ia-head" data-act="toggle" data-k="${U.esc(k)}" aria-expanded="${open}"><span class="ia-t">${kind ? ui.kindPill(kind) + " " : ""}${U.isAr() ? '<span class="ia-tt" dir="auto">' + U.t(u.title) + "</span>" : U.t(u.title)}</span><span class="ia-amt num">${U.m(i.total / 100)}</span>` +
       `<span class="ia-m">${U.esc(U.dShort(u.date))}${u.jobId ? " · " + U.t(M.jobCode(u.jobId)) : ' · <span class="c-warn">' + U.L("no job", "بدون بند") + "</span>"}${i.lines.length ? " · " + U.L(i.lines.length + " line" + (i.lines.length > 1 ? "s" : ""), U.plAr(i.lines.length, "صنف واحد", "صنفان", "أصناف", "صنفاً")) : ""}</span><span class="ia-car">${open ? "▾" : "›"}</span></button>` +
       X.chips(i) + (open ? '<div class="ia-body">' + X.linesTable(i) + `<button type="button" class="lnk" data-act="openUnit" data-key="${U.esc(u.key)}">${U.L("Open invoice (edit, pay, photo) ›", "فتح الفاتورة (تعديل، دفع، صورة) ›")}</button></div>` : "") + "</div>";
@@ -10274,7 +10855,7 @@ window.SL = window.SL || {};
       label += U.L("received, still owed", "مستلم، وما زال مستحقاً");
     } else label += "–";
     if (paidHere) { inner += '<i class="au-pd" aria-hidden="true">✓</i>'; label += U.L(" · paid this day", " · دُفع في هذا اليوم"); }
-    return `<button type="button" class="${cls.join(" ")}" data-act="iaOpen" data-id="${U.esc(i.u.id)}" aria-label="${U.esc(label)}">${inner}</button>`;
+    return `<button type="button" class="${cls.join(" ")}" data-act="iaOpen" data-id="${U.esc(i.u.id)}"${ui.mo(i.u.key)} aria-label="${U.esc(label)}">${inner}</button>`;
   };
 
   /** Row label: doc no (and the supplier when grouped by job), then total · job · proof, then the paid switch. */
@@ -10284,7 +10865,7 @@ window.SL = window.SL || {};
     const num = no ? U.ltr("#" + U.esc(no)) : ""; // "#INV-2618048" keeps its # in front in Arabic too
     const nm = mode === "jobs" ? (U.isAr() ? "<bdi>" + U.t(sup) + "</bdi>" : U.t(sup)) + (num ? " " + num : "") : num || U.esc(U.dDM(u.date || ""));
     const sub = [mode === "jobs" ? "" : U.esc(M.jobCode(u.jobId) || U.L("no job", "بدون بند")), i.proof ? "" : '<span class="c-warn">' + U.L("no doc", "بلا مستند") + "</span>", i.quote ? '<span class="c-stop">' + U.L("quote", "عرض سعر") + "</span>" : ""].filter(Boolean).join(" · ");
-    return `<div class="au-lab ia-lab"><button type="button" class="ia-open" data-act="iaOpen" data-id="${U.esc(u.id)}"><span class="au-nm">${nm}</span>` +
+    return `<div class="au-lab ia-lab"${ui.mo(u.key)}><button type="button" class="ia-open" data-act="iaOpen" data-id="${U.esc(u.id)}"><span class="au-nm">${nm}</span>` +
       `<span class="au-sub"><b class="num">${U.m(i.total / 100)}</b>${sub ? " · " + sub : ""}</span></button>${X.payChip(i, true)}</div>`;
   };
 
@@ -10489,15 +11070,16 @@ window.SL = window.SL || {};
   X.crewUnits = (pid, T) => U.sortBy(M.unitsFor(pid).filter((u) => u.kind === "crew" && (M.calc(u, T).owed > 0 || X.pendingPlans(u, T).length)), (u) => u.weekStart + ":" + String(1e12 - M.calc(u, T).owed).padStart(13, "0") + ":" + M.crewName(u.crewId));
   /** Everything the forecast says will be needed in the next 7 days, excluding what is already owed. */
   X.ahead = (f) => f.crewAhead + f.runRate + f.rentAhead + f.quotesDue;
-  /** Gauge per spec §3.8 (holds = 100%). */
-  X.gauge = (holds, owed) => {
-    if (holds <= 0) return `<div class="fgauge" role="img" aria-label="${U.L("Holds nothing", "لا يوجد نقد في اليد")}"></div>`;
+  /** Gauge per spec §3.8 (holds = 100%). wid gives the bar its motion identity (data-mb; segments slide on change). */
+  X.gauge = (holds, owed, wid) => {
+    const mb = wid ? ` data-mb="fg:${U.esc(wid)}"` : "";
+    if (holds <= 0) return `<div class="fgauge"${mb} role="img" aria-label="${U.L("Holds nothing", "لا يوجد نقد في اليد")}"></div>`;
     if (owed > holds) {
       const shortPct = Math.min(50, ((owed - holds) / holds) * 100);
-      return `<div class="fgauge pay-gauge" role="img" aria-label="${U.L("Owed via float exceeds holds", "المستحق من العهدة أكثر مما في اليد")}"><i class="claimed" style="width:${100 - shortPct}%"></i><i class="short" style="width:${shortPct}%"></i></div>`;
+      return `<div class="fgauge pay-gauge"${mb} role="img" aria-label="${U.L("Owed via float exceeds holds", "المستحق من العهدة أكثر مما في اليد")}"><i class="claimed" data-s="claimed" style="width:${100 - shortPct}%"></i><i class="short" data-s="short" style="width:${shortPct}%"></i></div>`;
     }
     const c = (owed / holds) * 100;
-    return `<div class="fgauge" role="img" aria-label="${U.L(`Owed via float ${U.esc(U.mw(owed / 100))} of ${U.esc(U.mw(holds / 100))}`, `مستحق من العهدة ${U.esc(U.mw(owed / 100))} من ${U.esc(U.mw(holds / 100))}`)}"><i class="claimed" style="width:${c}%"></i><i class="free" style="width:${100 - c}%"></i></div>`;
+    return `<div class="fgauge"${mb} role="img" aria-label="${U.L(`Owed via float ${U.esc(U.mw(owed / 100))} of ${U.esc(U.mw(holds / 100))}`, `مستحق من العهدة ${U.esc(U.mw(owed / 100))} من ${U.esc(U.mw(holds / 100))}`)}"><i class="claimed" data-s="claimed" style="width:${c}%"></i><i class="free" data-s="free" style="width:${100 - c}%"></i></div>`;
   };
 
   /** The richer float card for the Pay view. */
@@ -10509,10 +11091,10 @@ window.SL = window.SL || {};
     const name = X.holder(wid);
     let h = `<div class="card float pay-card${left < 0 ? " short" : ""}" id="pay-card-${U.esc(wid)}">
       <div class="hrow"><span class="lbl pay-flbl">${U.L(U.esc(String(name).toUpperCase()) + "'S FLOAT", "عهدة " + X.nmI(name))}</span><span class="spacer"></span><span class="t12 muted">${lastCount ? U.L("counted ", "آخر جرد ") + U.esc(U.dDM(lastCount.date)) : U.L("never counted", "لم تُجرد بعد")}</span></div>
-      <div class="kv pay-kv"><span>${holds <= 0 ? U.L(U.esc(name) + " holds", "في يد " + X.nmI(name)) : U.L("Holds (expected)", "في اليد (متوقع)")}</span><span class="v t20 pay-holds">${holds <= 0 ? (holds === 0 ? U.L("nothing", "لا شيء") : U.L("short by ", "ناقص ") + U.m(-holds / 100)) : U.m(holds / 100)}</span>
+      <div class="kv pay-kv"><span>${holds <= 0 ? U.L(U.esc(name) + " holds", "في يد " + X.nmI(name)) : U.L("Holds (expected)", "في اليد (متوقع)")}</span><span class="v t20 pay-holds">${holds <= 0 ? (holds === 0 ? U.L("nothing", "لا شيء") : U.L("short by ", "ناقص ") + ui.odo("card." + wid, -holds, "neg", U.m(-holds / 100))) : ui.odo("card." + wid, holds, "pos", U.m(holds / 100))}</span>
       <span>${U.L("Owed via float", "مستحق من العهدة")}</span><span class="v c-owed">${owed ? U.m(owed / 100) : '<span class="zero">–</span>'}</span>
       <span>${left < 0 ? '<b class="c-stop">' + U.L("Short by", "ناقص") + "</b>" : U.L("Left after paying", "يتبقى بعد الدفع")}</span><span class="v${left < 0 ? " c-stop" : ""}">${U.m(Math.abs(left) / 100)}</span></div>
-      ${X.gauge(holds, owed)}
+      ${X.gauge(holds, owed, wid)}
       <div class="t12 muted">${U.L("Owed via float ", "مستحق من العهدة ")}${U.mw(Math.min(owed, Math.max(holds, 0)) / 100)} · ${left < 0 ? '<b class="c-stop">' + U.L("short ", "ناقص ") + U.mw(-left / 100) + "</b>" : U.L("free ", "متاح ") + U.mw(left / 100)}</div>
       <div class="hrow pay-need"><span class="t13">${U.L("Next 7 days need ≈ ", "المطلوب خلال 7 أيام ≈ ")}<b class="num">${U.mw(ahead / 100)}</b>${f.underCount ? ' <span class="c-warn">+ ?</span>' : ""}</span><span class="spacer"></span><button class="lnk pay-why" data-act="why" data-w="${U.esc(wid)}" id="pay-why-${U.esc(wid)}">${U.L("Why?", "لماذا؟")}</button></div>`;
     if (f.topUp > 0) {
@@ -10544,7 +11126,7 @@ window.SL = window.SL || {};
     const sat = u.weekStart, cid = u.crewId, payer = M.payer(u), fl = X.isFloat(payer);
     let words = r.owed ? '<span class="c-owed">' + U.L("Owed", "مستحق") + "</span>" : "";
     if (pend.length) words = '<span class="c-committed">' + U.L(pend.length + " planned day" + (pend.length > 1 ? "s" : "") + " to confirm", "للتأكيد: " + U.plAr(pend.length, "يوم مخطط", "يومان مخططان", "أيام مخططة", "يوماً مخططاً")) + "</span>";
-    let h = `<div class="pay-item" id="pay-crew-${U.esc(u.tsId + "-" + cid)}">
+    let h = `<div class="pay-item" id="pay-crew-${U.esc(u.tsId + "-" + cid)}"${ui.mo(u.key)}>
       <div class="row pay-row">${ui.sw(r.owed ? st : "planned")}<span class="t">${U.t(X.crewNm(cid))} <span class="pay-comp muted">${U.esc(meta)}</span></span>
       <span class="a num c-owed">${owedHtml}</span><span class="f">${ui.flagSlot(u.key)}</span>
       <span class="m">${U.esc(wk + since)}${fl ? "" : " · " + U.esc(X.ryan())}</span><span class="w">${words}</span></div>`;
@@ -10594,7 +11176,7 @@ window.SL = window.SL || {};
     const since = g.since ? U.L("unpaid since " + X.dNoMon(g.since) + " (" + age + " d)", "غير مدفوع منذ " + X.dNoMon(g.since) + " (" + U.plAr(age, "يوم واحد", "يومين", "أيام", "يوماً") + ")") : "";
     const meta = [n > 1 ? U.L(n + " items", U.plAr(n, "عنصر واحد", "عنصران", "عناصر", "عنصراً")) : kinds, since, fl ? "" : X.ryan()].filter(Boolean).join(" · ");
     const one = n === 1 ? g.units[0] : null;
-    let h = `<div class="pay-item" id="pay-payee-${i}">
+    let h = `<div class="pay-item" id="pay-payee-${i}"${ui.mo(one && one.key)}>
       <div class="row pay-row${one && SL.actions.openUnit ? " tap" : ""}"${one && SL.actions.openUnit ? ` data-act="openUnit" data-key="${U.esc(one.key)}" role="button" tabindex="0"` : ""}>${ui.sw(one ? M.state(one, T) : "owed")}<span class="t">${one ? ui.mono(one.cat) + " " : ""}${U.t(g.payee || "?")}</span>
       <span class="a num c-owed">${U.m(g.owedH / 100)}</span><span class="f">${one ? ui.flagSlot(one.key) : ""}</span>
       <span class="m">${U.t(meta)}</span><span class="w">${one ? ui.stateWords(one, T) : '<span class="c-owed">' + U.L("Owed", "مستحق") + "</span>"}</span></div>`;
@@ -10629,7 +11211,7 @@ window.SL = window.SL || {};
   X.backRows = (pid, T) => {
     const sat = U.weekStart(T), rows = [];
     for (const u of M.unitsFor(pid)) for (const p of u.payments || []) if (!p.void && p.h < 0 && p.date >= sat && p.date <= T) rows.push({ u, p });
-    return U.sortBy(rows, (r) => r.p.date, "desc").map((r) => `<div class="row nosw pay-prow pay-back${SL.actions.openUnit ? ' tap" data-act="openUnit" data-key="' + U.esc(r.u.key) + '" role="button" tabindex="0"' : '"'}><span class="t">${ui.mono(r.u.cat)} ${U.t(M.refundLabel(r.u))}</span>` +
+    return U.sortBy(rows, (r) => r.p.date, "desc").map((r) => `<div class="row nosw pay-prow pay-back${SL.actions.openUnit ? ' tap" data-act="openUnit" data-key="' + U.esc(r.u.key) + '" role="button" tabindex="0"' : '"'}${ui.mo(r.u.key + "#" + r.p.id)}><span class="t">${ui.mono(r.u.cat)} ${U.t(M.refundLabel(r.u))}</span>` +
       `<span class="a num">${U.m(-r.p.h / 100, { sign: true })}</span><span class="f"></span><span class="m">${U.esc(U.dShort(r.p.date))} · ${U.L("back to ", "أُعيد إلى ")}${X.isFloat(r.p.walletId) ? U.L("float", "العهدة") : U.L("Ryan", "ريان")}</span><span class="w"></span></div>`).join("");
   };
 
@@ -10642,8 +11224,8 @@ window.SL = window.SL || {};
     if (!rows.length && back) return h + back + "</section>"; // only money back this week (a deposit returned)
     if (!rows.length) return h + '<div class="t13 muted pay-none">' + U.L("Nothing paid since ", "لم يُدفع شيء منذ ") + U.esc(U.dShort(U.weekStart(T))) + ".</div></section>";
     const line = U.L("float ", "العهدة ") + fl.length + " · " + U.m(U.sum(fl, (r) => r.p.h) / 100) + " · " + U.esc(X.ryan()) + " " +(ow.length ? U.m(U.sum(ow, (r) => r.p.h) / 100) : '<span class="zero">–</span>');
-    h += `<button class="pay-split t13" id="pay-paid-toggle" data-act="toggle" data-k="pay.paid" aria-expanded="${open}"><span class="num">${line}</span><span class="spacer"></span><span class="lnk">${open ? U.L("Hide", "إخفاء") : U.L("Show ", "عرض ") + rows.length} ${open ? "▴" : "▾"}</span></button>`;
-    if (open) h += '<div class="pay-paidrows">' + rows.map((r) => `<div class="row nosw pay-prow${SL.actions.openUnit ? ' tap" data-act="openUnit" data-key="' + U.esc(r.u.key) + '" role="button" tabindex="0"' : '"'}><span class="t">${ui.mono(r.u.cat)} ${U.t(r.u.kind === "crew" ? X.crewNm(r.u.crewId) : r.u.title)}</span><span class="a num">${U.m(r.p.h / 100)}</span><span class="f"></span><span class="m">${U.esc(X.dNoMon(r.p.date))} · ${U.esc(X.viaWord(r.p.walletId))}${r.p.note && !ro ? " · " + U.t(r.p.note) : ""}</span><span class="w">${ui.stateWords(r.u, T)}</span></div>`).join("") + "</div>";
+    h += `<button class="pay-split t13" id="pay-paid-toggle" data-act="toggle" data-k="pay.paid"${ui.mo("paidweek")} aria-expanded="${open}"><span class="num">${line}</span><span class="spacer"></span><span class="lnk">${open ? U.L("Hide", "إخفاء") : U.L("Show ", "عرض ") + rows.length} ${open ? "▴" : "▾"}</span></button>`;
+    if (open) h += '<div class="pay-paidrows">' + rows.map((r) => `<div class="row nosw pay-prow${SL.actions.openUnit ? ' tap" data-act="openUnit" data-key="' + U.esc(r.u.key) + '" role="button" tabindex="0"' : '"'}${ui.mo(r.u.key + "#" + r.p.id)}><span class="t">${ui.mono(r.u.cat)} ${U.t(r.u.kind === "crew" ? X.crewNm(r.u.crewId) : r.u.title)}</span><span class="a num">${U.m(r.p.h / 100)}</span><span class="f"></span><span class="m">${U.esc(X.dNoMon(r.p.date))} · ${U.esc(X.viaWord(r.p.walletId))}${r.p.note && !ro ? " · " + U.t(r.p.note) : ""}</span><span class="w">${ui.stateWords(r.u, T)}</span></div>`).join("") + "</div>";
     if (open) h += back;
     return h + "</section>";
   };
@@ -11193,7 +11775,7 @@ window.SL = window.SL || {};
     if (!isCost && r.note && !ro) meta.push(U.t(r.note));
     const cls = "row nosw v-fl-row" + (isCost ? " tap" : "") + (r.h > 0 ? " in" : "");
     const act = isCost ? ` data-act="openUnit" data-key="${U.esc(r.unitKey)}" role="button" tabindex="0"` : "";
-    return `<div class="${cls}"${act}>
+    return `<div class="${cls}"${act}${ui.mo(r.cashId ? "cash:" + r.cashId : r.unitKey + "#" + r.payId)}>
       <span class="t">${u ? ui.mono(u.cat) + " " : ""}${U.t(X.label(r, ro))}</span>
       <span class="a num${r.h > 0 ? " c-float" : ""}">${X.io(r.h)}</span><span class="f"></span>
       <span class="m">${meta.join(" · ")}</span><span class="w num v-fl-bal">${X.bal(r.bal)}</span></div>`;
@@ -12977,7 +13559,7 @@ window.SL = window.SL || {};
       if (!ro) btn = !X.ccOnly(inb.error) && X.canRead() ? `<button class="btn sm sec" data-act="rdRead" data-id="${id}">${inb.error === "rate_limited" ? U.L("Try later", "حاول لاحقاً") : U.L("Try again", "حاول مجدداً")}</button>` : ccBtn;
     } else { words = U.L("Waiting", "بالانتظار"); cls = "muted"; if (!ro) btn = X.canRead() ? `<button class="btn sm sec" data-act="rdRead" data-id="${id}">${U.L("Read now", "اقرأ الآن")}</button>` : ccBtn; }
     const rm = !ro && opts.remove && state !== "reading" ? `<button class="btn sm ghost rd-x" data-act="rdRemove" data-id="${id}" aria-label="${U.L("Remove", "حذف")} ${U.esc(inb.name || U.L("photo", "الصورة"))}">${U.L("Remove", "حذف")}</button>` : "";
-    return `<div class="rd-q" id="rdq-${id}"><span class="rd-ic mono" aria-hidden="true">${kindIc}</span>` +
+    return `<div class="rd-q" id="rdq-${id}"${ui.mo("in:" + inb.id)}><span class="rd-ic mono" aria-hidden="true">${kindIc}</span>` +
       `<span class="rd-n"${X.autoDir()}>${U.t(inb.name || U.L("Photo", "صورة"))}</span><span class="rd-b">${btn}${rm}</span>` +
       `<span class="rd-s"><span class="${cls}">${words}</span>${X.age(inb) ? ' · <span class="muted">' + X.age(inb) + "</span>" : ""}${inb.by === "claude-code" ? ` · <span class="muted">${U.L("by Claude Code", 'من <span lang="en">Claude Code</span>')}</span>` : ""}</span></div>`;
   };
@@ -13689,12 +14271,12 @@ window.SL = window.SL || {};
     meta.push(X.linesTxt(c));
     if ((c.files || []).length) meta.push(X.photoTxt());
     const id = U.esc(c.id);
-    let h = `<div class="row tap dv-inv${q1open || flag.includes("fg stop") ? " stopped" : ""}" data-act="openUnit" data-key="${U.esc(u.key)}" role="button" tabindex="0">` +
+    let h = `<div class="row tap dv-inv${q1open || flag.includes("fg stop") ? " stopped" : ""}" data-act="openUnit" data-key="${U.esc(u.key)}"${ui.mo(u.key)} role="button" tabindex="0">` +
       ui.sw(st) + `<span class="t${unrev ? " unrev" : ""}${X.tf()}">${kind ? ui.kindPill(kind) + " " : ""}${X.tt(U.t(X.title(c)))}</span>` +
       `<span class="a num">${U.m(r.inc / 100)}</span><span class="f">${flag}</span>` +
       `<span class="m">${meta.join(" · ")}</span><span class="w">${ui.stateWords(u, D)}</span></div>`;
     if (q1open) {
-      h += `<div class="dv-stopline" role="note"><span class="dv-sl-t"><i class="fg stop" aria-hidden="true">▲</i> ${U.L("Reads as a price quote, not an invoice", "يبدو عرض سعر وليس فاتورة")}</span>`;
+      h += `<div class="dv-stopline"${ui.mo(u.key)} role="note"><span class="dv-sl-t"><i class="fg stop" aria-hidden="true">▲</i> ${U.L("Reads as a price quote, not an invoice", "يبدو عرض سعر وليس فاتورة")}</span>`;
       if (!ro && !X.past()) h += `<span class="btns"><button type="button" class="btn sm sec" id="dv-qf-yes-${id}" data-act="quoteFix" data-id="${id}" data-paid="yes">${U.L("Sayed paid — keep, get invoice", U.esc(X.floatName(M.pidOf(c))) + " دفع — أبقِه واطلب الفاتورة")}</button>` +
         `<button type="button" class="btn sm" id="dv-qf-no-${id}" data-act="quoteFix" data-id="${id}" data-paid="no">${U.L("Not paid — move to Quotes", "لم يُدفع — انقله إلى عروض الأسعار")}</button></span>`;
       h += "</div>";
@@ -13969,7 +14551,7 @@ window.SL = window.SL || {};
     const meta = [X.jobTxt(q.jobId), U.esc(X.validTxt(q))];
     if ((q.lines || []).length) meta.push(X.linesTxt(q));
     if ((q.files || []).length) meta.push(X.photoTxt());
-    return `<div class="dv-q"><div class="row tap${flag.includes("fg stop") ? " stopped" : ""}" data-go="${X.h("quote", q.id)}" role="link" tabindex="0">` +
+    return `<div class="dv-q"${ui.mo("q:" + q.id)}><div class="row tap${flag.includes("fg stop") ? " stopped" : ""}" data-go="${X.h("quote", q.id)}" role="link" tabindex="0">` +
       ui.sw(s === "accepted" ? "committed" : "none") +
       `<span class="t${X.tf()}">${X.quotePill()} ${X.tt(U.t(q.supplier || U.L("Unknown supplier", "مورد غير معروف")) + (q.no ? " #" + U.esc(q.no) : ""))}</span>` +
       `<span class="a num c-committed">${U.m(U.num(q.total))}</span><span class="f">${flag}</span>` +
@@ -14430,7 +15012,7 @@ window.SL = window.SL || {};
     const sub = (nAct ? U.L(nAct + " job" + (nAct > 1 ? "s" : "") + " in progress", "قيد التنفيذ: " + U.plAr(nAct, "بند واحد", "بندان", "بنود", "بنداً"))
       : jobs.length ? U.L(jobs.length + " job" + (jobs.length > 1 ? "s" : ""), U.plAr(jobs.length, "بند واحد", "بندان", "بنود", "بنداً")) : U.L("no jobs yet", "لا بنود بعد")) +
       (t.noPrice ? ' · <span class="c-warn">' + U.L(t.noPrice + " no price · counts 0", "بلا سعر: " + t.noPrice + " · تُحسب 0") + "</span>" : "");
-    const bar = t.cost > 0 || t.prepaid > 0 ? ui.moneyBar(t, { scale, budget: p.budget > 0 ? U.hal(p.budget) : 0 }) : "";
+    const bar = t.cost > 0 || t.prepaid > 0 ? ui.moneyBar(t, { scale, budget: p.budget > 0 ? U.hal(p.budget) : 0, id: "p:" + p.id }) : "";
     return `<a class="v-projects-p st-${st}" href="${U.esc(go)}">
       <div class="hrow"><b class="v-projects-n">${U.t(U.nm(p) || p.id)}</b>${p.code ? ' <span class="muted t12">' + U.t(p.code) + "</span>" : ""}<span class="spacer"></span>${ui.statusPill(st)}</div>
       <div class="hrow t13"><span class="v-projects-m">${meta}</span><span class="spacer"></span>${X.flagChip(p.id)}</div>
@@ -14771,7 +15353,7 @@ window.SL = window.SL || {};
     const t = { cost: hh(d.cost), paid: hh(d.paid), paidOff: hh(d.paidOff), owed: hh(d.owed), prepaid: hh(d.prepaid), noPrice: d.noPrice || 0 };
     const bud = d.budget > 0 ? hh(d.budget) : 0;
     let h = `<div class="hrow"><span class="t28 num">${U.m(d.cost)}</span><span class="spacer"></span>${bud ? '<span class="t12 muted">' + U.L("budget ", "الميزانية ") + U.mw(d.budget) + " · " + X.pct(t.cost, bud) + "</span>" : ""}</div>`;
-    h += ui.moneyBar(t, { committed: hh(d.committed), budget: bud, label: U.L("Paid off " + U.round2(d.paidOff) + ", Owed " + U.round2(d.owed), "مسدد " + U.round2(d.paidOff) + "، مستحق " + U.round2(d.owed)) });
+    h += ui.moneyBar(t, { committed: hh(d.committed), budget: bud, id: "cow", label: U.L("Paid off " + U.round2(d.paidOff) + ", Owed " + U.round2(d.owed), "مسدد " + U.round2(d.paidOff) + "، مستحق " + U.round2(d.owed)) });
     h += ui.legend(t, { committed: hh(d.committed) });
     h += ui.identity(t);
     let k = kv(U.L("Committed (accepted quotes, not cost yet)", "ملتزم به (عروض أسعار مقبولة، ليست تكلفة بعد)"), E(d.committed), "c-committed");
@@ -16329,8 +16911,19 @@ window.SL = window.SL || {};
     return base + " investor report " + D + (U.isAr() ? " (Arabic)" : "") + ".pdf";
   };
   let can = null;
+  /* A frozen investor snapshot runs on the dev shim (no downloads of its own) and ships the PDFs as published files
+   * (window.__SL_SNAPSHOT.pdfs = [{lang, href, name}]). The artifact viewer never follows a plain download link, so the
+   * button fetches the file and hands it to the platform's downloads capability (the snapshot declares it; tools/snapshot.py
+   * keeps the platform runtime as window.__SL_PLATFORM before the shim replaces window.claude). */
+  X.snapPdfs = () => (window.__SL_SNAPSHOT && window.__SL_SNAPSHOT.pdfs) || [];
+  X.snapDl = null;
+  if (X.snapPdfs().length) {
+    const P = window.__SL_PLATFORM || (window.claude && window.claude !== window.__SL_RUNTIME ? window.claude : null);
+    if (P && typeof P.use === "function") P.use("downloads").then((d) => { X.snapDl = d || null; if (d) try { ui.render(); } catch (e) { /* not started yet */ } }).catch(() => {});
+  }
   /** The "Investor PDF" button, where this view can draw pages and save files ("" elsewhere). */
   X.btn = (cls) => {
+    if (X.snapPdfs().length) return X.snapDl ? `<button type="button" class="${cls || "chip"} pdf-btn" data-act="snapPdf"${X.busy ? " disabled" : ""}>${U.L("⤓ Investor PDF", "⤓ PDF للمستثمرين")}</button>` : "";
     if (can === null) can = X.canDraw();
     if (!can || !SL.S.downloads || (SL._admin && SL._admin.dlGone)) return "";
     return `<button type="button" class="${cls || "chip"} pdf-btn" data-act="investorPdf"${X.busy ? " disabled" : ""} title="${U.L("A PDF for investors: balances, invoices, crews and equipment", "ملف PDF للمستثمرين: الأرصدة والفواتير والعمالة والمعدات")}">${X.busy ? U.L("Making PDF…", "جارٍ إنشاء PDF…") : U.L("⤓ Investor PDF", "⤓ PDF للمستثمرين")}</button>`;
@@ -16354,6 +16947,24 @@ window.SL = window.SL || {};
     } catch (e) {
       console.warn("[pdf]", e);
       ui.toast(U.L("Couldn't make the PDF. Try again.", "تعذّر إنشاء ملف PDF. حاول مرة أخرى."));
+    } finally { X.busy = false; ui.render(); }
+  };
+
+  /** Snapshot: save the published PDF in the viewer's language. */
+  A.snapPdf = async () => {
+    const list = X.snapPdfs(), p = list.find((x) => x.lang === (U.isAr() ? "ar" : "en")) || list[0];
+    if (!p || !X.snapDl || X.busy) return;
+    X.busy = true; ui.render();
+    try {
+      const res = await fetch(p.href);
+      if (!res.ok) throw new Error("PDF " + res.status);
+      await X.snapDl.save({ filename: p.name || p.href, data: await res.blob() });
+      ui.toast(U.L("Investor PDF saved", "تم حفظ ملف PDF للمستثمرين"));
+    } catch (e) {
+      const code = e && e.code;
+      if (code === "declined") { /* the viewer said no */ }
+      else if (code && SL._admin && SL._admin.dlOutcome) { const o = SL._admin.dlOutcome({ ok: false, code }); if (o.gone) X.snapDl = null; if (o.msg) ui.toast(U.esc(o.msg)); }
+      else { console.warn("[pdf]", e); ui.toast(U.L("Couldn't get the PDF. Try again.", "تعذّر جلب ملف PDF. حاول مرة أخرى.")); }
     } finally { X.busy = false; ui.render(); }
   };
 
