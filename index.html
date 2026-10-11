@@ -543,6 +543,15 @@ html[dir=rtl] .sw.part{background:linear-gradient(270deg,var(--ink) 50%,transpar
 .pill.review{color:var(--info)}
 .pill.paper{color:var(--warn)}
 .pill.est{color:var(--ink-2);border-style:dotted}
+/* "what it's for" tags (ui.tags): quiet grey pills, a word or two each, never wider than their box (ellipsis) */
+.tgs{display:flex;flex-wrap:wrap;gap:3px;min-width:0;max-width:100%}
+.tg{display:inline-block;flex:0 1 auto;min-width:0;max-width:100%;height:16px;line-height:16px;padding:0 5px;box-sizing:border-box;border-radius:var(--r-pill);background:var(--sunk);color:var(--ink-2);font-size:var(--t-11);font-weight:500;letter-spacing:0;text-transform:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:1px}
+/* one line of whole tags: a tag that doesn't fit wraps onto a second line, which is cut off (the first one, if it alone
+   is too wide, ends in …). Used in tight spots: unit rows, the Balances names, the Invoices labels. */
+.tgs.one{flex-wrap:wrap;max-height:16px;overflow:hidden}
+/* a unit row (ui.unitRow tags:true): one line under the meta */
+.row>.tgs.rtg{grid-column:2/5;grid-row:3;margin-top:2px}
+.row.nosw>.tgs.rtg{grid-column:1/4}
 
 /* flag glyphs (§3.6) */
 .fg{font-style:normal;font-size:12px;line-height:1}
@@ -1212,6 +1221,7 @@ html[dir=rtl] .v-prj-nojob{box-shadow:inset -3px 0 0 var(--warn)}
   body.desk .v-ledger .lg-row>.w{grid-column:4;grid-row:1;text-align:start;min-width:0;overflow:hidden;text-overflow:ellipsis}
   body.desk .v-ledger .lg-row>.a{grid-column:5;grid-row:1}
   body.desk .v-ledger .lg-row>.f{grid-column:6;grid-row:1}
+  body.desk .v-ledger .lg-row>.tgs{grid-column:2/5;grid-row:2;margin:0 0 1px}
   body.desk .v-ledger .lg-x{padding-inline:22px calc(8rem + 24px)}
   body.desk .v-ledger .lg-detail .lg-lines table.t td.lg-desc{max-width:none}
 }
@@ -1473,6 +1483,46 @@ html[dir=rtl] .v-bal .bl-pt tbody tr.on th{box-shadow:inset -3px 0 0 var(--ink)}
 /* "You paid" split: cash to the float holder vs paid directly (indented, lighter) */
 .v-bal .bl-sum .kv .bl-ind{padding-inline-start:14px}
 .v-bal .bl-sum .kv .v.bl-ind-v{font-size:var(--t-14);font-weight:600;color:var(--ink-2)}
+
+/* the Invoice column (the bill's full amount, right after its name) and the "what it's for" tags under the name */
+.v-bal .bl .bl-inv{box-shadow:inset -1px 0 0 var(--line);padding-inline-end:10px}
+html[dir=rtl] .v-bal .bl .bl-inv{box-shadow:inset 1px 0 0 var(--line)}
+.v-bal .bl td.bl-inv b{font-size:var(--t-14);font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums}
+.v-bal .bl .bl-cap{display:block;font-size:10px;font-weight:500;color:var(--ink-3);margin-top:1px}
+.v-bal .bl .bl-d > .tgs{display:flex;margin:3px 0 2px}
+@media (max-width:600px){
+  .v-bal .bl td.bl-inv b{font-size:var(--t-13)}
+  .v-bal .bl .bl-inv{padding-inline-end:6px}
+}
+
+/* the two boxes at the top: "You've paid" and "Sayed's money". Receipt lines: the label on the start side (a grey line
+   under it), the amount on the end side in big figures; a heavy rule above the total. Side by side from 760 px. */
+.v-bal .bl-dash{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--s3)}
+@media (min-width:760px){ .v-bal .bl-dash{grid-template-columns:repeat(2,minmax(0,1fr));align-items:start} }
+.v-bal .bl-rc{gap:0;padding:10px 14px 12px}
+.v-bal .bl-rh{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px 8px;min-height:36px;padding-bottom:6px;border-bottom:1px solid var(--line-2)}
+.v-bal .bl-rh h3{font-size:var(--t-11);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+html[dir=rtl] .v-bal .bl-rh h3{letter-spacing:0;text-transform:none;font-size:var(--t-13)}
+.v-bal .bl-rd{font-size:var(--t-12);color:var(--ink-3)}
+.v-bal .bl-rl{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 0 7px;border-bottom:1px dashed var(--line)}
+.v-bal .bl-rk{min-width:0;font-size:var(--t-16);font-weight:600;color:var(--ink)}
+.v-bal .bl-rk small{display:block;margin-top:1px;font-size:var(--t-12);font-weight:400;color:var(--ink-3)}
+.v-bal .bl-rv{flex:none;text-align:end;font-size:var(--t-20);font-weight:700;color:var(--ink)}
+.v-bal .bl-rv.c-stop{color:var(--stop)}
+.v-bal .bl-rv.c-stop .h{color:inherit;opacity:.8}
+/* the total's heavy rule replaces the dashed one under the line before it (one rule, not two) */
+.v-bal .bl-rl.bl-rt{margin-top:-1px;padding-top:9px;border-top:2px solid var(--ink);border-bottom:0}
+.v-bal .bl-rl:has(+ .bl-rl.bl-rt){border-bottom:0}
+.v-bal .bl-rl.bl-rt .bl-rk{font-weight:700}
+.v-bal .bl-rl.bl-rt .bl-rv{font-size:var(--t-28)}
+.v-bal .bl-rl.bl-rcnt{border-top:1px solid var(--line-2)}
+.v-bal .bl-rl.bl-rdif{border-bottom:0}
+.v-bal .bl-rl.bl-rdif .bl-rv{font-size:var(--t-16)}
+.v-bal .bl-rn{margin-top:6px;font-size:var(--t-12);color:var(--ink-2)}
+.v-bal .bl-rn .lnk{font-size:var(--t-13);min-height:32px}
+.v-bal .bl-fl .bl-rl{border-bottom-color:color-mix(in srgb,var(--float-ink) 25%,transparent)}
+.v-bal .bl-fl .bl-rh{border-bottom-color:color-mix(in srgb,var(--float-ink) 45%,transparent)}
+.v-bal .bl-sbtn{min-height:34px}
 
 /* ---- 44-audit.css ---- */
 /* 44-audit: Crews — the crew-day Gantt and the day editor. Tokens only (plus the job colours below). */
@@ -1787,6 +1837,14 @@ html[dir=rtl] .v-inva .ia-grp{box-shadow:inset -3px 0 0 var(--jc)}
 .v-inva .ia-f .chip.on small{color:inherit;opacity:.8}
 .v-inva.ia-sheet{display:flex;flex-direction:column;gap:10px}
 @media (max-width:399px){ .v-inva .ia-lab .ia-chip.paysw{padding:0 5px} }
+/* the label column: the invoice total, large, right under its number (job · proof after it, cut first when tight),
+   then what it was for (ui.tags, one line) */
+.v-inva .ia-tot{display:flex;align-items:baseline;gap:5px;min-width:0;max-width:100%;white-space:nowrap}
+.v-inva .ia-tot > b{flex:none;font-size:var(--t-16);font-weight:700;line-height:1.25;color:var(--ink);font-variant-numeric:tabular-nums}
+.v-inva .ia-tot > .au-sub{min-width:0}
+.v-inva .ia-lab .tgs.ia-tg{margin-top:1px}
+.v-inva .ia-head > .tgs.ia-tg{grid-column:1/3;margin-top:3px}
+@media (min-width:1100px){ .v-inva .ia-tot > b{font-size:1.125rem} }
 
 /* ---- 50-pay.css ---- */
 /* 50-pay.css: Pay view (#pay) and the pay / top-up / why sheets. Every selector is scoped under .v-pay. */
@@ -3339,6 +3397,32 @@ window.SL = window.SL || {};
     return out;
   };
   M.projectTotals = (pid, D) => memo("pt:" + pid + ":" + D, () => M.totals(M.unitsFor(pid), D));
+  /** Record a failed money identity (M.identityFailures; tools/test_model.js asserts it stays empty). */
+  function idFail(where, t) { const f = (M.identityFailures = M.identityFailures || []); if (!f.includes(where)) f.push(where); console.error("[model] identity failed", where, t); }
+  M.idFail = idFail;
+  /** The owner's own pocket ("Ryan direct"); any other wallet is a float. */
+  M.isOwnerWallet = (wid) => { const w = M.wallet(wid); return (w && w.kind === "owner") || wid === "w_ryan"; };
+  /** Money actually paid on a project as of D: Σ payments dated ≤ D, not void (a refund is a negative payment), per
+   *  category and per pocket. Archived costs are left out, as on Balances. → {cat: {T, P, E, S, O}, total,
+   *  float (paid from a float wallet), owner (paid by the owner directly), wallets: {wid: h}, depositHeld (the part of
+   *  cat.E that is equipment deposits, net of deposits returned; the same payments, so rentals = cat.E − depositHeld)}.
+   *  Identities: Σ cat = total = float + owner, and cat[k] = Σ M.calc(u, D).paid over the category's units. */
+  M.paidBy = (pid, D) => memo("paidBy:" + pid + ":" + D, () => {
+    const cat = {}, wallets = {}; M.CAT_ORDER.forEach((k) => (cat[k] = 0));
+    let total = 0, float = 0, owner = 0, depositHeld = 0;
+    for (const u of M.unitsFor(pid)) {
+      if (u.archived) continue;
+      for (const p of u.payments) {
+        if (p.void || !p.date || p.date > D) continue;
+        cat[u.cat] += p.h; total += p.h; wallets[p.walletId] = (wallets[p.walletId] || 0) + p.h;
+        if (u.deposit) depositHeld += p.h;
+        if (M.isOwnerWallet(p.walletId)) owner += p.h; else float += p.h;
+      }
+    }
+    const t = { cat, total, float, owner, wallets, depositHeld };
+    if (U.sum(M.CAT_ORDER, (k) => cat[k]) !== total || float + owner !== total) idFail("paidBy:" + pid, t);
+    return t;
+  });
 
   /* ---------------- crews ---------------- */
   /** {mDays, lDays, heads, wages (h), food (h), other (h), days (confirmed count), planDays} for a crew unit (optionally one job).
@@ -3446,6 +3530,68 @@ window.SL = window.SL || {};
     let bal = 0; for (const r of rows) { bal += r.h; r.bal = bal; }
     return rows;
   };
+  /** A wallet's saved cash counts dated ≤ D (not void), latest first: [{key, date, at, counted, expected, diff, reason, note}]. */
+  M.countsOf = (wid, D) => {
+    const w = M.wallet(wid);
+    return Object.entries((w && w.counts) || {}).filter(([, c]) => c && !c.void && c.date && (!D || c.date <= D)).map(([key, c]) => Object.assign({ key }, c))
+      .sort((a, b) => (a.date !== b.date ? (a.date > b.date ? -1 : 1) : (b.at || 0) - (a.at || 0) || (b.key < a.key ? -1 : 1)));
+  };
+  /** A float wallet's money as of D, as a receipt for its holder (every project; h):
+   *   in   topups (cash from the owner, nTop of them) · adjIn (+ adjustments, e.g. a scrap sale) · refunds (cash back from
+   *        a payee: a negative payment, e.g. a deposit returned)
+   *   out  returns (cash given back to the owner) · adjOut (− adjustments) · paidOut (Σ payments, nPaid) per category (paidCat)
+   *   adj  [{id, date, h, note}] each adjustment, oldest first
+   *   holds  what he should have by the book (= M.walletCalc(wid, D).holds)
+   *   count  the latest cash count dated ≤ D, or null: {date, at, counted, book, diff, since: {in, out}, late, stored}.
+   *          book and diff are the figures saved with the count (count.expected = the Statement's "should hold" when he
+   *          counted, count.diff = counted − that): the Float page and Statement › Past counts show the same ones
+   *          (stored: true). since = money dated after the count's day, and the correction the count booked itself
+   *          (count.ref). late = what was logged after the count for its day or earlier (an invoice logged later, a
+   *          top-up sent that evening: same day, so no date tells them apart), net; it can be either sign.
+   *          A count saved without expected (stored: false) falls back to timestamps: everything dated before its day,
+   *          and its day's payments, but not that day's cash in / out created after count.at (late = 0).
+   *  Identities: topups + adjIn + refunds − returns − adjOut − paidOut = holds · book + since.in − since.out + late = holds. */
+  M.floatReceipt = (wid, D) => memo("frc:" + wid + ":" + D, () => {
+    const r = { wid, D, topups: 0, nTop: 0, adjIn: 0, adjOut: 0, adj: [], refunds: 0, returns: 0, paidOut: 0, nPaid: 0, paidCat: {}, holds: 0, count: null };
+    M.CAT_ORDER.forEach((k) => (r.paidCat[k] = 0));
+    for (const c of M.cash()) {
+      if (c.walletId !== wid || !c.date || c.date > D) continue;
+      const h = U.hal(c.amount);
+      if (c.type === "topup") { r.topups += h; r.nTop++; }
+      else if (c.type === "return") r.returns += h;
+      else if (c.type === "adjust" && h) { if (h > 0) r.adjIn += h; else r.adjOut -= h; r.adj.push({ id: c.id, date: c.date, h, note: c.note || "" }); }
+    }
+    for (const u of M.units()) for (const p of u.payments) {
+      if (p.void || p.walletId !== wid || !p.date || p.date > D) continue;
+      if (p.h < 0) r.refunds -= p.h; else { r.paidOut += p.h; r.nPaid++; r.paidCat[u.cat] += p.h; }
+    }
+    r.holds = r.topups + r.adjIn + r.refunds - r.returns - r.adjOut - r.paidOut;
+    if (r.holds !== M.walletCalc(wid, D).holds) idFail("floatReceipt:" + wid, r);
+    const c = M.countsOf(wid, D)[0];
+    if (c) {
+      const at = c.at || 0, since = { in: 0, out: 0 }, ref = c.ref && typeof c.ref === "object" ? c.ref : null;
+      const own = (f) => !!ref && ((ref.coll === "cash" && f.cashId === ref.id) || (ref.coll === "costs" && f.unitKey === "c:" + ref.id));
+      const counted = U.hal(c.counted), stored = c.expected != null && c.expected !== "" && isFinite(Number(c.expected));
+      const sinceAdd = (f) => { if (f.h > 0) since.in += f.h; else since.out -= f.h; };
+      let book = 0, diff, late = 0;
+      if (stored) {
+        // the figures saved with the count, as every screen shows them; what moved since is explained, never folded in
+        book = U.hal(c.expected);
+        diff = c.diff != null && c.diff !== "" && isFinite(Number(c.diff)) ? U.hal(c.diff) : counted - book;
+        for (const f of M.floatLedger(wid, D)) if (own(f) || f.date > c.date) sinceAdd(f);
+        late = r.holds - book - since.in + since.out;
+      } else {
+        for (const f of M.floatLedger(wid, D)) {
+          if (!own(f) && (f.date < c.date || (f.date === c.date && (!f.cashId || !at || !f.at || f.at <= at)))) book += f.h;
+          else sinceAdd(f);
+        }
+        diff = counted - book;
+      }
+      r.count = { key: c.key, date: c.date, at, counted, book, diff, since, late, stored, reason: c.reason || "", note: c.note || "" };
+      if (book + since.in - since.out + late !== r.holds) idFail("floatReceipt:count:" + wid, r);
+    }
+    return r;
+  });
 
   /**
    * Weekly float statement for wallet wid over [from, to] (to defaults to today). Lettered lines (spec §D.15):
@@ -3603,6 +3749,77 @@ window.SL = window.SL || {};
     else if (u.date) p.push(U.dShort(u.date));
     const code = M.jobCode(u.jobId); p.push(code || M.NO_JOB());
     return p;
+  };
+
+  /* ---------------- "what it's for" tags ---------------- */
+  const TAG_STOP = new Set(["of", "with", "and", "for", "the", "a", "an", "to", "in", "on", "from", "by", "x", "×", "&", "+", "و", "من", "مع", "في", "على", "الى", "إلى"]);
+  /** A short label from free text: its first phrase (before a comma, parenthesis, dash, colon or full stop), quotes
+   *  stripped, at most 3 words and about 20 letters, no dangling "of" / "with". "Transport – iron (نقل حدايد)" → "Transport". */
+  M.shortLabel = (s) => {
+    s = String(s == null ? "" : s).replace(/["“”«»]/g, "").replace(/(^|[\s(])['‘’]+|['‘’]+(?=[\s),.]|$)/g, "$1");
+    const first = (s.split(/\s*(?:[,،;؛:()[\]|·•–—]|\s-\s|\.(?:\s|$))\s*/).find((x) => x && x.trim()) || "").trim();
+    const out = [];
+    for (const w of first.split(/\s+/).filter(Boolean)) {
+      if (out.length >= 3 || (out.length && out.join(" ").length + 1 + w.length > 20)) break;
+      out.push(w);
+    }
+    while (out.length > 1 && TAG_STOP.has(out[out.length - 1].toLowerCase())) out.pop();
+    return out.join(" ");
+  };
+  /** Up to 3 short "what it's for" tags of a unit, plain text, in lang ("en" | "ar"; default the viewer's), the line
+   *  with the most money first, no repeats: a line's catalog item tag (catalog/items .tag {en, ar}), else a short label
+   *  from the line's text. A rental: its equipment (else its lines, else its description). A service: its lines' item
+   *  tags, else its description (Arabic: the description's Arabic, else the service type's, else its first line's).
+   *  A purchase with no lines: its description. A crew week or an equipment deposit: none.
+   *  In Arabic every tag is Arabic: an English label becomes the Arabic of the catalog entry it names (equipment or
+   *  item, by name or a one-word alias: "Scaffolding ('Sikolo'), 15 days" → "سقالة"), else it is left out. */
+  M.forTags = (u, lang) => {
+    if (!u || u.kind === "crew" || u.deposit) return [];
+    const ar = (lang || (U.isAr() ? "ar" : "en")) === "ar";
+    return memo("tags:" + (ar ? "ar:" : "en:") + u.key, () => {
+      const c = u.doc || {}, acc = new Map(), items = M.items();
+      const pick = (en, a) => String((ar ? a || en : en || a) || "");
+      const tagOf = (o) => (o && o.tag && typeof o.tag === "object" ? pick(o.tag.en, o.tag.ar).trim() : "");
+      /** The Arabic of the catalog entry an English label names, or "". */
+      const arOf = (label) => {
+        const l = label.toLowerCase(), words = l.split(/[^a-z0-9]+/).filter(Boolean);
+        const names = (o) => [o.name].concat(Array.isArray(o.aliases) ? o.aliases : []).map((x) => String(x || "").toLowerCase().trim()).filter(Boolean);
+        for (const src of [M.equipment(), items]) for (const o of Object.values(src)) {
+          if (!o || !names(o).some((n) => n === l || (/^[a-z0-9]+$/.test(n) && words.includes(n)))) continue;
+          const t = tagOf(o) || M.shortLabel(o.ar);
+          if (U.hasAr(t)) return t;
+        }
+        return "";
+      };
+      const add = (label, h) => {
+        label = String(label || "").trim(); if (!label) return;
+        if (ar && !U.hasAr(label)) { label = arOf(label); if (!label) return; }
+        const k = label.toLowerCase(), e = acc.get(k); if (e) e.h += h; else acc.set(k, { label, h, i: acc.size });
+      };
+      const amt = (l) => U.hal(l.amount) || U.hal(U.num(l.qty) * U.num(l.unitPrice));
+      const lineText = (l, it) => (ar ? l.ar || (it && it.ar) || l.desc : l.desc || (it && it.name) || l.ar);
+      // a description in Arabic: its Arabic "(…)" part (as the rental names do), else the description itself
+      const descText = (d) => { d = String(d || ""); const p = (/\(([^()]*)\)\s*$/.exec(d) || [])[1]; return ar && p && U.hasAr(p) ? p : d; };
+      const lines = (c.lines || []).filter((l) => l && typeof l === "object");
+      const fromLines = (all) => { for (const l of lines) { const it = l.itemId && items[l.itemId], t = tagOf(it); if (t) add(t, amt(l)); else if (all) add(M.shortLabel(lineText(l, it)), amt(l)); } };
+      if (u.kind === "rental") {
+        const eq = c.equipmentId && M.equipment()[c.equipmentId];
+        if (eq) add(tagOf(eq) || M.shortLabel(pick(eq.name, eq.ar)), 1);
+        else if (lines.length) fromLines(true);
+        else add(M.shortLabel(descText(c.desc)), 1);
+      } else if (u.kind === "service") {
+        fromLines(false);
+        if (!acc.size) {
+          const s = M.SERVICE_SUBS[c.sub], sub = s && s !== M.SERVICE_SUBS.other ? pick(s.label, s.ar) : "", d = descText(c.desc);
+          const l0 = lines.find((l) => l.ar);
+          add(ar && !U.hasAr(d) ? sub || (l0 && M.shortLabel(l0.ar)) || M.shortLabel(d) : M.shortLabel(d) || sub, 1);
+        }
+      } else {
+        fromLines(true);
+        if (!acc.size && u.kind === "purchase") add(M.shortLabel(descText(c.desc)), 1);
+      }
+      return [...acc.values()].sort((a, b) => b.h - a.h || a.i - b.i).slice(0, 3).map((x) => x.label);
+    });
   };
 })(window.SL);
 
@@ -5034,6 +5251,16 @@ window.SL = window.SL || {};
   ui.statusPill = (st) => { st = st === "pending" ? "planned" : st || "active"; const s = M.STATUS[st] || M.STATUS.active; return `<span class="pill st-${st}">${s.glyph} ${s.label}</span>`; };
   ui.kindPill = (k) => { const L = U.isAr() ? { invoice: "فاتورة", simplified: "مبسطة", handwritten: "بخط اليد", receipt: "سند قبض", quote: "عرض سعر", delivery: "سند تسليم", other: "أخرى" } : { invoice: "Invoice", simplified: "Simplified", handwritten: "Handwritten", receipt: "Receipt", quote: "Quote", delivery: "Delivery", other: "Other" }; return `<span class="pill k-${U.esc(k || "other")}">${L[k] || (k ? U.esc(k) : U.L("Doc", "مستند"))}</span>`; };
   ui.sw = (state) => `<i class="sw ${state === "none" ? "none" : state}" aria-hidden="true"></i>`;
+  /** A unit's "what it's for" tags (M.forTags) as quiet pills, or "". opts: {skip: plain text already shown (a tag it
+   *  contains is left out, e.g. "Scaffolding" under "Scaffolding on site"), max (3), cls (extra class on the group)}. */
+  ui.tags = (u, opts) => {
+    opts = opts || {};
+    const skip = String(opts.skip || "").toLowerCase();
+    const ts = M.forTags(u).filter((t) => !skip || !skip.includes(t.toLowerCase())).slice(0, opts.max || 3);
+    return ts.length ? `<span class="tgs${opts.cls ? " " + opts.cls : ""}">${ts.map((t) => '<span class="tg">' + U.t(t) + "</span>").join("")}</span>` : "";
+  };
+  /** Plain search text of a unit's tags in both languages (so "gypsum" finds it in Arabic too, and "جبس" in English). */
+  ui.tagText = (u) => U.uniq(M.forTags(u, "en").concat(M.forTags(u, "ar"))).join(" ");
 
   /**
    * Compact money bar. t = {paidOff, owed, prepaid} (h). opts: {scale, committed, budget, label, id}
@@ -5103,7 +5330,8 @@ window.SL = window.SL || {};
     // .fslot fills the 16 px slot and carries a 44 px hit area (::after), so a near miss doesn't open the row instead
     return `<span class="fslot" data-act="flag" data-id="${U.esc(top.id)}" role="button" tabindex="0" aria-label="${U.esc(top.title)}">${ui.sevGlyph(top.sev)}</span>`;
   };
-  /** Standard unit row (two lines). opts: {act (default "openUnit"), amountH (override), extraMeta, cls, title} */
+  /** Standard unit row (two lines). opts: {act (default "openUnit"), amountH (override), extraMeta, cls, title,
+   *  tags (true: a third line with what it's for, ui.tags)} */
   ui.unitRow = (u, D, opts) => {
     opts = opts || {};
     const r = M.calc(u, D), st = M.state(u, D);
@@ -5116,7 +5344,7 @@ window.SL = window.SL || {};
     return `<div class="row tap${stop ? " stopped" : ""}${opts.cls ? " " + opts.cls : ""}" data-act="${opts.act || "openUnit"}" data-key="${U.esc(u.key)}"${ui.mo(u.key)} role="button" tabindex="0">
       ${ui.sw(st)}<span class="t${unrev ? " unrev" : ""}">${ui.mono(u.cat)} ${U.t(opts.title || u.title)}</span>
       <span class="a num${unrev ? " unrev-amt" : ""}">${money}</span><span class="f">${flag}</span>
-      <span class="m">${ui.unitMeta(u, D)}${opts.extraMeta ? " · " + opts.extraMeta : ""}</span><span class="w">${ui.stateWords(u, D)}</span></div>`;
+      <span class="m">${ui.unitMeta(u, D)}${opts.extraMeta ? " · " + opts.extraMeta : ""}</span><span class="w">${ui.stateWords(u, D)}</span>${opts.tags ? ui.tags(u, { skip: opts.title || u.title, cls: "one rtg" }) : ""}</div>`;
   };
   /** Section header: label, optional count/total/action. */
   ui.sech = (label, right, act) => `<div class="sech"><h3>${label}</h3>${right != null ? '<span class="tot num">' + right + "</span>" : ""}${act || ""}</div>`;
@@ -8084,6 +8312,7 @@ window.SL = window.SL || {};
     // notes are hidden from read-only viewers (spec part 2 §G), so search must not find them either
     const bits = [u.title, u.ar, u.payee, d.supplier, d.desc, ui.readOnlyUI() ? "" : d.note, d.doc && d.doc.no, M.jobCode(u.jobId), M.jobName && M.jobName(u.jobId)];
     (d.lines || []).forEach((l) => bits.push(l.desc, l.ar));
+    bits.push(ui.tagText(u)); // what it's for, in English and Arabic
     return bits.filter(Boolean).join(" \u0001 ").toLowerCase();
   };
 
@@ -8413,7 +8642,7 @@ window.SL = window.SL || {};
 
   /** Row opts under a job filter: a crew week split across jobs shows this job's share, marked as a part. */
   X.rowOpts = (u, D, job, open) => {
-    const o = { act: "ledgerExpand", cls: "lg-row" + (open ? " open" : "") }, r = X.calcFor(u, D, job);
+    const o = { act: "ledgerExpand", cls: "lg-row" + (open ? " open" : ""), tags: true }, r = X.calcFor(u, D, job);
     if (r.part) { const jc = U.esc(M.jobCode(job) || U.L("no job", "بدون بند")); o.amountH = r.inc; o.extraMeta = '<span class="lg-part">' + U.L(jc + " part of " + ui.mw(r.full.inc), "حصة " + jc + " من " + ui.mw(r.full.inc)) + "</span>"; }
     if (u.kind === "crew") o.title = X.ttl(u);
     return o;
@@ -9151,12 +9380,13 @@ window.SL = window.SL || {};
       const r = M.calc(u, D), party = PARTY[u.cat] || "P", open = !!(r.owed || r.prepaid);
       X.parties[party].owed += r.owed; X.parties[party].prepaid += r.prepaid;
       if (u.noPrice && !r.paid && !r.inc) X.unpriced++;
-      const base = { key: u.key, cat: u.cat, party, open, files: u.kind === "crew" ? [] : (u.doc.files || []).slice() };
+      // unit: for its tags (what it's for) · inv: the invoice amount column · tagq: tag words to search, both languages
+      const base = { key: u.key, cat: u.cat, party, open, files: u.kind === "crew" ? [] : (u.doc.files || []).slice(), unit: u, inv: X.invoice(u, r, D), tagq: ui.tagText(u) };
       if (u.kind === "crew") {
         for (const d of u.days) {
           if (d.plan || d.date > D || !d.h) continue;
           const fx = X.blank(); fx[party] = -d.h;
-          rows.push(Object.assign({}, base, { mo: u.key + "@" + d.date, date: d.date, seq: 0, fx, title: U.L(U.t(u.title) + " came", bd(U.t(X.unitName(u))) + " · حضر"),
+          rows.push(Object.assign({}, base, { mo: u.key + "@" + d.date, date: d.date, seq: 0, fx, inv: { h: d.h }, title: U.L(U.t(u.title) + " came", bd(U.t(X.unitName(u))) + " · حضر"),
             meta: [X.ml(d.m, d.l) + (d.food ? U.L(" +food", " + أكل") : ""), U.esc(M.jobCode(d.job))].filter(Boolean).join(" · ") }));
         }
       } else if (u.pendingDelivery) {
@@ -9233,6 +9463,20 @@ window.SL = window.SL || {};
     row.meta = [(p.h < 0 ? U.L("back to", "أُعيد إلى") : U.L("paid by", "دفعها")) + " " + who, note].filter(Boolean).join(" · ");
     row.deposit = !!u.deposit; row.refund = p.h < 0;
   };
+  /** The Invoice column of a unit's rows (h; unk = no price yet; cap = a small word under it): a purchase / service /
+   *  other cost = its invoice total · a rental = what it has run up as of D ("so far" while still on site) · a deposit
+   *  = what was handed over · a crew week = its wages to date (a day row shows that day's instead, set in X.rows). */
+  X.invoice = (u, r, D) => {
+    if (u.kind === "crew") return { h: r.inc, cap: U.L("week", "الأسبوع") };
+    if (u.deposit) return { h: U.sum(u.payments.filter((p) => !p.void && p.date && p.date <= D && p.h > 0), (p) => p.h) };
+    if (u.kind === "rental") return u.noPrice ? { unk: true } : { h: r.inc, cap: !u.out || u.out > D ? U.L("so far", "حتى الآن") : "" };
+    return u.h ? { h: u.h } : { unk: true };
+  };
+  X.invCell = (v) => {
+    if (!v) return '<td class="r num bl-inv"><span class="zero">·</span></td>';
+    const amt = v.unk ? '<span class="unk">?</span>' : v.h ? U.mw(v.h / 100) : '<span class="zero">–</span>';
+    return `<td class="r num bl-inv"><b>${amt}</b>${v.cap ? '<small class="bl-cap">' + v.cap + "</small>" : ""}</td>`;
+  };
   X.sum = (rows) => { const t = X.blank(); for (const r of rows) for (const k in t) t[k] += r.fx[k]; return t; };
   /** What Ryan paid (h): out = all cash out of his pocket, back = cash that came back (returns, capital), split into
    *  toS = cash handed to the float holder (nTop top-ups) and dir = paid straight to a party (dp per party). */
@@ -9245,8 +9489,8 @@ window.SL = window.SL || {};
     }
     return { out, back, toS, nTop, dir, dp };
   };
-  /** The card at the top: per party what they earned, were paid, are owed and got ahead (tap a row = only its events),
-   *  then what Ryan paid, the cash Sayed should still hold and what is owed in total. */
+  /** The card under the two boxes: per party what they earned, were paid, are owed and got ahead (tap a row = only its
+   *  events), then the cash out of Ryan's pocket (to Sayed / paid direct) and what is owed in total. */
   X.summary = (rows, pid, D, f, sayed, fw, holds) => {
     const { out, back, toS, nTop, dir, dp } = X.paidSplit(rows);
     const t = X.partyTotals(pid, D), unk = X.unpriced, sy = U.esc(sayed), owed = t.all.owed;
@@ -9254,7 +9498,7 @@ window.SL = window.SL || {};
     const cells = (x) => cell(x.earned) + cell(x.paid) + cell(x.owed, "c-owed") + cell(x.ahead, "c-prepaid");
     const row = (k, fk, label) => {
       const x = t[k], on = f === fk;
-      const np = x.unpriced ? `<small class="c-warn">${U.L("+" + x.unpriced + " unpriced", U.ltr("+" + x.unpriced) + " بلا سعر")}</small>` : "";
+      const np = x.unpriced ? `<small class="c-warn">${U.L(x.unpriced + " invoice" + (x.unpriced > 1 ? "s" : "") + " pending", U.plAr(x.unpriced, "فاتورة منتظرة", "فاتورتان منتظرتان", "فواتير منتظرة", "فاتورة منتظرة"))}</small>` : "";
       return `<tr class="tap${on ? " on" : ""}" data-act="balFilter" data-val="${on ? "all" : fk}" role="button" tabindex="0" aria-pressed="${on}"><th scope="row">${label}${np}</th>${cells(x)}</tr>`;
     };
     const table = '<table class="bl-pt"><thead><tr><th scope="col">' + U.L("SAR", "ر.س") + "</th>" +
@@ -9266,13 +9510,13 @@ window.SL = window.SL || {};
     const dparts = X.PARTIES.filter((k) => dp[k]).map((k) => X.colName(k) + " " + U.mw(dp[k] / 100)).join(" · ");
     const split = subl(U.L("To " + sy + " (cash)", "نقد إلى " + sy), toS, nTop ? U.L(nTop + " top-up" + (nTop > 1 ? "s" : ""), U.plAr(nTop, "دفعة واحدة", "دفعتان", "دفعات", "دفعة")) : "") +
       subl(U.L("Paid directly", "دفع مباشر"), dir, dparts);
-    const isFloat = fw && M.wallet(fw) && M.wallet(fw).kind === "float", src = isFloat ? M.sources(pid, D) : null;
+    // "Out of your pocket" (cash that left Ryan: to Sayed + paid direct), not "You paid": the "You've paid" box above is
+    // what reached the trades, suppliers and shops. What Sayed has left is in the "Sayed's money" box above.
     return `<div class="card bl-sum">${table}<div class="kv">` +
-      line(U.L("You paid", "دفعت"), out, "", back ? U.L(U.mw(back / 100) + " came back (returns, capital)", "وصلك " + U.mw(back / 100) + " (إرجاع نقد، رأس مال)") : U.L("cash to " + sy + " + paid direct", "نقد إلى " + sy + " + دفع مباشر")) +
+      line(U.L("Out of your pocket", "خرج من جيبك"), out, "", back ? U.L(U.mw(back / 100) + " came back (returns, capital)", "وصلك " + U.mw(back / 100) + " (إرجاع نقد، رأس مال)") : U.L("cash to " + sy + " + paid direct", "نقد إلى " + sy + " + دفع مباشر")) +
       split +
-      line(U.L(sy + " has left", "المتبقي مع " + sy), holds, holds < 0 ? "c-stop" : "", src ? U.L("got " + U.mw(src.given / 100) + " · paid out " + U.mw(src.floatSpent / 100), "استلم " + U.mw(src.given / 100) + " · صرف " + U.mw(src.floatSpent / 100)) : U.L("cash he should be holding", "النقد الذي يجب أن يكون معه")) +
       line(U.L("<b>Total owed</b>", "<b>إجمالي المستحقات</b>"), owed, owed ? "c-owed" : "", holds >= owed ? U.L(sy + "'s cash covers it", "نقد " + sy + " يغطيها") : U.L("short by " + U.mw((owed - holds) / 100) + " after " + sy + "'s cash", "ينقص " + U.mw((owed - holds) / 100) + " بعد نقد " + sy)) +
-      `</div>${unk ? '<p class="t12 c-warn">? ' + U.L(unk + " rental" + (unk > 1 ? "s" : "") + " with no price yet: no money has moved, so they are not listed. Set their rates in Pay › Set", U.plAr(unk, "إيجار واحد", "إيجاران", "إيجارات", "إيجاراً") + " بلا سعر بعد: لم يتحرك أي مال، لذلك لا تظهر هنا. حدد أسعارها في الدفع › تحديد") + "</p>" : ""}</div>`;
+      `</div>${unk ? '<p class="t12 c-warn">? ' + U.L(unk + " equipment invoice" + (unk > 1 ? "s" : "") + " still to come: they count here once they arrive", U.plAr(unk, "فاتورة معدات واحدة", "فاتورتا معدات", "فواتير معدات", "فاتورة معدات") + " لم تصل بعد: تُحسب هنا عند وصولها") + "</p>" : ""}</div>`;
   };
   /** Proof icon: a filled document (tap to open the file) when a paper backs the event, a dashed empty one when not. */
   const DOC = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M9.5 1.5V5H13M6 8.5h5M6 11h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
@@ -9308,10 +9552,11 @@ window.SL = window.SL || {};
   ];
   X.q = "";
   const plain = (html) => String(html || "").replace(/<[^>]*>/g, "").replace(/&amp;/g, "&").replace(/&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-  /** Search text of a row: title, meta, day and every amount (so "5000" or "5,000" finds it). */
+  /** Search text of a row: title, meta, tags (English and Arabic), day and every amount, the invoice's too (so "5000"
+   *  or "5,000" finds it). */
   X.qText = (r) => {
-    const amts = Object.values(r.fx).filter(Boolean).map((v) => { const w = U.mw(Math.abs(v) / 100); return w + " " + w.replace(/,/g, ""); });
-    return (plain(r.title) + " " + plain(r.meta) + " " + U.dShort(r.date) + " " + amts.join(" ")).toLowerCase();
+    const amts = Object.values(r.fx).concat(r.inv && r.inv.h ? [r.inv.h] : []).filter(Boolean).map((v) => { const w = U.unbidi(U.mw(Math.abs(v) / 100)); return w + " " + w.replace(/,/g, ""); });
+    return (plain(r.title) + " " + plain(r.meta) + " " + (r.tagq || "") + " " + U.dShort(r.date) + " " + amts.join(" ")).toLowerCase();
   };
   X.dayLabel = (d, T) => (d === T ? U.L("Today · ", "اليوم · ") : d === U.addDays(T, -1) ? U.L("Yesterday · ", "أمس · ") : "") + U.dShort(d);
   SL.views.balances = {
@@ -9329,33 +9574,36 @@ window.SL = window.SL || {};
       const SHORT = { P: U.L("Suppl.", "موردون"), E: U.L("Equip", "معدات") }, lab = (k, l) => U.esc(k === "sayed" ? sayed : X.colName(k, l));
       const labH = (k, l) => (SHORT[k] ? `<span class="bl-lg">${lab(k, l)}</span><span class="bl-sm" aria-hidden="true">${SHORT[k]}</span>` : lab(k, l));
       const head = cols.map(([k, l]) => `<th class="r${k === "me" ? " bl-me" : ""}" scope="col">${labH(k, l)}</th>`).join("");
+      // the Invoice column: the amount of the bill the row is about, right after its name (a party's −/+ come after)
+      const invH = `<span class="bl-lg">${U.L("Invoice", "الفاتورة")}</span><span class="bl-sm" aria-hidden="true">${U.L("Inv.", "فاتورة")}</span>`;
       let h = '<div class="v-bal"><div class="hrow bl-top"><h2 class="t20">' + U.L("Balances", "الأرصدة") + '</h2><span class="spacer"></span>' + (SL._pdf && SL._pdf.btn ? SL._pdf.btn() : "") + ui.asOfChip() + "</div>";
       if (!all.length) return h + '<div class="empty">' + U.L("Nothing logged yet.", "لم يُسجَّل شيء بعد.") + "</div></div>";
+      h += X.dash(pid, D, fw);
       h += X.summary(all, pid, D, f, sayed, fw, holds);
       h += '<div class="chips bl-chips" role="group" aria-label="' + U.L("Show", "عرض") + '">' + X.FILTERS.map(([k, l, fn, ar]) => { const n = all.filter(fn).length; return `<button type="button" class="chip${k === f ? " on" : ""}" data-act="balFilter" data-val="${k}" aria-pressed="${k === f}">${U.esc(k === "sayed" ? sayed : U.L(l, ar))} <small class="muted">${n}</small></button>`; }).join("") + "</div>";
       const help = ui.isOpen("bl.help", false), sy = U.esc(sayed), me = U.L("Me", "أنا"), arr = U.L("→", "←");
       h += `<div class="bl-tools"><input id="bl-q" class="inp" type="search" placeholder="${U.L("Search: supplier, crew, job, amount", "بحث: مورد، طاقم، بند، مبلغ")}" aria-label="${U.L("Search events", "بحث في الحركات")}" value="${U.esc(X.q)}" autocomplete="off"><button type="button" class="lnk bl-hlp" data-act="toggle" data-k="bl.help" aria-expanded="${help}">${help ? U.L("Hide help", "إخفاء الشرح") : U.L("How to read", "طريقة القراءة")}</button></div>`;
-      if (help) h += '<p class="t12 muted bl-help">' + U.L('Money starts with <b class="bl-me">Me</b> and moves right: Me → ' + sy + ' → whoever was paid, so every row balances. Me and ' + sy + ': cash in <b>+</b> / out <b>−</b>; the small <b>= n</b> under ' + sy + "'s amounts is what he should hold after it. Trades, suppliers and equipment: <b class=\"c-owed\">−</b> when they work or deliver (we owe them), <b class=\"c-prepaid\">+</b> when they are paid. Their balance: <b class=\"c-owed\">−</b> we still owe, <b class=\"c-prepaid\">+</b> paid ahead. Proof: <b>doc</b> = a document backs it (tap to open) · <b>none</b> = nothing on paper (" + nDoc + " of " + all.length + " events have one).",
-        `المال يبدأ من <b class="bl-me">${me}</b> ويتحرك إلى اليسار: ${me} ${arr} ${sy} ${arr} من استلم الدفعة، فيتوازن كل سطر. ${me} و${sy}: نقد داخل <b>+</b> / خارج <b>−</b>؛ الرقم الصغير <b>${U.ltr("= n")}</b> تحت مبالغ ${sy} هو ما يجب أن يكون معه بعدها. الحرفيون والموردون والمعدات: <b class="c-owed">−</b> عندما يعملون أو يسلّمون (لهم علينا)، <b class="c-prepaid">+</b> عندما يُدفع لهم. رصيدهم: <b class="c-owed">−</b> ما زال لهم علينا، <b class="c-prepaid">+</b> مدفوع مقدماً. المستند: <b>مستند</b> = يوجد مستند يدعمه (اضغط لفتحه) · <b>لا يوجد</b> = لا شيء على ورق (${nDoc} من ${all.length} حركة لها مستند).`) + "</p>";
-      h += '<div class="bl-box"><div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-pc">' + U.L("Proof", "مستند") + '</th><th scope="col" class="bl-d">' + U.L("Description", "الوصف") + "</th>" + head + "</tr></thead>";
+      if (help) h += '<p class="t12 muted bl-help">' + U.L('Money starts with <b class="bl-me">Me</b> and moves right: Me → ' + sy + ' → whoever was paid, so every row balances. Me and ' + sy + ': cash in <b>+</b> / out <b>−</b>; the small <b>= n</b> under ' + sy + "'s amounts is what he should hold after it. Trades, suppliers and equipment: <b class=\"c-owed\">−</b> when they work or deliver (we owe them), <b class=\"c-prepaid\">+</b> when they are paid. Their balance: <b class=\"c-owed\">−</b> we still owe, <b class=\"c-prepaid\">+</b> paid ahead. <b>Invoice</b>: the bill's full amount (a crew: that day's wages, or the week's on a payment; a rental: what it has cost so far); the grey tags say what it was for. Proof: <b>doc</b> = a document backs it (tap to open) · <b>none</b> = nothing on paper (" + nDoc + " of " + all.length + " events have one).",
+        `المال يبدأ من <b class="bl-me">${me}</b> ويتحرك إلى اليسار: ${me} ${arr} ${sy} ${arr} من استلم الدفعة، فيتوازن كل سطر. ${me} و${sy}: نقد داخل <b>+</b> / خارج <b>−</b>؛ الرقم الصغير <b>${U.ltr("= n")}</b> تحت مبالغ ${sy} هو ما يجب أن يكون معه بعدها. الحرفيون والموردون والمعدات: <b class="c-owed">−</b> عندما يعملون أو يسلّمون (لهم علينا)، <b class="c-prepaid">+</b> عندما يُدفع لهم. رصيدهم: <b class="c-owed">−</b> ما زال لهم علينا، <b class="c-prepaid">+</b> مدفوع مقدماً. <b>الفاتورة</b>: المبلغ الكامل للفاتورة (الطاقم: أجر ذلك اليوم، أو أجر الأسبوع عند الدفع؛ الإيجار: ما كلّفه حتى الآن)؛ والوسوم الرمادية تقول لماذا كانت. المستند: <b>مستند</b> = يوجد مستند يدعمه (اضغط لفتحه) · <b>لا يوجد</b> = لا شيء على ورق (${nDoc} من ${all.length} حركة لها مستند).`) + "</p>";
+      h += '<div class="bl-box"><div class="bl-wrap"><table class="bl"><thead><tr><th scope="col" class="bl-pc">' + U.L("Proof", "مستند") + '</th><th scope="col" class="bl-d">' + U.L("Description", "الوصف") + '</th><th scope="col" class="r bl-inv">' + invH + "</th>" + head + "</tr></thead>";
       // the Balance row sits right under the column names, above the events (in its own tbody: the search never hides it)
       const tot = '<tr class="bl-tot"><td class="bl-pc"></td><th scope="row" class="bl-d">' + U.L("Balance", "الرصيد") + '<span class="t11 muted">' + (f === "all" ? U.L("all events", "كل الحركات") : U.L("all events, not just these", "كل الحركات، لا هذه فقط")) + (ui.isPast() ? U.L(" · as of ", " · حتى تاريخ ") + U.esc(U.dShort(D)) : "") + "</span></th>" +
-        cols.map(([k]) => X.cell(t[k], k)).join("") + "</tr>";
+        '<td class="bl-inv"></td>' + cols.map(([k]) => X.cell(t[k], k)).join("") + "</tr>";
       h += '<tbody class="bl-totb">' + tot + "</tbody><tbody>";
       let day = null;
       for (const r of rows) {
         if (r.date !== day) {
           // each day repeats the column names (the table head scrolls away on a long phone list)
           const first = day === null; day = r.date;
-          h += `<tr class="bl-day" data-day="${U.esc(day)}"><td class="bl-pc"></td><th scope="rowgroup" class="bl-d">${U.esc(X.dayLabel(day, T))}</th>${cols.map(([k, l]) => `<td class="r${k === "me" ? " bl-me" : ""}">${first ? "" : labH(k, l)}</td>`).join("")}</tr>`;
+          h += `<tr class="bl-day" data-day="${U.esc(day)}"><td class="bl-pc"></td><th scope="rowgroup" class="bl-d">${U.esc(X.dayLabel(day, T))}</th><td class="r bl-inv">${first ? "" : invH}</td>${cols.map(([k, l]) => `<td class="r${k === "me" ? " bl-me" : ""}">${first ? "" : labH(k, l)}</td>`).join("")}</tr>`;
         }
         const act = r.key ? ` class="tap${r.pending ? " bl-pend" : ""}" data-act="openUnit" data-key="${U.esc(r.key)}" role="button" tabindex="0"`
           : r.cashId ? ` class="tap" data-go="${U.esc(r.capital ? ui.href("capital") : ui.href("float", r.wid || M.defaultWallet(pid)))}" role="link" tabindex="0"` : "";
         const bad = X.leak(r);
-        h += `<tr${act}${ui.mo(r.mo)} data-d="${U.esc(r.date)}" data-q="${U.esc(X.qText(r))}"${bad ? ' data-leak="1"' : ""}><td class="bl-pc">${X.proof(r.files)}</td><th scope="row" class="bl-d${bad ? " bl-leak" : ""}"><span class="bl-t">${r.title}</span>${r.meta ? '<span class="t11 muted">' + r.meta + "</span>" : ""}${r.pending && !ui.readOnlyUI() && !ui.isPast() ? `<button type="button" class="btn sm bl-dlv" data-act="markDelivered" data-id="${U.esc(r.key.slice(2))}">✓ ${r.pending}</button>` : ""}${bad ? '<span class="t11 c-stop">' + U.L("▲ doesn't balance by " + U.mw(bad / 100) + ": money from nowhere", "▲ غير متوازن بفارق " + U.mw(bad / 100) + ": مبلغ بلا مصدر") + "</span>" : ""}</th>` +
-          cols.map(([k]) => X.cell(r.fx[k], k, r.sayedAfter)).join("") + "</tr>";
+        h += `<tr${act}${ui.mo(r.mo)} data-d="${U.esc(r.date)}" data-q="${U.esc(X.qText(r))}"${bad ? ' data-leak="1"' : ""}><td class="bl-pc">${X.proof(r.files)}</td><th scope="row" class="bl-d${bad ? " bl-leak" : ""}"><span class="bl-t">${r.title}</span>${r.unit ? ui.tags(r.unit, { skip: plain(r.title + " " + r.meta), cls: "one bl-tg" }) : ""}${r.meta ? '<span class="t11 muted">' + r.meta + "</span>" : ""}${r.pending && !ui.readOnlyUI() && !ui.isPast() ? `<button type="button" class="btn sm bl-dlv" data-act="markDelivered" data-id="${U.esc(r.key.slice(2))}">✓ ${r.pending}</button>` : ""}${bad ? '<span class="t11 c-stop">' + U.L("▲ doesn't balance by " + U.mw(bad / 100) + ": money from nowhere", "▲ غير متوازن بفارق " + U.mw(bad / 100) + ": مبلغ بلا مصدر") + "</span>" : ""}</th>` +
+          X.invCell(r.inv) + cols.map(([k]) => X.cell(r.fx[k], k, r.sayedAfter)).join("") + "</tr>";
       }
-      h += `<tr class="bl-none"${rows.length ? " hidden" : ""}><td colspan="${cols.length + 2}" class="muted t13">${rows.length ? U.L("No event matches the search · ", "لا توجد حركة تطابق البحث · ") : f === "open" ? U.L("Everything is settled. ", "كل شيء مسوّى. ") : U.L("Nothing here. ", "لا يوجد شيء هنا. ")}<button type="button" class="lnk" data-act="balClear">${U.L("Show all", "عرض الكل")}</button></td></tr>`;
+      h += `<tr class="bl-none"${rows.length ? " hidden" : ""}><td colspan="${cols.length + 3}" class="muted t13">${rows.length ? U.L("No event matches the search · ", "لا توجد حركة تطابق البحث · ") : f === "open" ? U.L("Everything is settled. ", "كل شيء مسوّى. ") : U.L("Nothing here. ", "لا يوجد شيء هنا. ")}<button type="button" class="lnk" data-act="balClear">${U.L("Show all", "عرض الكل")}</button></td></tr>`;
       h += "</tbody></table></div></div>";
       if (cols.length < X.COLS.length) h += `<p class="t12 muted bl-hid">${U.L("Not shown (nothing in them): ", "غير معروضة (فارغة): ")}${X.COLS.filter((c) => !cols.includes(c)).map(([k, l]) => lab(k, l).replace(/\.$/, "")).join(U.L(", ", "، "))}.</p>`;
       return h + "</div>";
@@ -9431,6 +9679,95 @@ window.SL = window.SL || {};
     }
     for (const k of ["T", "P", "E"]) for (const f in t.all) t.all[f] += t[k][f];
     return t;
+  };
+})(window.SL);
+
+/* ---- the two boxes at the top of Balances: "You've paid" (money that reached crews, suppliers and shops, per kind, and
+ * through whose hands) and "Sayed's money" (a float's receipt: received − paid out = should have, then his last count) ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui;
+  const X = SL._bal;
+  /** A formatter for figures that add up to a total shown above them: exact to the halala ("7,135.06") when any of hs
+   *  has halalas, else whole riyals ("1,200"), so the parts always add up to the total. */
+  const fx = (hs) => (hs.some((h) => h % 100) ? (h) => U.m(h / 100) : (h) => U.mw(h / 100));
+  /** One receipt line: a label (a small grey line under it: o.sub) and an amount, exact to the halala (zero → "–").
+   *  o: {out (shown as −), cls (on the line), vcls (on the amount), html (instead of the amount)} */
+  const ln = (label, h, o) => {
+    o = o || {};
+    const amt = o.html != null ? o.html : !h ? '<span class="zero">–</span>' : U.m((o.out ? -h : h) / 100);
+    return `<div class="bl-rl${o.cls ? " " + o.cls : ""}"><span class="bl-rk">${label}${o.sub ? "<small>" + o.sub + "</small>" : ""}</span><span class="bl-rv num${o.vcls ? " " + o.vcls : ""}">${amt}</span></div>`;
+  };
+  /** Per kind, the non-zero ones: "crews 1,200 · invoices 7,135.06 · equipment 700.00" (they add up to Paid out). */
+  const kinds = (c) => {
+    const ks = [[c.T, U.L("crews", "العمالة")], [c.P + c.S, U.L("invoices", "الفواتير")], [c.E, U.L("equipment", "المعدات")], [c.O, U.L("other", "أخرى")]].filter(([h]) => h), f = fx(ks.map(([h]) => h));
+    return ks.map(([h, l]) => l + " " + f(h)).join(" · ");
+  };
+  /** Adjustment notes with their amounts ("scrap sale 3,000"), a long note cut short. */
+  const notes = (list) => { const f = fx(list.map((a) => a.h)); return list.map((a) => { const n = String(a.note || "").trim(); return (n ? U.t(n.length > 34 ? n.slice(0, 33) + "…" : n) + " " : "") + f(Math.abs(a.h)); }).join(" · "); };
+  /** A count against the book: "matches" / "short by 12.00" / "over by 5.00". */
+  const diffW = (h) => (!h ? '<span class="c-prepaid">' + U.L("matches", "مطابق") + "</span>" : h < 0 ? '<span class="c-stop">' + U.L("short by ", "ناقص ") + U.m(-h / 100) + "</span>" : '<span class="c-warn">' + U.L("over by ", "زائد ") + U.m(h / 100) + "</span>");
+
+  /** "You've paid" as of D: money that actually reached someone (payments dated ≤ D, not void), per kind: Crews ·
+   *  Invoices (materials + services) · Equipment (rentals and deposits) · Other (when any) · Total, then through whose
+   *  hands. The total is the table's Paid column, to the halala (checked: M.identityFailures). */
+  X.paidBox = (pid, D) => {
+    const pb = M.paidBy(pid, D), c = pb.cat, col = X.partyTotals(pid, D).all.paid;
+    if (pb.total !== col) M.idFail("balances:paid:" + pid, { paidBy: pb.total, paidColumn: col });
+    // the deposit part from the same payments as the Equipment line, so rentals + deposit = Equipment to the halala
+    const dep = pb.depositHeld, rent = c.E - dep, fi = fx([c.P, c.S]), fe = fx([rent, dep]);
+    const invSub = c.P && c.S ? U.L("materials " + fi(c.P) + " · services " + fi(c.S), "مواد " + fi(c.P) + " · خدمات " + fi(c.S)) : c.S ? U.L("services", "خدمات") : U.L("materials + services", "مواد + خدمات");
+    const eqSub = dep > 0 ? (rent ? U.L("rentals " + fe(rent) + " · ", "إيجار " + fe(rent) + " · ") : "") + U.L("deposit " + fe(dep) + " (the shop holds it)", "تأمين " + fe(dep) + " (عند المحل)") : U.L("rentals", "إيجار");
+    let h = ln(U.L("Crews", "العمالة"), c.T, { sub: U.L("wages + food", "أجور + أكل") }) + ln(U.L("Invoices", "الفواتير"), c.P + c.S, { sub: invSub }) + ln(U.L("Equipment", "المعدات"), c.E, { sub: eqSub });
+    if (c.O) h += ln(U.L("Other", "أخرى"), c.O);
+    h += ln(U.L("Total", "الإجمالي"), pb.total, { cls: "bl-rt" });
+    // through whose hands: each float (its holder's name), then Ryan himself
+    const fl = Object.keys(pb.wallets).filter((wid) => pb.wallets[wid] && !M.isOwnerWallet(wid)), fv = fx(fl.map((wid) => pb.wallets[wid]).concat([pb.owner]));
+    const via = fl.map((wid) => {
+      const nm = X.bd(U.esc(M.walletName(wid)));
+      return nm ? U.L("via " + nm + "'s float " + fv(pb.wallets[wid]), "من عهدة " + nm + " " + fv(pb.wallets[wid])) : U.L("via a float ", "من عهدة ") + fv(pb.wallets[wid]);
+    });
+    if (pb.owner) via.push(U.L("by you directly " + fv(pb.owner), "منك مباشرة " + fv(pb.owner)));
+    return `<section class="card bl-rc bl-paid"><div class="bl-rh"><h3>${U.L("You've paid", "ما دفعته")}</h3>${ui.isPast() ? '<span class="bl-rd">' + U.L("as of ", "حتى ") + U.esc(U.dShort(D)) + "</span>" : ""}</div>${h}${via.length ? '<p class="bl-rn">' + via.join(" · ") + "</p>" : ""}</section>`;
+  };
+
+  /** "Sayed's money" for a float wallet as of D, as a receipt he can follow: received from Ryan (+ other money in, money
+   *  back) − given back − paid out = should have (by the book); then his last count and the difference. */
+  X.floatBox = (wid, D) => {
+    const r = M.floatReceipt(wid, D), ro = ui.readOnlyUI(), who = X.bd(U.esc(M.walletName(wid))), owner = X.bd(U.esc(M.walletName(M.ownerWalletId())));
+    let h = ln(U.L("Received from " + owner, "استلم من " + owner), r.topups, { sub: r.nTop ? U.L(r.nTop + " top-up" + (r.nTop > 1 ? "s" : ""), U.plAr(r.nTop, "تعبئة واحدة", "تعبئتان", "تعبئات", "تعبئة")) : "" });
+    if (r.adjIn) h += ln(U.L("Other money in", "نقد وارد آخر"), r.adjIn, { sub: ro ? "" : notes(r.adj.filter((a) => a.h > 0)) });
+    if (r.refunds) h += ln(U.L("Money back", "مبالغ أُعيدت إليه"), r.refunds, { sub: U.L("refunds, e.g. a deposit returned", "مثل تأمين أُعيد") });
+    if (r.returns) h += ln(U.L("Gave back to " + owner, "أرجع إلى " + owner), r.returns, { out: true });
+    if (r.adjOut) h += ln(U.L("Other money out", "نقد صادر آخر"), r.adjOut, { out: true, sub: ro ? "" : notes(r.adj.filter((a) => a.h < 0)) });
+    h += ln(U.L("Paid out", "صرف"), r.paidOut, { out: true, sub: kinds(r.paidCat) });
+    h += ln(U.L("Should have", "المفروض معه"), r.holds, { cls: "bl-rt", vcls: r.holds < 0 ? "c-stop" : "",
+      sub: r.holds < 0 ? U.L("paid out " + U.m(-r.holds / 100) + " more than he got", "صرف أكثر مما استلم بـ " + U.m(-r.holds / 100)) : U.L("by the book", "حسب الدفتر") });
+    const c = r.count;
+    if (c) {
+      h += ln(U.L("Counted " + U.esc(U.dShort(c.date)), "جرد يوم " + U.esc(U.dShort(c.date))), c.counted, { cls: "bl-rcnt", html: c.counted ? null : U.m(0) });
+      // the difference saved with the count (as on the Float page and Statement), against the book then; what was
+      // logged since for that day or before, and what moved after it, each on its own (book + late + since = should have)
+      const sub = [];
+      if (c.late || c.since.in || c.since.out) sub.push(U.L("against " + U.m(c.book / 100) + " at the count", "مقابل " + U.m(c.book / 100) + " وقت الجرد"));
+      if (c.late) sub.push(U.L("logged later for that day or before " + U.m(c.late / 100, { sign: true }), "سُجّل بعده عن يومه أو قبله " + U.m(c.late / 100, { sign: true })));
+      const fsn = fx([c.since.in, c.since.out]), since = [c.since.in ? U.L("+" + fsn(c.since.in) + " in", "وارد " + fsn(c.since.in)) : "", c.since.out ? U.L("−" + fsn(c.since.out) + " out", "صادر " + fsn(c.since.out)) : ""].filter(Boolean).join(U.L(", ", "، "));
+      if (since) sub.push(U.L("since then " + since, "بعده " + since));
+      h += ln(U.L("Difference", "الفرق"), 0, { cls: "bl-rdif", html: diffW(c.diff), sub: sub.join(" · ") });
+    } else h += '<p class="bl-rn">' + U.L("No cash count yet.", "لا يوجد جرد بعد.") + "</p>";
+    const pdf = SL._pdf && SL._pdf.sayedBtn ? SL._pdf.sayedBtn(wid) : "";
+    return `<section class="card float bl-rc bl-fl"><div class="bl-rh"><h3>${U.L(who + "'s money", "عهدة " + who)}</h3>${pdf}</div>${h}` +
+      `<p class="bl-rn"><button type="button" class="lnk" data-go="${U.esc(ui.href("float", wid))}">${U.L("Every line ›", "كل الحركات ›")}</button>${!c && !ro && !ui.isPast() ? ` · <button type="button" class="lnk" data-go="${U.esc(ui.href("statement", wid))}">${U.L("Count cash ›", "جرد النقد ›")}</button>` : ""}</p></section>`;
+  };
+
+  /** Both boxes (side by side on a wide screen): the project's payments, then each float with money in or out by D
+   *  (the project's own float first). */
+  X.dash = (pid, D, fw) => {
+    const fl = M.floatWallets().map((x) => x.id).sort((a, b) => (b === fw) - (a === fw)).filter((wid) => {
+      const r = M.floatReceipt(wid, D);
+      return wid === fw || r.topups || r.paidOut || r.returns || r.adj.length || r.refunds;
+    });
+    return '<div class="bl-dash">' + X.paidBox(pid, D) + fl.map((wid) => X.floatBox(wid, D)).join("") + "</div>";
   };
 })(window.SL);
 
@@ -10746,16 +11083,18 @@ window.SL = window.SL || {};
   const DOC = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M4 1.5h5.5L13 5v9.5H4z" fill="currentColor" opacity=".25" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M9.5 1.5V5H13M6 8.5h5M6 11h5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
 
   /** The paid / not paid switch of one invoice (1 tap, Undo toast): a paid one → not paid (voids its payments) ·
-   *  an unpaid one → paid in full, today. short: the compact label for a timeline row. */
+   *  an unpaid one → paid in full, today. short: the compact label for a timeline row
+   *  (a figure only when part is paid: "Owed 300"; else "Paid ✓" / "Unpaid"). */
   X.payChip = (i, short) => {
     const by = !short && i.paidBy.length ? " · " + U.esc(i.paidBy.join(" + ")) : "";
     const pay = (cls, on, body) => AU().ro() ? `<span class="ia-chip ${cls}">${body}</span>` :
       `<button type="button" class="ia-chip ${cls} paysw${on ? " on" : ""}" data-act="invPaid" data-id="${U.esc(i.u.id)}" data-to="${on ? "off" : "on"}" role="switch" aria-checked="${on}" aria-label="${U.esc(U.unbidi(i.u.title || ""))}"><i class="ia-sw" aria-hidden="true"></i>${body}</button>`;
-    if (!i.received && i.paid) return pay("ok", true, U.L("Prepaid ", "مدفوع مقدماً ") + U.mw(i.paid / 100) + by) + (i.due && !short ? pay("warn", false, U.L(U.mw(i.due / 100) + " to pay on delivery", U.mw(i.due / 100) + " تُدفع عند التسليم")) : "");
-    if (!i.received && i.due) return pay("warn", false, U.L("Not paid · ", "غير مدفوع · ") + U.mw(i.due / 100));
-    if (i.due > 0 && !i.paid) return pay("owed", false, U.L("Unpaid ", "غير مدفوع ") + U.mw(i.due / 100));
+    if (!i.received && i.paid) return pay("ok", true, (short && !i.due ? U.L("Prepaid ✓", "مدفوع مقدماً ✓") : U.L("Prepaid ", "مدفوع مقدماً ") + U.mw(i.paid / 100)) + by) + (i.due && !short ? pay("warn", false, U.L(U.mw(i.due / 100) + " to pay on delivery", U.mw(i.due / 100) + " تُدفع عند التسليم")) : "");
+    if (!i.received && i.due) return pay("warn", false, short ? U.L("Not paid", "غير مدفوع") : U.L("Not paid · ", "غير مدفوع · ") + U.mw(i.due / 100));
+    if (i.due > 0 && !i.paid) return pay("owed", false, short ? U.L("Unpaid", "غير مدفوع") : U.L("Unpaid ", "غير مدفوع ") + U.mw(i.due / 100));
     if (i.due > 0) return pay("owed", false, U.L("Owed ", "مستحق ") + U.mw(i.due / 100));
-    return i.paid ? pay("ok", true, U.L("Paid ", "مسدد ") + (short ? U.mw(i.paid / 100) : "") + by) : '<span class="ia-chip ok">' + U.L("Paid", "مسدد") + "</span>";
+    // on a timeline row the total already shows twice (label and mark): the switch shows a figure only for a part payment
+    return i.paid ? pay("ok", true, short ? U.L("Paid ✓", "مسدد ✓") : U.L("Paid", "مسدد") + by) : '<span class="ia-chip ok">' + U.L("Paid", "مسدد") + "</span>";
   };
 
   X.chips = (i) => {
@@ -10790,7 +11129,7 @@ window.SL = window.SL || {};
     const kind = u.doc.doc && u.doc.doc.kind;
     return `<div class="ia-card${open ? " open" : ""}${i.up ? " up" : ""}"${ui.mo(u.key)}>` +
       `<button type="button" class="ia-head" data-act="toggle" data-k="${U.esc(k)}" aria-expanded="${open}"><span class="ia-t">${kind ? ui.kindPill(kind) + " " : ""}${U.isAr() ? '<span class="ia-tt" dir="auto">' + U.t(u.title) + "</span>" : U.t(u.title)}</span><span class="ia-amt num">${U.m(i.total / 100)}</span>` +
-      `<span class="ia-m">${U.esc(U.dShort(u.date))}${u.jobId ? " · " + U.t(M.jobCode(u.jobId)) : ' · <span class="c-warn">' + U.L("no job", "بدون بند") + "</span>"}${i.lines.length ? " · " + U.L(i.lines.length + " line" + (i.lines.length > 1 ? "s" : ""), U.plAr(i.lines.length, "صنف واحد", "صنفان", "أصناف", "صنفاً")) : ""}</span><span class="ia-car">${open ? "▾" : "›"}</span></button>` +
+      `<span class="ia-m">${U.esc(U.dShort(u.date))}${u.jobId ? " · " + U.t(M.jobCode(u.jobId)) : ' · <span class="c-warn">' + U.L("no job", "بدون بند") + "</span>"}${i.lines.length ? " · " + U.L(i.lines.length + " line" + (i.lines.length > 1 ? "s" : ""), U.plAr(i.lines.length, "صنف واحد", "صنفان", "أصناف", "صنفاً")) : ""}</span>${ui.tags(u, { skip: u.title, cls: "one ia-tg" })}<span class="ia-car">${open ? "▾" : "›"}</span></button>` +
       X.chips(i) + (open ? '<div class="ia-body">' + X.linesTable(i) + `<button type="button" class="lnk" data-act="openUnit" data-key="${U.esc(u.key)}">${U.L("Open invoice (edit, pay, photo) ›", "فتح الفاتورة (تعديل، دفع، صورة) ›")}</button></div>` : "") + "</div>";
   };
 
@@ -10894,7 +11233,8 @@ window.SL = window.SL || {};
     return `<button type="button" class="${cls.join(" ")}" data-act="iaOpen" data-id="${U.esc(i.u.id)}"${ui.mo(i.u.key)} aria-label="${U.esc(label)}">${inner}</button>`;
   };
 
-  /** Row label: doc no (and the supplier when grouped by job), then total · job · proof, then the paid switch. */
+  /** Row label: doc no (and the supplier when grouped by job), then the total, large, · job · proof, then what it was for
+   *  (2 tags at most, one line), then the paid switch. */
   X.tlabel = (i, mode) => {
     const u = i.u, no = (u.doc.doc && u.doc.doc.no) || "";
     const sup = u.doc.supplier || U.L("Supplier", "المورد");
@@ -10902,7 +11242,7 @@ window.SL = window.SL || {};
     const nm = mode === "jobs" ? (U.isAr() ? "<bdi>" + U.t(sup) + "</bdi>" : U.t(sup)) + (num ? " " + num : "") : num || U.esc(U.dDM(u.date || ""));
     const sub = [mode === "jobs" ? "" : U.esc(M.jobCode(u.jobId) || U.L("no job", "بدون بند")), i.proof ? "" : '<span class="c-warn">' + U.L("no doc", "بلا مستند") + "</span>", i.quote ? '<span class="c-stop">' + U.L("quote", "عرض سعر") + "</span>" : ""].filter(Boolean).join(" · ");
     return `<div class="au-lab ia-lab"${ui.mo(u.key)}><button type="button" class="ia-open" data-act="iaOpen" data-id="${U.esc(u.id)}"><span class="au-nm">${nm}</span>` +
-      `<span class="au-sub"><b class="num">${U.m(i.total / 100)}</b>${sub ? " · " + sub : ""}</span></button>${X.payChip(i, true)}</div>`;
+      `<span class="ia-tot"><b class="num">${U.mw(i.total / 100)}</b>${sub ? '<span class="au-sub">' + sub + "</span>" : ""}</span>${ui.tags(u, { cls: "one ia-tg" })}</button>${X.payChip(i, true)}</div>`;
   };
 
   /** The chart: a header per supplier (or job), a row per invoice, then Bought / Paid per day. */
@@ -16224,20 +16564,21 @@ window.SL = window.SL || {};
     try { return typeof CanvasRenderingContext2D !== "undefined" && typeof TextEncoder !== "undefined" && !!document.createElement("canvas").getContext("2d"); } catch (e) { return false; }
   };
 
-  /** A drawn page → {w, h, bytes, filter}: lossless (Flate) where the browser can compress, else a sharp JPEG. */
+  /** A drawn page → {w, h, bytes, filter, pw, ph}: lossless (Flate) where the browser can compress, else a sharp JPEG.
+   *  pw × ph: the page in points (X.page notes it on the canvas: A4, or the size of X.withSize). */
   X.encode = async (canvas) => {
-    const w = canvas.width, h = canvas.height;
+    const w = canvas.width, h = canvas.height, pt = canvas._pt || [X.PW, X.PH], pw = pt[0], ph = pt[1];
     if (typeof CompressionStream === "function") {
       try {
         const px = canvas.getContext("2d").getImageData(0, 0, w, h).data, rgb = new Uint8Array(w * h * 3);
         for (let i = 0, j = 0; i < px.length; i += 4) { rgb[j++] = px[i]; rgb[j++] = px[i + 1]; rgb[j++] = px[i + 2]; }
         const z = new Blob([rgb]).stream().pipeThrough(new CompressionStream("deflate")); // zlib = PDF FlateDecode
-        return { w, h, bytes: new Uint8Array(await new Response(z).arrayBuffer()), filter: "FlateDecode" };
+        return { w, h, pw, ph, bytes: new Uint8Array(await new Response(z).arrayBuffer()), filter: "FlateDecode" };
       } catch (e) { /* fall back to JPEG */ }
     }
     const blob = await new Promise((res) => canvas.toBlob(res, "image/jpeg", 0.93));
     if (!blob) throw new Error("page image failed");
-    return { w, h, bytes: new Uint8Array(await blob.arrayBuffer()), filter: "DCTDecode" };
+    return { w, h, pw, ph, bytes: new Uint8Array(await blob.arrayBuffer()), filter: "DCTDecode" };
   };
 
   /** A PDF string of text: plain ASCII in (…), anything else UTF-16BE hex (Arabic titles). */
@@ -16252,7 +16593,7 @@ window.SL = window.SL || {};
   /** "D:20260928134502+03'00'" (local time with its offset, so every reader shows the same time). */
   const pdfDate = (d) => { const o = -d.getTimezoneOffset(), a = Math.abs(o); return "D:" + d.getFullYear() + [d.getMonth() + 1, d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds()].map(p2).join("") + (o >= 0 ? "+" : "-") + p2((a / 60) | 0) + "'" + p2(a % 60) + "'"; };
 
-  /** pages: [{w, h, bytes, filter}] → the PDF as a Blob. info: {title, author, subject}. */
+  /** pages: [{w, h, bytes, filter, pw, ph (points; default A4)}] → the PDF as a Blob. info: {title, author, subject}. */
   X.pdf = (pages, info) => {
     info = info || {};
     const enc = new TextEncoder(), parts = [], off = [];
@@ -16269,9 +16610,8 @@ window.SL = window.SL || {};
     obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
     obj(2, "<< /Type /Pages /Kids [" + kids + "] /Count " + n + " >>");
     obj(3, "<< /Title " + pdfStr(info.title) + " /Author " + pdfStr(info.author) + " /Subject " + pdfStr(info.subject) + " /Producer (Site Ledger) /CreationDate (" + pdfDate(new Date()) + ") >>");
-    const W = X.PW.toFixed(2), H = X.PH.toFixed(2);
     pages.forEach((p, i) => {
-      const pg = 4 + 3 * i, ct = pg + 1, im = pg + 2;
+      const pg = 4 + 3 * i, ct = pg + 1, im = pg + 2, W = (p.pw || X.PW).toFixed(2), H = (p.ph || X.PH).toFixed(2);
       obj(pg, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + H + "] /Resources << /XObject << /Im" + i + " " + im + " 0 R >> >> /Contents " + ct + " 0 R >>");
       const draw = enc.encode("q " + W + " 0 0 " + H + " 0 0 cm /Im" + i + " Do Q");
       obj(ct, "<< /Length " + draw.length + " >>", draw);
@@ -16309,10 +16649,18 @@ window.SL = window.SL || {};
     await Promise.race([Promise.all(want.map((f) => document.fonts.load(f, /Arabic/.test(f) ? "عربي" : "Aa1").catch(() => null))), new Promise((r) => setTimeout(r, 2500))]);
   };
 
-  /** A new blank A4 page on doc, drawn in points. */
+  /** Draw fn's pages at another size (sz: {PW, PH, MX, MT, MB} in points, e.g. X.A5): the kit's page globals are swapped
+   *  while fn runs (synchronously) and put back after; each canvas notes its size for X.encode / X.pdf. */
+  X.A5 = { PW: 419.53, PH: 595.28, MX: 22, MT: 24, MB: 40 };
+  X.withSize = (sz, fn) => {
+    const keep = { PW: X.PW, PH: X.PH, MX: X.MX, MT: X.MT, MB: X.MB, CW: X.CW };
+    Object.assign(X, sz); X.CW = X.PW - 2 * X.MX;
+    try { return fn(); } finally { Object.assign(X, keep); }
+  };
+  /** A new blank page on doc (A4, or the size of X.withSize), drawn in points. */
   X.page = (doc) => {
     const c = document.createElement("canvas");
-    c.width = Math.round(X.PW * X.S); c.height = Math.round(X.PH * X.S);
+    c.width = Math.round(X.PW * X.S); c.height = Math.round(X.PH * X.S); c._pt = [X.PW, X.PH];
     const ctx = c.getContext("2d");
     ctx.fillStyle = "#FFFFFF"; ctx.fillRect(0, 0, c.width, c.height); // every pixel, before scaling (no grey edge in a JPEG)
     ctx.setTransform(X.S, 0, 0, X.S, 0, 0);
@@ -16416,8 +16764,9 @@ window.SL = window.SL || {};
     pg.y = y + 6;
     return pg;
   };
-  /** The next page of a section that ran long. */
+  /** The next page of a section that ran long (a document with its own look gives doc.more(doc, title)). */
   X.more = (doc, title) => {
+    if (doc.more) return doc.more(doc, title);
     const pg = X.page(doc);
     X.band(pg);
     pg.title = title;
@@ -16480,41 +16829,71 @@ window.SL = window.SL || {};
   };
 
   /** A table. cols: [{label, w (pt; one col may be "*": the rest), num, align}]. rows: [{cells:[text], kind "row"|"group"|"total",
-   *  colors:[…], weights:[…], nums:[…] (per cell: a figure or words), note (a muted second line under cell 0)}]. Breaks onto continued pages, repeating the header.
-   *  o: {rh (row height), size}. Returns the page it ended on. */
+   *  colors:[…], weights:[…], nums:[…] (per cell: a figure or words), note (a second line under cell noteAt (default 0,
+   *  spanning the row), muted: noteColor, noteWeight)}]. Breaks onto continued pages, repeating the header.
+   *  r.keep = n: start a new page unless n more rows fit under it too (a group's name never alone at the foot of a page).
+   *  A group that carries on to a new page has its row again under the header, "(continued)".
+   *  On an Arabic page the figures of a num column are right-aligned (ones under ones) at the column's far side plus its
+   *  widest figure, so the column still hugs that side. o: {rh (row height), size, big print: hh (header height), hsize
+   *  (header text size), hcolor, hfill, pad, mid (text centred in its row, for tall rows; a row with a note centres
+   *  both lines), noteSize, noteH (the height a note adds)}. Returns the page it ended on. */
   X.table = (pg, cols, rows, o) => {
     o = o || {};
     const fixed = U.sum(cols.filter((c) => c.w !== "*"), (c) => c.w), star = Math.max(40, X.CW - fixed);
     const ws = cols.map((c) => (c.w === "*" ? star : c.w)), xs = [];
     ws.reduce((x, w, i) => { xs[i] = x; return x + w; }, X.MX);
-    const size = o.size || 7.8, pad = 4, rh0 = o.rh || 15;
+    const size = o.size || 7.8, pad = o.pad || 4, rh0 = o.rh || 15, hh = o.hh || 15, hsize = o.hsize || 6.6;
+    /** Baseline in a row from its top: the kit's small rows sit at fixed offsets; o.mid centres the text. */
+    const base = (h, sz, dflt) => (o.mid ? h / 2 + sz * 0.36 : dflt);
+    const isNum = (r, i) => (r.nums && r.nums[i] !== undefined ? r.nums[i] : !!cols[i].num); // a row can mark a cell as words (e.g. "36/يوم")
+    const fsize = (r) => (r.kind === "total" ? size + 0.6 : size);
+    const fweight = (r, i) => (r.kind === "total" || r.kind === "group" ? 700 : (r.weights && r.weights[i]) || (i === 0 ? 600 : 400));
+    // Arabic page: each num column's widest figure (its digits then line up by their right edge)
+    const numW = cols.map((c, i) => {
+      if (!pg.rtl || !c.num) return 0;
+      let m = 0;
+      for (const r of rows) { const v = r.cells[i]; if (v != null && v !== "" && isNum(r, i)) m = Math.max(m, X.width(pg, v, { size: fsize(r), weight: fweight(r, i), num: true })); }
+      return Math.min(m, ws[i] - 2 * pad);
+    });
     const head = (p) => {
       const y = p.y;
-      X.rect(p, X.MX, y, X.CW, 15, C.sunk);
-      cols.forEach((c, i) => X.text(p, c.label, c.num ? xs[i] + ws[i] - pad : xs[i] + pad, y + 10.2, { size: 6.6, weight: 700, color: C.ink2, align: c.num ? "end" : "start", maxW: ws[i] - 2 * pad }));
-      p.y = y + 15;
+      X.rect(p, X.MX, y, X.CW, hh, o.hfill || C.sunk);
+      cols.forEach((c, i) => X.text(p, c.label, c.num ? xs[i] + ws[i] - pad : xs[i] + pad, y + base(hh, hsize, 10.2), { size: hsize, weight: 700, color: o.hcolor || C.ink2, align: c.num ? "end" : "start", maxW: ws[i] - 2 * pad }));
+      p.y = y + hh;
     };
-    if (X.room(pg) < 15 + rh0 * 2) pg = X.more(pg.doc, pg.title);
-    head(pg);
-    for (const r of rows) {
-      const rh = r.note ? rh0 + 8 : r.kind === "total" ? rh0 + 3 : rh0;
-      if (X.room(pg) < rh) { pg = X.more(pg.doc, pg.title); head(pg); }
-      const y = pg.y;
-      if (r.kind === "group") X.rect(pg, X.MX, y, X.CW, rh, C.group);
-      if (r.kind === "total") { X.rect(pg, X.MX, y, X.CW, rh, C.floatBg); X.hline(pg, X.MX, y, X.CW, C.ink, 0.9); }
-      if (r.fill) X.rect(pg, X.MX, y, X.CW, rh, r.fill);
-      const by = y + (r.kind === "total" ? 11.5 : 10.4);
+    const nsz = o.noteSize || 6.6, nh = o.noteH || 8;
+    const rowH = (r) => (r.note ? rh0 + nh : r.kind === "total" ? rh0 + 3 : rh0);
+    const draw = (r) => {
+      const rh = rowH(r), y = pg.y;
+      // r.fill: the row's own colour (a total keeps its rule on top: r.line, else ink)
+      if (r.kind === "total") { X.rect(pg, X.MX, y, X.CW, rh, r.fill || C.floatBg); X.hline(pg, X.MX, y, X.CW, r.line || C.ink, 0.9); }
+      else if (r.fill || r.kind === "group") X.rect(pg, X.MX, y, X.CW, rh, r.fill || C.group);
+      // a centred row with a note: its two lines centred together (the other cells on the first line)
+      const two = r.note && o.mid, by = two ? y + (rh - (size * 0.72 + 6 + nsz * 0.72)) / 2 + size * 0.72 : y + (r.kind === "total" ? base(rh, size + 0.6, 11.5) : base(rh, size, 10.4));
       cols.forEach((c, i) => {
         const v = r.cells[i];
         if (v == null || v === "") return;
-        const bold = r.kind === "total" || r.kind === "group" ? 700 : (r.weights && r.weights[i]) || (i === 0 ? 600 : 400);
         const span = r.kind === "group" && i === 0 && r.span ? U.sum(ws.slice(0, r.span)) : ws[i];
-        const num = r.nums && r.nums[i] !== undefined ? r.nums[i] : !!c.num; // a row can mark a cell as words (e.g. "36/يوم")
-        X.text(pg, v, c.num ? xs[i] + ws[i] - pad : xs[i] + pad, by, { size: r.kind === "total" ? size + 0.6 : size, weight: bold, color: (r.colors && r.colors[i]) || C.ink, num, align: c.num ? "end" : "start", maxW: span - 2 * pad });
+        const num = isNum(r, i), o2 = { size: fsize(r), weight: fweight(r, i), color: (r.colors && r.colors[i]) || C.ink, num, align: c.num ? "end" : "start", maxW: span - 2 * pad };
+        // right-aligned figure on an Arabic page: "start" there anchors the right edge
+        if (c.num && num && numW[i]) X.text(pg, v, xs[i] + ws[i] - pad - numW[i], by, Object.assign(o2, { align: "start", maxW: numW[i] + 0.5 }));
+        else X.text(pg, v, c.num ? xs[i] + ws[i] - pad : xs[i] + pad, by, o2);
       });
-      if (r.note) X.text(pg, r.note, xs[0] + pad, y + 18.5, { size: 6.6, color: r.noteColor || C.ink3, maxW: X.CW - 2 * pad });
+      if (r.note) { const ni = r.noteAt || 0; X.text(pg, r.note, xs[ni] + pad, two ? by + 6 + nsz * 0.72 : y + 18.5, { size: nsz, weight: r.noteWeight || 400, color: r.noteColor || C.ink3, maxW: (r.noteAt != null ? ws[ni] : X.CW) - 2 * pad }); }
       if (r.kind !== "total") X.hline(pg, X.MX, y + rh, X.CW, C.line, 0.4);
       pg.y = y + rh;
+    };
+    if (X.room(pg) < hh + rh0 * 2) pg = X.more(pg.doc, pg.title);
+    head(pg);
+    let group = null;
+    for (const r of rows) {
+      if (X.room(pg) < rowH(r) + (r.keep || 0) * rh0) {
+        pg = X.more(pg.doc, pg.title); head(pg);
+        // the group this row belongs to, again, so a continued page still says what it lists
+        if (group && r.kind !== "group") draw(Object.assign({}, group, { cells: [group.cells[0] + U.L(" (continued)", " (تابع)")].concat(group.cells.slice(1)) }));
+      }
+      if (r.kind === "group") group = r;
+      draw(r);
     }
     pg.y += 4;
     return pg;
@@ -16532,7 +16911,8 @@ window.SL = window.SL || {};
 /* 73-pdf-pages: the investor PDF's pages, from the same model as the screens (figures as of the as-of date):
  *   1 Balances (work done, paid, owed; by party; cash: to Sayed vs direct; by job) · 2 Invoices (by supplier)
  *   3 Crews (per crew, and a day chart like the Crews screen) · 4 Equipment rental (lines, days on site, deposits).
- * A long table carries on to the next page. Action: investorPdf. SL.pdf.build(pid, D) → {blob, pages} (Claude Code). */
+ * A long table carries on to the next page. Action: investorPdf. SL.pdf.build(pid, D) → {blob, pages} (Claude Code).
+ * The "⤓ PDF for Sayed" button (X.sayedBtn) is here; its pages and action (sayedPdf) are in 74-pdf-sayed.js. */
 
 /* ---- chunk 1: shared names and page 1, Balances ---- */
 (function (SL) {
@@ -16962,7 +17342,16 @@ window.SL = window.SL || {};
     if (X.snapPdfs().length) return X.snapDl ? `<button type="button" class="${cls || "chip"} pdf-btn" data-act="snapPdf"${X.busy ? " disabled" : ""}>${U.L("⤓ Investor PDF", "⤓ PDF للمستثمرين")}</button>` : "";
     if (can === null) can = X.canDraw();
     if (!can || !SL.S.downloads || (SL._admin && SL._admin.dlGone)) return "";
-    return `<button type="button" class="${cls || "chip"} pdf-btn" data-act="investorPdf"${X.busy ? " disabled" : ""} title="${U.L("A PDF for investors: balances, invoices, crews and equipment", "ملف PDF للمستثمرين: الأرصدة والفواتير والعمالة والمعدات")}">${X.busy ? U.L("Making PDF…", "جارٍ إنشاء PDF…") : U.L("⤓ Investor PDF", "⤓ PDF للمستثمرين")}</button>`;
+    return `<button type="button" class="${cls || "chip"} pdf-btn" data-act="investorPdf"${X.busy ? " disabled" : ""} title="${U.L("A PDF for investors: balances, invoices, crews and equipment", "ملف PDF للمستثمرين: الأرصدة والفواتير والعمالة والمعدات")}">${X.busy && X.busyKind !== "sayed" ? U.L("Making PDF…", "جارٍ إنشاء PDF…") : U.L("⤓ Investor PDF", "⤓ PDF للمستثمرين")}</button>`;
+  };
+  /** "⤓ PDF for Sayed" (Balances › Sayed's money): where the Investor PDF button shows (this view can draw pages and
+   *  save files), not in a frozen snapshot (it ships only the investor PDFs). wid: the float wallet. */
+  X.sayedBtn = (wid, cls) => {
+    if (X.snapPdfs().length) return "";
+    if (can === null) can = X.canDraw();
+    if (!can || !SL.S.downloads || (SL._admin && SL._admin.dlGone)) return "";
+    const who = M.walletName(wid);
+    return `<button type="button" class="${cls || "chip"} pdf-btn bl-sbtn" data-act="sayedPdf" data-w="${U.esc(wid)}"${X.busy ? " disabled" : ""} title="${U.esc(U.L("A simple PDF for " + who + ": what he got, what he paid, what he should have", "ملف PDF بسيط لـ " + who + ": ما استلمه وما صرفه وما يجب أن يكون معه"))}"><span>${X.busy && X.busyKind === "sayed" ? U.L("Making PDF…", "جارٍ إنشاء PDF…") : U.L("⤓ PDF for " + U.esc(who), "⤓ PDF لـ" + U.esc(who))}</span></button>`;
   };
 
   A.investorPdf = async () => {
@@ -17006,6 +17395,445 @@ window.SL = window.SL || {};
 
   /** For Claude Code: SL.pdf.build(pid, D) → {blob, pages}. */
   SL.pdf = { build: (pid, D) => X.build(pid || ui.pid(), D || ui.D()), fileName: X.fileName };
+})(window.SL);
+
+/* ---- 74-pdf-sayed.js ---- */
+/* ---- 74-pdf-sayed.js ---- */
+/* 74-pdf-sayed: "⤓ PDF for Sayed" (Balances › Sayed's money). A plain, big-print PDF for the float's holder, always in
+ * Arabic (right to left) whatever the viewer's language, on A5 pages (sent by phone: an A5 page shows its print about
+ * 1.4× the size of an A4 one). The first pages tell the story in five coloured blocks (got from Ryan, paid out, should
+ * have, counted, the difference), the next pages list every line, grouped as on Balances. Figures as of the as-of date,
+ * from M.floatReceipt (the "Sayed's money" box) and M.floatLedger (the lines of Pay › float and the Statement), to the
+ * halala; right-aligned (ones under ones), with .00 on every figure of a block or a table when one has halalas.
+ * Arabic words only: no free-text notes (Ryan's are internal and in English); a name or tag with no Arabic gives way to
+ * its Arabic. Drawn with the 72-pdf kit. Action: sayedPdf. SL.pdf.sayed(wid, D) → {blob, pages, name}. */
+
+/* ---- chunk 1: the figures (the model only; no canvas) ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model;
+  const X = (SL._pdf = SL._pdf || {});
+
+  /** Run fn with the app in Arabic (names and dates follow SL.lang; the model's caches are keyed on SL.S.ver), then put
+   *  the viewer's language back. fn is synchronous, so nothing renders in Arabic meanwhile. */
+  X.asAr = (fn) => {
+    const was = SL.lang;
+    if (was === "ar") return fn();
+    SL.lang = "ar"; SL.S.ver++;
+    try { return fn(); } finally { SL.lang = was; SL.S.ver++; }
+  };
+  const grp = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  /** Halalas → "12,864.94" / "20,000" (halalas only when there are some; dec: always, "20,000.00"); no sign: say a
+   *  negative figure in words. */
+  X.sn = (h, dec) => { const a = Math.abs(Math.round(h)), c = a % 100; return grp((a - c) / 100) + (c || dec ? "." + String(c).padStart(2, "0") : ""); };
+  /** Some figure in hs has halalas (then all of them show .00, so their digits line up). */
+  X.sDec = (hs) => hs.some((h) => h != null && Math.round(h) % 100 !== 0);
+  /** A day as numbers, "26/9": short, and read the same in both languages. */
+  X.sDay = (iso) => { if (!iso) return ""; const d = U.parse(iso); return d.getDate() + "/" + (d.getMonth() + 1); };
+
+  /** What he paid, in the groups of Balances' "You've paid": crews · invoices and materials (purchases + services) ·
+   *  equipment (rentals and deposits) · other. */
+  X.SG = [
+    { k: "T", cats: ["T"], label: () => U.L("Crews", "العمال") },
+    { k: "P", cats: ["P", "S"], label: () => U.L("Invoices and materials", "الفواتير والمواد") },
+    { k: "E", cats: ["E"], label: () => U.L("Equipment", "المعدات") },
+    { k: "O", cats: ["O"], label: () => U.L("Other", "أخرى") },
+  ];
+  const GROUP = {}; X.SG.forEach((g) => g.cats.forEach((c) => (GROUP[c] = g.k)));
+  /** A shop's name without its legal form ("شركة فنار نجد للتجارة" → "فنار نجد للتجارة"). */
+  const plain = (s) => String(s || "").replace(/^\s*(?:شركة|شركه|مؤسسة|مؤسسه)\s+/, "").trim();
+  const latin = (s) => /[A-Za-z]/.test(String(s || ""));
+  /** Tags joined: "تنر، جبس" (the Arabic comma between Arabic words), " · " when one is in Latin letters. */
+  X.sJoin = (ts) => ts.join(ts.some(latin) ? " · " : U.L(", ", "، "));
+  /** The money a wallet's counts booked themselves (count.ref: a cash adjustment or a cost), as "coll:id". */
+  const fixes = (wid) => { const s = new Set(), w = M.wallet(wid); for (const c of Object.values((w && w.counts) || {})) if (c && c.ref && c.ref.id) s.add(c.ref.coll + ":" + c.ref.id); return s; };
+  const FIX_TXT = /^\s*(?:unexplained float difference|cash found at count)/i; // the texts the count screen writes
+  const isFix = (fx, coll, id, text) => fx.has(coll + ":" + id) || FIX_TXT.test(String(text || ""));
+  X.sFix = () => U.L("Count difference", "فرق جرد");
+  /** An adjustment's note as a word or two for the PDF, or "": Arabic only (Ryan's notes are internal, in English): its
+   *  Arabic "(…)" part, else its text before the first ":", at most 3 words / about 20 letters (M.shortLabel). */
+  X.sNote = (note) => {
+    const s = String(note || "").trim();
+    if (!U.isAr() || !U.hasAr(s)) return "";
+    const p = (/\(([^()]*)\)/.exec(s) || [])[1], t = M.shortLabel(p && U.hasAr(p) && !latin(p) ? p : s.split(/[:：]/)[0]);
+    return U.hasAr(t) && !latin(t) ? t : "";
+  };
+  /** A unit's kind in words: the name of last resort, and a rental's tag when nothing says what it was for. */
+  const kindName = (u) => (u.kind === "rental" ? U.L("Equipment rental", "إيجار معدات") : u.kind === "service" ? M.svcName(M.SERVICE_SUBS[u.doc.sub]) : u.kind === "purchase" ? U.L("Purchase", "مشتريات") : U.L("Other", "أخرى"));
+  /** Who a payment went to, and what for: {name, tag}. A crew: its name and week ("أسبوع
+   *  26/9"); a shop: its name (the catalog's Arabic in Arabic) and what it was for (M.forTags: تنر، جبس; a rental with
+   *  none: إيجار معدات); in Arabic a name with no Arabic gives way to its tags, else its kind; a deposit: the rental
+   *  shop; a count's own correction: فرق جرد. fx: the wallet's count corrections. */
+  X.sWho = (u, fx) => {
+    if (!u) return { name: U.L("Payment", "دفعة"), tag: "" };
+    if (u.kind === "crew") return { name: u.title, tag: U.L("week of ", "أسبوع ") + X.sDay(u.weekStart) };
+    if (u.deposit) { const s = plain(u.shop); return { name: s && (!U.isAr() || U.hasAr(s)) ? s : U.L("rental shop", "محل التأجير"), tag: U.L("deposit", "تأمين") }; }
+    if (isFix(fx || new Set(), "costs", u.id, u.doc.desc)) return { name: X.sFix(), tag: "" };
+    const name = plain(X.supName ? X.supName(u) : u.payee), tag = X.sJoin(M.forTags(u).slice(0, 2));
+    if (U.isAr() && !U.hasAr(name)) return { name: tag || kindName(u), tag: "" };
+    return { name, tag: tag || (u.kind === "rental" ? kindName(u) : "") };
+  };
+
+  /** A float's money as of D for its holder: the receipt (M.floatReceipt) and its lines (M.floatLedger), oldest first.
+   *  → {wid, D, who, owner, r, adj (r.adj, each with its tag), got: [{date, h, name, tag}] (from the owner, other money
+   *  in, money back), spent: {T, P, E, O: [rows]}, back: [rows] (given back to the owner, other money out), inTotal,
+   *  outTotal}. h > 0. The lines add up to the receipt to the halala, and the last running balance is what he should
+   *  have (else M.identityFailures). */
+  X.sayedData = (wid, D) => {
+    const r = M.floatReceipt(wid, D), led = M.floatLedger(wid, D), owner = M.walletName(M.ownerWalletId()), fx = fixes(wid);
+    const tagOf = new Map(r.adj.map((a) => [a.id, isFix(fx, "cash", a.id, a.note) ? X.sFix() : X.sNote(a.note)]));
+    const got = [], back = [], spent = {};
+    X.SG.forEach((g) => (spent[g.k] = []));
+    for (const f of led) {
+      if (!f.h) continue;
+      const row = { date: f.date, h: Math.abs(f.h), name: "", tag: "" };
+      if (f.cashId) {
+        if (f.ctype === "topup") row.name = owner;
+        else if (f.ctype === "return") row.name = U.L("Gave back to ", "رجّعت ل") + owner;
+        else { row.name = f.h > 0 ? U.L("Other money in", "فلوس ثانية دخلت") : U.L("Other money out", "فلوس طلعت من العهدة"); row.tag = tagOf.get(f.cashId) || ""; }
+        (f.h > 0 ? got : back).push(row);
+      } else {
+        const u = M.unit(f.unitKey), who = X.sWho(u, fx);
+        row.name = who.name;
+        if (f.refund) { row.tag = u && u.deposit ? U.L("deposit back", "رجّع التأمين") : U.L("money back", "رجّع مبلغ"); got.push(row); }
+        else { row.tag = who.tag; spent[GROUP[u ? u.cat : "O"] || "O"].push(row); }
+      }
+    }
+    const sum = (a) => U.sum(a, (x) => x.h);
+    const d = { wid, D, who: M.walletName(wid), owner, r, adj: r.adj.map((a) => Object.assign({}, a, { tag: tagOf.get(a.id) || "" })), got, spent, back,
+      inTotal: r.topups + r.adjIn + r.refunds, outTotal: r.paidOut + r.returns + r.adjOut };
+    const bal = led.length ? led[led.length - 1].bal : 0;
+    if (sum(got) !== d.inTotal || sum(back) !== r.returns + r.adjOut || d.inTotal - d.outTotal !== r.holds || bal !== r.holds ||
+      X.SG.some((g) => sum(spent[g.k]) !== U.sum(g.cats, (c) => r.paidCat[c]))) M.idFail("sayedPdf:" + wid, d);
+    return d;
+  };
+  /** Any line to list (else the PDF is the story alone). */
+  X.sHasLines = (d) => !!(d.got.length || d.back.length || X.SG.some((g) => d.spent[g.k].length));
+})(window.SL);
+
+/* ---- chunk 2: the story in five coloured blocks (X.sBlocks: what they say; X.sPage1: drawn) ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util;
+  const X = SL._pdf, C = X.C;
+  /** Soft fills with dark text of the same hue (prints well; no gradients). */
+  const K = (X.SK = {
+    green: { bg: "#E1F2E5", ink: "#1B6637", edge: "#A3D4B1" },
+    red: { bg: "#FCE3E0", ink: "#A0261E", edge: "#EFAEA6" },
+    yellow: { bg: "#FFF2BF", ink: "#665000", edge: "#EBCD70" },
+    blue: { bg: "#E1ECF8", ink: "#1D4C7E", edge: "#ABC6E6" },
+    orange: { bg: "#FDE6D2", ink: "#94400E", edge: "#F0BC8E" },
+  });
+  const END = () => X.PW - X.MX; // the far end of a line (the left edge on an Arabic page)
+  X.sEnd = END;
+  // block padding · space under the last line · the label, the big figure, a line (pt) · gap between a label and its figure
+  const PAD = 16, GAP = 4, LBL = 23, BIG = 38, LN = 21, SEP = 16;
+  const SAR = () => U.L("SAR", "ريال");
+  /** s with its right edge at physical x R: a figure's digits line up by their right edge on either page. */
+  X.sRight = (pg, s, R, y, o) => X.text(pg, s, pg.rtl ? X.PW - R : R, y, Object.assign({}, o, { align: pg.rtl ? "start" : "end" }));
+  /** "ريال" and the figure before it, ending at logical x (Arabic reads the figure first). Returns the width. */
+  X.sMoney = (pg, h, x, y, size, color) => {
+    const us = Math.max(16, Math.round(size * 0.46));
+    const wu = X.text(pg, SAR(), x, y, { size: us, weight: 600, color, align: "end" }), gap = us * 0.4;
+    return wu + gap + X.text(pg, X.sn(h), x - wu - gap, y, { size, weight: 700, color, num: true, align: "end" });
+  };
+
+  const lsz = (l) => ({ size: l.bold ? LN + 1 : LN, weight: l.bold ? 700 : 400 });
+  /** How block b lays out on pg. Figures are right-aligned: the lines' at physical x Rl, the big one at Rb. On an
+   *  Arabic page (figures at the far, left end) all of them share one right edge when every line's label still fits
+   *  beside it, else the lines' figures line up among themselves, nearer the end, and the labels keep their room.
+   *  The head: one row (the label, then the big figure at the far end) when both fit, else the label above it. */
+  const lay = (pg, b) => {
+    const us = Math.max(16, Math.round(BIG * 0.46)), uw = b.txt != null ? 0 : X.width(pg, SAR(), { size: us, weight: 600 }) + us * 0.4;
+    const dec = X.sDec([b.h].concat(b.lines.map((l) => l.h)));
+    const bw = b.txt != null ? X.width(pg, b.txt, { size: 32, weight: 700 }) : X.width(pg, X.sn(b.h, dec), { size: BIG, weight: 700, num: true });
+    const lw = Math.max(0, ...b.lines.map((l) => (l.h != null ? X.width(pg, X.sn(l.h, dec), { size: LN + 1, weight: 700, num: true }) : 0)));
+    let Rb, Rl;
+    if (pg.rtl) {
+      const x0 = X.MX + PAD + uw, all = x0 + Math.max(bw, lw);
+      const fits = b.lines.every((l) => l.h == null || X.width(pg, l.label, lsz(l)) <= X.PW - X.MX - PAD - (l.indent ? 16 : 0) - all - SEP);
+      Rb = fits ? all : x0 + bw; Rl = fits ? all : x0 + lw;
+    } else Rb = Rl = X.PW - X.MX - PAD - uw;
+    const money = pg.rtl ? Rb - X.MX - PAD : uw + bw, one = X.width(pg, b.label, { size: LBL, weight: 700 }) + SEP + money <= X.CW - 2 * PAD;
+    return { us, dec, money, one, Rb, Rl, top: one ? 44 : 80 };
+  };
+  const blockH = (L, n, lh) => L.top + 14 + (n ? n * lh + GAP : 0);
+  /** A block's height on pg at line pitch lh. */
+  X.sBlockH = (pg, b, lh) => blockH(lay(pg, b), b.lines.length, lh);
+  /** Long words-only lines of b wrapped to the block's width (each piece a line of its own). */
+  X.sWrap = (pg, b) => {
+    const out = [];
+    for (const l of b.lines) {
+      const w = X.CW - 2 * PAD - (l.indent ? 16 : 0), o = lsz(l);
+      if (l.h != null || X.width(pg, l.label, o) <= w) { out.push(l); continue; }
+      const parts = [];
+      let cur = "";
+      for (const wd of String(l.label).split(/\s+/)) { const t = cur ? cur + " " + wd : wd; if (cur && X.width(pg, t, o) > w) { parts.push(cur); cur = wd; } else cur = t; }
+      if (cur) parts.push(cur);
+      parts.forEach((p, i) => out.push(Object.assign({}, l, { label: p, rule: !!l.rule && i === 0 })));
+    }
+    b.lines = out;
+    return b;
+  };
+  /** A coloured block at y: its label and big figure (b.h halalas, or b.txt words), then b.lines [{label, h (a figure,
+   *  right-aligned under the big one), bold, indent, rule (a line above), opt (dropped when that keeps the story on one
+   *  page)}] at pitch lh. Returns its height. */
+  X.sBlock = (pg, y, b, lh) => {
+    const k = b.k, L = lay(pg, b), hgt = blockH(L, b.lines.length, lh), by = y + L.top;
+    X.rrect(pg, X.MX, y, X.CW, hgt, 14, k.bg, k.edge);
+    if (b.txt != null) X.text(pg, b.txt, END() - PAD, by, { size: 32, weight: 700, color: k.ink, align: "end" });
+    else {
+      X.text(pg, SAR(), END() - PAD, by, { size: L.us, weight: 600, color: k.ink, align: "end" });
+      X.sRight(pg, X.sn(b.h, L.dec), L.Rb, by, { size: BIG, weight: 700, color: k.ink, num: true });
+    }
+    X.text(pg, b.label, X.MX + PAD, L.one ? by - 3 : y + 35, { size: LBL, weight: 700, color: k.ink, maxW: X.CW - 2 * PAD - (L.one ? L.money + SEP : 0) });
+    let ly = by + lh + 2;
+    for (const l of b.lines) {
+      if (l.rule) X.hline(pg, X.MX + PAD, ly - (lh + 11) / 2, X.CW - 2 * PAD, k.edge, 1); // midway between the lines' ink
+      const ind = l.indent ? 16 : 0;
+      let room = X.CW - 2 * PAD - ind;
+      if (l.h != null) {
+        const wv = X.sRight(pg, X.sn(l.h, L.dec), L.Rl, ly, { size: LN + 1, weight: 700, color: k.ink, num: true });
+        // the label stops SEP short of its figure (an ellipsis never touches the number)
+        room = pg.rtl ? X.PW - X.MX - PAD - ind - L.Rl - SEP : L.Rl - wv - SEP - X.MX - PAD - ind;
+      }
+      X.text(pg, l.label, X.MX + PAD + ind, ly, Object.assign(lsz(l), { color: k.ink, maxW: Math.max(24, room) }));
+      ly += lh;
+    }
+    return hgt;
+  };
+
+  /** The yellow block: should have = got − paid, the sum as two lines under it. Paid out more than he got: said so
+   *  (never "from your own pocket": the book may be missing money in). */
+  X.sShould = (d) => {
+    const r = d.r, more = r.adjIn || r.refunds || r.returns || r.adjOut;
+    const sum = more ? [{ label: U.L("All in", "اللي دخل"), h: d.inTotal }, { label: U.L("minus all out", "ناقص اللي طلع"), h: d.outTotal }]
+      : [{ label: U.L("You got", "استلمت"), h: r.topups }, { label: U.L("minus you paid", "ناقص صرفت"), h: r.paidOut }];
+    return r.holds >= 0 ? { k: K.yellow, label: U.L("You should have", "المفروض يكون معك"), h: r.holds, lines: sum }
+      : { k: K.yellow, label: U.L("You paid more than you got", "صرفت أكثر من اللي استلمته"), h: -r.holds, lines: sum };
+  };
+
+  /** What the blocks say for d (X.sayedData), no drawing: green got · red paid out (groups with money in them) · yellow
+   *  should have (the sum under it) · blue counted · orange the difference (the last two once he has counted). The
+   *  difference is the one saved with the count (as on the Float page), against the book then, said in words either
+   *  sign; then why (money came in that isn't written down, or spending isn't / money is missing); then how the book
+   *  changed since the count (dated after it, or written after it for its day or earlier), in and out: the book then
+   *  + in − out = what he should have now. */
+  X.sBlocks = (d) => {
+    const r = d.r, c = r.count, bl = [];
+    const gl = [];
+    for (const a of d.adj) if (a.h > 0) gl.push({ label: U.L("Other money in", "فلوس ثانية دخلت") + (a.tag ? " · " + a.tag : ""), h: a.h, indent: true });
+    if (r.refunds) gl.push({ label: U.L("Money back (refunds, deposits)", "فلوس رجعت لك (تأمين أو مرتجع)"), h: r.refunds, indent: true });
+    if (gl.length) gl.push({ label: U.L("All the money you got", "كل اللي دخل معك"), h: d.inTotal, bold: true, rule: true, opt: true });
+    bl.push({ k: K.green, label: U.L("You got from ", "استلمت من ") + d.owner, h: r.topups, lines: gl });
+    const rl = X.SG.map((g) => ({ label: g.label(), h: U.sum(g.cats, (k) => r.paidCat[k]), indent: true })).filter((l) => l.h);
+    if (r.returns) rl.push({ label: U.L("Gave back to ", "رجّعت ل") + d.owner, h: r.returns, rule: true });
+    if (r.adjOut) rl.push({ label: U.L("Other money out", "فلوس طلعت من العهدة"), h: r.adjOut, rule: !r.returns });
+    if (r.returns || r.adjOut) rl.push({ label: U.L("All the money that went out", "كل اللي طلع منك"), h: d.outTotal, bold: true, rule: true, opt: true });
+    bl.push({ k: K.red, label: U.L("You paid", "صرفت"), h: r.paidOut, lines: rl });
+    bl.push(X.sShould(d));
+    if (!c) return bl;
+    bl.push({ k: K.blue, label: U.L("You counted", "عدّيت"), h: c.counted, lines: [{ label: U.L("On ", "يوم ") + U.dShort(c.date) }] });
+    // since the count the book moved (dated after it, or written after it for its day or earlier): in / out, so the
+    // book then + in − out = what he should have now
+    const inn = c.since.in + Math.max(0, c.late), out = c.since.out + Math.max(0, -c.late), after = [];
+    if (inn || out) after.push({ label: U.L("Since the count the book changed:", "بعد العدّ تغيّر الحساب:"), rule: true });
+    if (inn) after.push({ label: U.L("came in", "دخل"), h: inn, indent: true });
+    if (out) after.push({ label: U.L("went out", "طلع"), h: out, indent: true });
+    const lbl = U.L("The difference", "الفرق");
+    if (!c.diff) return bl.concat([{ k: K.orange, label: lbl, txt: U.L("Matches ✓", "مضبوط ✓"), lines: [{ label: U.L("What you counted matched the book", "اللي عدّيته كان نفس الحساب") }].concat(after) }]);
+    const ol = [{ label: U.L("At the count the book said:", "وقت العدّ الحساب كان:") },
+      c.book >= 0 ? { label: U.L("you should have", "المفروض معك"), h: c.book, indent: true } : { label: U.L("you paid more by", "صرفت زيادة"), h: -c.book, indent: true },
+      { label: U.L("and you counted", "وانت عدّيت"), h: c.counted, indent: true },
+      c.diff > 0 ? { label: U.L("So money came in that isn't written down.", "يعني فيه فلوس دخلت معك وما انكتبت."), rule: true }
+        : { label: U.L("So spending isn't written down, or money is missing.", "يعني مصاريف ما انكتبت، أو فلوس ناقصة."), rule: true },
+      { label: c.diff > 0 ? U.L("Tell us where it came from.", "قول لنا من وين.") : U.L("Tell us where it went.", "قول لنا وين راحت.") }];
+    return bl.concat([{ k: K.orange, label: lbl, h: Math.abs(c.diff), lines: ol.concat(after) }]);
+  };
+
+  /** The story pages for d: title and date, then the blocks. The roomiest spacing that fits one page; short of room,
+   *  the in / out totals go if that makes it fit (the yellow block says them); else every line stays, at the closest
+   *  spacing, and the blocks that don't fit carry on to the next page (got, paid, should have first; then the count). */
+  X.sPage1 = (doc, d) => {
+    const bl = X.sBlocks(d);
+    let pg = X.page(doc);
+    pg.title = U.L("Float account — ", "حساب العهدة — ") + d.who;
+    X.text(pg, pg.title, X.MX, 50, { size: 26, weight: 700, maxW: X.CW });
+    X.text(pg, U.L("Up to ", "لغاية يوم ") + U.dLong(d.D), X.MX, 77, { size: 17, color: C.ink2, maxW: X.CW });
+    bl.forEach((b) => X.sWrap(pg, b));
+    const top = 92, room = X.PH - X.MB - top, tiers = [[32, 14], [30, 12], [28, 10]];
+    const need = (lh, gap, short) => U.sum(bl, (b) => X.sBlockH(pg, short ? Object.assign({}, b, { lines: b.lines.filter((l) => !l.opt) }) : b, lh)) + gap * (bl.length - 1);
+    let fit = tiers.find(([lh, gap]) => need(lh, gap) <= room);
+    if (!fit) { fit = tiers.find(([lh, gap]) => need(lh, gap, true) <= room); if (fit) bl.forEach((b) => (b.lines = b.lines.filter((l) => !l.opt))); }
+    fit = fit || tiers[tiers.length - 1]; // more than a page anyway: every line, packed close, the rest on the next page
+    let y = top;
+    for (const b of bl) {
+      if (y + X.sBlockH(pg, b, fit[0]) > X.PH - X.MB) { pg = X.more(doc, pg.title); y = pg.y + 6; }
+      y += X.sBlock(pg, y, b, fit[0]) + fit[1];
+    }
+    pg.y = y;
+    if (X.room(pg) >= 30 && X.sHasLines(d)) X.text(pg, U.L("Every line is on the next pages.", "كل التفاصيل في الصفحات اللي بعدها."), X.MX, y + 16, { size: 17, color: C.ink2, maxW: X.CW });
+    return pg;
+  };
+})(window.SL);
+
+/* ---- chunk 3: the details pages, the file, the action ---- */
+(function (SL) {
+  "use strict";
+  const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
+  const X = SL._pdf, C = X.C, K = X.SK;
+  /** Big-print table: tall rows, 18 pt text centred in them; a tag that doesn't fit beside its name goes under it (16 pt). */
+  const TB = { rh: 34, size: 18, hh: 32, hsize: 16, pad: 8, mid: true, hfill: "#F1F1EC", hcolor: C.ink2, noteSize: 16, noteH: 19 };
+  /** The day and amount columns, as wide as their widest text over every section (so they line up page to page). */
+  const widths = (pg, d) => {
+    const all = d.got.concat(d.back, ...X.SG.map((g) => d.spent[g.k]));
+    const hs = all.map((x) => x.h).concat([d.inTotal, d.r.paidOut, d.r.returns + d.r.adjOut], X.SG.map((g) => U.sum(d.spent[g.k], (x) => x.h)));
+    const dw = Math.max(X.width(pg, U.L("Day", "اليوم"), { size: TB.hsize, weight: 700 }), ...all.map((x) => X.width(pg, X.sDay(x.date), { size: TB.size, num: true })));
+    const aw = Math.max(X.width(pg, U.L("Amount", "المبلغ"), { size: TB.hsize, weight: 700 }), ...hs.map((h) => X.width(pg, X.sn(h, true), { size: TB.size + 0.6, weight: 700, num: true })));
+    return { DW: Math.ceil(dw) + 2 * TB.pad + 2, AW: Math.ceil(aw) + 2 * TB.pad + 2 };
+  };
+  /** s cut after a whole word (else a letter) with "…" to fit w, in the context's current font. */
+  const cut = (ctx, s, w) => {
+    if (ctx.measureText(s).width <= w) return s;
+    const ws = s.split(/\s+/);
+    for (let n = ws.length - 1; n >= 1; n--) { const t = ws.slice(0, n).join(" ").replace(/[\s,،·]+$/, "") + "…"; if (ctx.measureText(t).width <= w) return t; }
+    return X.fit(ctx, s, w);
+  };
+  /** Who and what for in w: "name · tag" on one line when it fits, else the name on its line and the tag (a crew's
+   *  week, what a bill was for) whole on a second line under it → {main, note}. Neither is cut unless it alone is
+   *  wider than w. */
+  const pair = (pg, name, tag, w) => {
+    const ctx = pg.ctx, sep = " · ";
+    ctx.font = X.font(TB.size, 600);
+    if (!tag || !name) return { main: cut(ctx, name || tag || "", w), note: "" };
+    if (ctx.measureText(name + sep + tag).width <= w) return { main: name + sep + tag, note: "" };
+    const main = cut(ctx, name, w);
+    ctx.font = X.font(TB.noteSize, 600);
+    return { main, note: cut(ctx, tag, w) };
+  };
+  const line = (pg, x, k, w, dec) => {
+    const p = pair(pg, x.name, x.tag, w);
+    const r = { cells: [X.sDay(x.date), p.main, X.sn(x.h, dec)], nums: [true, false, true], weights: [400, 600, 700], colors: [C.ink2, C.ink, k.ink] };
+    if (p.note) Object.assign(r, { note: p.note, noteAt: 1, noteColor: C.ink2, noteWeight: 600 });
+    return r;
+  };
+  const total = (label, h, k, dec) => ({ kind: "total", cells: ["", label, X.sn(h, dec)], fill: "#FFFFFF", line: k.ink, colors: ["", k.ink, k.ink] });
+  /** Lines then their total; the last line keeps its total with it (a total never starts a page alone). */
+  const withTotal = (lines, tot) => { if (lines.length) lines[lines.length - 1].keep = 1.1; return lines.concat([tot]); };
+  /** A section's coloured band: its name and total, kept with the first rows of its table. A table that carries on
+   *  names the section on its next page ("التفاصيل — اللي صرفته (تابع)"). */
+  const band = (pg, k, label, h, base) => {
+    pg.title = base;
+    pg = X.need(pg, 64 + TB.hh + TB.rh * 3 + 4); // the band, the header, a group's name and its first two lines
+    const y = pg.y + 10;
+    X.rrect(pg, X.MX, y, X.CW, 46, 12, k.bg, k.edge);
+    const wm = X.sMoney(pg, h, X.sEnd() - 14, y + 31, 22, k.ink);
+    X.text(pg, label, X.MX + 14, y + 31, { size: 21, weight: 700, color: k.ink, maxW: X.CW - 28 - wm - 12 });
+    pg.y = y + 54;
+    pg.title = base + " — " + label;
+    return pg;
+  };
+
+  /** The details pages: the money he got (from Ryan, other money in, money back), what he paid (crews, invoices and
+   *  materials, equipment, other: each line, a total per group), what he gave back; then what he should have, again.
+   *  Columns: day (26/9) · to whom (and what for) · amount. */
+  X.sDetails = (doc, d) => {
+    let pg = X.page(doc);
+    const base = U.L("The details", "التفاصيل");
+    pg.title = base;
+    X.text(pg, base, X.MX, 50, { size: 26, weight: 700, maxW: X.CW });
+    X.text(pg, U.L("Every riyal in and out, up to ", "كل ريال دخل أو طلع، لغاية ") + U.dShort(d.D), X.MX, 77, { size: 17, color: C.ink2, maxW: X.CW });
+    pg.y = 84;
+    const cw = widths(pg, d), w = X.CW - cw.DW - cw.AW - 2 * TB.pad;
+    const cols = (who) => [{ label: U.L("Day", "اليوم"), w: cw.DW }, { label: who, w: "*" }, { label: U.L("Amount", "المبلغ"), w: cw.AW, num: true }];
+    if (d.got.length) {
+      const dec = X.sDec(d.got.map((x) => x.h).concat([d.inTotal]));
+      pg = band(pg, K.green, U.L("Money you got", "الفلوس اللي استلمتها"), d.inTotal, base);
+      pg = X.table(pg, cols(U.L("From", "من مين")), withTotal(d.got.map((x) => line(pg, x, K.green, w, dec)), total(U.L("Total", "المجموع"), d.inTotal, K.green, dec)), TB);
+    }
+    const groups = X.SG.filter((g) => d.spent[g.k].length);
+    if (groups.length) {
+      const dec = X.sDec([].concat(...groups.map((g) => d.spent[g.k].map((x) => x.h))));
+      pg = band(pg, K.red, U.L("What you paid", "اللي صرفته"), d.r.paidOut, base);
+      const rows = [];
+      for (const g of groups) {
+        rows.push({ kind: "group", cells: [g.label()], span: 3, fill: K.red.bg, colors: [K.red.ink], keep: 2 });
+        rows.push(...withTotal(d.spent[g.k].map((x) => line(pg, x, K.red, w, dec)), total(U.L("Total ", "مجموع ") + g.label(), U.sum(d.spent[g.k], (x) => x.h), K.red, dec)));
+      }
+      pg = X.table(pg, cols(U.L("To whom", "لمين")), rows, TB);
+    }
+    if (d.back.length) {
+      const r = d.r, h = r.returns + r.adjOut, dec = X.sDec(d.back.map((x) => x.h).concat([h]));
+      const lbl = r.returns && r.adjOut ? U.L("Given back, or other money out", "رجّعته أو طلع من العهدة") : r.returns ? U.L("Given back to ", "رجّعته ل") + d.owner : U.L("Other money out", "فلوس طلعت من العهدة");
+      pg = band(pg, K.red, lbl, h, base);
+      pg = X.table(pg, cols(U.L("What", "إيش")), withTotal(d.back.map((x) => line(pg, x, K.red, w, dec)), total(U.L("Total", "المجموع"), h, K.red, dec)), TB);
+    }
+    // the answer again under the lines it comes from, when it fits (the story has it; never a page of its own)
+    pg.title = base;
+    const b = X.sWrap(pg, X.sShould(d)), h = X.sBlockH(pg, b, 30);
+    if (X.room(pg) >= h + 12) { X.sBlock(pg, pg.y + 10, b, 30); pg.y += h + 10; }
+    return pg;
+  };
+
+  /** A page that carries on: the section's name, "(continued)". */
+  const more = (doc, title) => {
+    const pg = X.page(doc);
+    pg.title = title;
+    X.text(pg, title + U.L(" (continued)", " (تابع)"), X.MX, 46, { size: 20, weight: 700, color: C.ink2, maxW: X.CW });
+    pg.y = 58;
+    return pg;
+  };
+  const foot = (pg, i, n, d) => {
+    const y = X.PH - 16;
+    X.hline(pg, X.MX, y - 15, X.CW, C.line, 0.6);
+    X.text(pg, U.L("Page " + i + " of " + n, "صفحة " + i + " من " + n), X.MX, y, { size: 12, weight: 600, color: C.ink3 });
+    X.text(pg, U.L("Float account — ", "حساب العهدة — ") + d.who + " · " + U.dShort(d.D), X.sEnd(), y, { size: 12, color: C.ink3, align: "end", maxW: X.CW * 0.58 });
+  };
+
+  /** Draw the pages (always Arabic, A5) and wrap them in a PDF → {blob, pages, name}. Figures as of D. */
+  X.buildSayed = async (wid, D) => {
+    await X.fonts();
+    const doc = X.asAr(() => X.withSize(X.A5, () => {
+      const d = X.sayedData(wid, D), doc = { wid, D, pages: [], more };
+      X.sPage1(doc, d);
+      if (X.sHasLines(d)) X.sDetails(doc, d);
+      doc.pages.forEach((pg, i) => foot(pg, i + 1, doc.pages.length, d));
+      doc.info = { title: U.L("Float account — ", "حساب العهدة — ") + d.who + " · " + D, author: d.owner, subject: U.L("What you got, what you paid, what you should have", "اللي استلمته واللي صرفته واللي المفروض يكون معك") };
+      return doc;
+    }));
+    const out = [];
+    for (const pg of doc.pages) { out.push(await X.encode(pg.c)); pg.c.width = 0; pg.c.height = 0; } // free each canvas once encoded
+    return { blob: X.pdf(out, doc.info), pages: out.length, name: X.sayedFileName(wid, D) };
+  };
+  /** "sayed-float-2026-10-11.pdf" (the holder's name, else "float-<date>.pdf"). */
+  X.sayedFileName = (wid, D) => { const w = M.wallet(wid) || {}, s = U.slug(w.holder || ""); return (s && s !== "x" ? s + "-" : "") + "float-" + D + ".pdf"; };
+
+  /** "⤓ PDF for Sayed" (d.w = the float wallet; Balances › Sayed's money): his money as of the as-of date, saved like the
+   *  investor PDF (the downloads capability; a browser download on the website; app/dist/out/ on the dev server). */
+  A.sayedPdf = async (d) => {
+    if (X.busy) return;
+    if (!X.canDraw()) return ui.toast(U.L("The PDF can't be made in this view.", "لا يمكن إنشاء ملف PDF في هذا العرض."));
+    if (!SL.S.downloads) return ui.toast(U.L("Downloads aren't available here.", "التنزيل غير متاح هنا."));
+    const wid = (d && d.w) || M.defaultWallet(ui.pid()), D = ui.D(), who = U.esc(M.walletName(wid));
+    X.busy = true; X.busyKind = "sayed"; ui.render();
+    try {
+      const r0 = await X.buildSayed(wid, D);
+      const r = await SL.store.download(r0.name, r0.blob);
+      if (r && r.ok) ui.toast(U.L("PDF for " + who + " ready · " + r0.pages + " pages · as of " + U.dShort(D), "ملف PDF لـ" + who + " جاهز · " + U.plAr(r0.pages, "صفحة واحدة", "صفحتان", "صفحات", "صفحة") + " · حتى تاريخ " + U.dShort(D)));
+      else {
+        const o = SL._admin && SL._admin.dlOutcome ? SL._admin.dlOutcome(r) : { msg: U.L("Not saved.", "لم يُحفظ.") };
+        if (o.gone && SL._admin) SL._admin.dlGone = true; // saving can't run in this view: the buttons go
+        if (o.msg) ui.toast(U.esc(o.msg));
+      }
+    } catch (e) {
+      console.warn("[pdf]", e);
+      ui.toast(U.L("Couldn't make the PDF. Try again.", "تعذّر إنشاء ملف PDF. حاول مرة أخرى."));
+    } finally { X.busy = false; X.busyKind = ""; ui.render(); }
+  };
+
+  /** For Claude Code: SL.pdf.sayed(wid, D) → {blob, pages, name}. */
+  SL.pdf = SL.pdf || {};
+  SL.pdf.sayed = (wid, D) => X.buildSayed(wid || M.defaultWallet(ui.pid()), D || ui.D());
 })(window.SL);
 
 /* ---- 99-boot.js ---- */
