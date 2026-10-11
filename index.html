@@ -446,6 +446,8 @@ h1,h2,h3,h4{margin:0;text-wrap:balance}
 .strip.asof{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--hdr-h));z-index:19;background:var(--info-bg);color:var(--info);font-weight:600}
 @media (min-width:768px){.strip.asof{top:calc(env(safe-area-inset-top,0px) + var(--hdr-h) + 40px)}} /* below the sticky tablet tabs */
 @media (min-width:1100px){body.desk .strip.asof{top:calc(env(safe-area-inset-top,0px) + var(--hdr-h))}}
+.strip.moved{background:var(--float-bg);color:var(--float-ink);font-weight:600}
+.strip.moved a{color:inherit;font-weight:700}
 .strip.offline{background:var(--warn-bg);color:var(--warn)}
 .strip.full{background:var(--stop-bg);color:var(--stop);font-weight:600}
 .strip button{color:inherit;text-decoration:underline;font-weight:600}
@@ -2778,6 +2780,9 @@ window.SL = window.SL || {};
     /** true when the viewer may write (null = unknown → optimistic) and not "view as investor". */
     canWrite: () => S.canWrite !== false && !SL.ui?.investorView,
     readOnly: () => S.canWrite === false,
+    /** The ledger moved to the website (config/main.movedTo = its URL): inside Claude this copy is frozen and view only.
+     *  The website build and frozen snapshots ignore it. Claude Code can still write here (ArtifactData). */
+    movedTo: () => (!window.__SL_WEB && !window.__SL_SNAPSHOT && S.config && typeof S.config.movedTo === "string" && S.config.movedTo) || "",
   });
 
   /* ---------------- boot ---------------- */
@@ -2792,7 +2797,7 @@ window.SL = window.SL || {};
     c.use("user").then(async (u) => {
       S.user = u;
       if (u) {
-        try { const can = await u.can("data.write"); if (can === false) S.canWrite = false; else if (can === true) S.canWrite = true; } catch (e) {}
+        try { const can = await u.can("data.write"); if (can === false || store.movedTo()) S.canWrite = false; else if (can === true) S.canWrite = true; } catch (e) {}
         try { S.isOwner = await u.isOwner(); } catch (e) {}
       }
       changed();
@@ -2823,7 +2828,7 @@ window.SL = window.SL || {};
       (snap) => {
         const map = {};
         snap.docs.forEach((d) => { if (d.exists) map[d.id] = Object.assign({ id: d.id }, d.data()); });
-        if (coll === "config") S.config = mergeConfig(map.main);
+        if (coll === "config") { S.config = mergeConfig(map.main); if (store.movedTo()) S.canWrite = false; }
         else if (coll === "catalog") S.catalog = {
           crews: map.crews || { items: {} }, equipment: map.equipment || { items: {}, kits: {} },
           items: map.items || { items: {} }, suppliers: map.suppliers || { items: {} },
@@ -2875,7 +2880,7 @@ window.SL = window.SL || {};
   /** Wrap a write: resolves {ok:true} or {ok:false, code, message}. Refused writes flip read-only when the platform said nothing. */
   async function guard(fn) {
     if (!S.db) return { ok: false, code: "unavailable", message: U.L("Not connected", "غير متصل") };
-    if (S.canWrite === false) return { ok: false, code: "read_only", message: U.L("View only", "للعرض فقط") };
+    if (S.canWrite === false || store.movedTo()) return { ok: false, code: "read_only", message: U.L("View only", "للعرض فقط") };
     try { const r = await fn(); return { ok: true, value: r }; }
     catch (e) {
       const code = (e && e.code) || "unavailable";
@@ -4731,6 +4736,7 @@ window.SL = window.SL || {};
   function strips(v) {
     const s = S(); let h = "";
     if (window.__SL_SNAPSHOT) h += '<div class="strip ro">' + U.L("Snapshot · figures as of ", "نسخة ثابتة · الأرقام حتى تاريخ ") + U.esc(U.dShort(window.__SL_SNAPSHOT.asOf)) + U.L(" · made ", " · أُعدت ") + U.esc(window.__SL_SNAPSHOT.generated) + "</div>";
+    else if (SL.store.movedTo()) { const to = SL.store.movedTo(); h += '<div class="strip moved">' + U.L("Moved to the website · this copy is frozen, view only · ", "انتقل الدفتر إلى الموقع · هذه نسخة مجمّدة للعرض فقط · ") + '<a href="' + U.esc(to) + '" target="_blank" rel="noopener" lang="en">' + U.esc(to.replace(/^https?:\/\//, "").replace(/\/$/, "")) + "</a></div>"; }
     else if (ui.readOnlyUI()) h += '<div class="strip ro">' + U.L("View only · live · as of ", "للعرض فقط · مباشر · حتى تاريخ ") + U.esc(U.dShort(U.today())) + " " + new Date(s.lastSync || Date.now()).toTimeString().slice(0, 5) + (ui.investorView && s.canWrite !== false ? ' · <button data-act="exitInvestor">' + U.L("Exit investor view", "الخروج من عرض المستثمر") + "</button>" : "") + "</div>";
     if (!s.live) h += '<div class="strip offline">' + U.L("Not live · last synced ", "غير متصل · آخر مزامنة ") + new Date(s.lastSync || Date.now()).toTimeString().slice(0, 5) + (s.liveTerminal ? ' · <button data-act="reloadPage">' + U.L("Reload to reconnect", "أعد التحميل للاتصال") + "</button>" : U.L(" · reconnecting", " · جارٍ إعادة الاتصال")) + "</div>";
     if (s.quotaFull) h += '<div class="strip full">' + U.L("Storage full (5,000 documents). Archive a finished project in Settings › Data.", "التخزين ممتلئ (5,000 مستند). أرشف مشروعاً منتهياً من الإعدادات › البيانات.") + "</div>";
