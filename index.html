@@ -1749,7 +1749,7 @@ html[dir=rtl] .v-inva .ia-tt{min-width:0;overflow:hidden;text-overflow:ellipsis;
 /* Arabic: price watch meta wraps (a Latin supplier would be cut at its start, the right-hand end of an RTL line) */
 html[dir=rtl] .v-inva .ia-wn small{white-space:normal;overflow-wrap:anywhere}
 
-/* timeline: a group header per supplier (or job), a row per invoice, a bar from the invoice date to the day it came */
+/* timeline: a group header per supplier (or job), a row per invoice, one mark with its total on the invoice date */
 .v-inva .ia-grp{grid-column:1/-1;display:flex;align-items:center;min-height:30px;padding:0 8px;background:var(--sunk);border-bottom:1px solid var(--line);box-shadow:inset 3px 0 0 var(--jc)}
 html[dir=rtl] .v-inva .ia-grp{box-shadow:inset -3px 0 0 var(--jc)}
 .v-inva .ia-grp .au-nm{position:sticky;inset-inline-start:8px;font-size:var(--t-12);color:var(--ink-2);overflow:visible}
@@ -1758,9 +1758,30 @@ html[dir=rtl] .v-inva .ia-grp{box-shadow:inset -3px 0 0 var(--jc)}
 .v-inva .ia-open .au-nm,.v-inva .ia-open .au-sub{max-width:100%}
 .v-inva .ia-lab .ia-chip.paysw,.v-inva .ia-lab > .ia-chip{align-self:flex-start;min-height:24px;padding:0 7px;font-size:var(--t-11);gap:4px}
 .v-inva .ia-lab .ia-chip.paysw::after{inset:-4px -2px}
-.v-inva .ia-tail{position:absolute;z-index:1;inset-inline:0;top:50%;height:5px;margin-top:-2px;background:repeating-linear-gradient(135deg,var(--owed) 0 1.5px,transparent 1.5px 4px);box-shadow:inset 0 0 0 1px var(--owed)}
-.v-inva .ia-tail.lg{position:static;display:inline-block;width:16px;margin:0}
-.v-inva .au-c .ia-up{background:var(--stop)}
+/* the invoice mark: a point in time, never a bar. Centred on its day and wider than the narrow day column (one invoice
+   per row, so nothing beside it to hit); in the first / last column it hugs the inner edge instead (s / e), so it never
+   slides under the sticky label column (which stays above it, z-index 5) or off the grid. Above the red line (z 2).
+   It sits level with the invoice number (top of the row), clear of the label's pay chip, which can run past the label
+   column on a phone, and of the paid ✓ at the bottom of the day.
+   filled (job colour) = received and paid · .nr dashed, lighter = not received / performed yet · .ow = money left to pay */
+.v-inva .ia-mk{position:absolute;z-index:3;top:6px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:baseline;gap:4px;padding:1px 7px;border:2px solid var(--jc);border-radius:8px;background:var(--jc);color:var(--paper);white-space:nowrap;font-size:1.25rem;line-height:1.2;font-weight:700;font-variant-numeric:tabular-nums}
+.v-inva .ia-mk.s,.v-inva .ia-mk.e{left:auto;transform:none}
+.v-inva .ia-mk.s{inset-inline-start:3px}
+.v-inva .ia-mk.e{inset-inline-end:3px}
+.v-inva .au-c .ia-mk b{position:static;font:inherit;font-stretch:normal;padding:0;border-radius:0;background:none;color:inherit}
+.v-inva .ia-mk small{font-size:var(--t-11);font-weight:600;opacity:.85}
+.v-inva .ia-mk.nr{border-style:dashed;background:color-mix(in srgb,var(--jc) 14%,var(--paper));color:var(--ink)}
+.v-inva .ia-mk.ow{border-color:var(--owed);background:var(--owed-bg);color:var(--owed)}
+.v-inva .ia-mk.ow.nr{background:color-mix(in srgb,var(--owed-bg) 50%,var(--paper))}
+.v-inva .ia-mk .ia-up{top:-6px;inset-inline-end:-8px;background:var(--stop)}
+.v-inva .ia-mk.e .ia-up{inset-inline-end:-3px} /* last column: the ↑ stays inside the grid */
+/* legend swatches of the three looks */
+.v-inva .ia-ms{display:inline-block;width:18px;height:12px;border:2px solid var(--jc);border-radius:4px;background:var(--jc);box-sizing:border-box}
+.v-inva .ia-ms.nr{border-style:dashed;background:color-mix(in srgb,var(--jc) 14%,var(--paper))}
+.v-inva .ia-ms.ow{border:2px solid var(--owed);background:var(--owed-bg)}
+/* a new invoice's cells flash only (the print-in clip would cut the mark down to its narrow cell) */
+.v-inva .au-c.mo-new{animation:mo-hi var(--mo-5) ease-out backwards;animation-delay:calc(var(--mo-3) - var(--mo-t,0ms))}
+@media (prefers-reduced-motion:reduce){ .v-inva .au-c.mo-new{animation-delay:calc(0ms - var(--mo-t,0ms))} }
 .v-inva .ia-f .chip small{font-weight:500}
 .v-inva .ia-f .chip.owed small{color:var(--owed)} .v-inva .ia-f .chip.warn small{color:var(--warn)} .v-inva .ia-f .chip.stop small{color:var(--stop)}
 .v-inva .ia-f .chip.on small{color:inherit;opacity:.8}
@@ -10652,7 +10673,7 @@ window.SL = window.SL || {};
 
 /* ---- 46-invoices.js ---- */
 /* 46-invoices: Invoices audit (#invaudit[.jobs|.list][.<filter>][.<sat>]) — every purchase and service: received? paid? proof? price OK?
- *   A timeline like Crews (a row per invoice, a bar from its date to the day it came) or a list; chips filter: Not received ·
+ *   A timeline like Crews (a row per invoice, one mark with its total on its date) or a list; chips filter: Not received ·
  *   Unpaid · Price up · No proof. Tap an invoice for its lines: price paid vs
  *   the usual (from our own history, SL.prices) and vs the market (catalog item .market, written by Claude Code when
  *   Ryan asks "check market prices"). "Price watch" ranks items by how far the last price moved. */
@@ -10803,8 +10824,9 @@ window.SL = window.SL || {};
 })(window.SL);
 
 /* ---- chunk 2b: the timeline (like Crews): one row per invoice under its supplier (or job), one column per day ----
- *   dotted bar = ordered, waiting for delivery · solid = received (colour = job) · thin orange line = received, still owed
- *   ✓ = the day it was paid · the number = the invoice total · red line = today. Tap a row or a bar: the invoice sheet. */
+ *   An invoice is a point in time: one mark, its total, on its document date (never a bar across days).
+ *   filled = received and paid (colour = job) · dashed, lighter = not received / performed yet · orange = money left to pay
+ *   ✓ = a day it was paid · ↑ = a price above usual · red line = today. Tap a row or its mark: the invoice sheet. */
 (function (SL) {
   "use strict";
   const U = SL.util, M = SL.model, ui = SL.ui, A = SL.actions;
@@ -10825,40 +10847,48 @@ window.SL = window.SL || {};
     const o = Object.assign({}, w, patch || {}), dflt = U.addDays(U.weekStart(U.today()), -7);
     return ui.href("invaudit", o.mode !== "supplier" ? o.mode : "", o.f !== "all" ? o.f : "", o.from && o.from !== dflt ? o.from : "");
   };
-  /** Where an invoice sits on the timeline: from its date to the day it came (or today while it hasn't), then an owed
-   *  tail to today while money is left on it; ✓ on each day a payment was made. */
+  /** Where an invoice sits on the timeline: its document date (d) and the days it was paid. open = not received yet or
+   *  money left on it, until today (openTo); end = its latest activity, to order the groups. */
   X.span = (i, T) => {
-    const d0 = i.u.date || T, rec = i.received ? i.recDate || d0 : "";
-    const from = rec && rec < d0 ? rec : d0, end = rec || T;
+    const d = i.u.date || T, open = !i.received || i.due > 0;
     const paid = new Set(i.u.payments.filter((p) => !p.void && p.date && p.date <= T).map((p) => p.date));
-    return { from, end, rec, owedTo: rec && i.due > 0 ? T : "", paid };
+    return { d, open, openTo: open ? T : "", end: open ? U.maxDate(d, T) : U.maxDate(d, i.recDate), paid };
   };
+  /** In a window: its date or a payment day falls in it, or it is dated earlier and still open (then its mark sits at
+   *  the start of the window with its date, so a hidden invoice is always received and paid). */
   X.touches = (sp, days) => {
     const a = days[0], b = days[days.length - 1];
-    if (sp.from <= b && (sp.owedTo || sp.end) >= a) return true;
+    if (sp.d >= a && sp.d <= b) return true;
     for (const d of sp.paid) if (d >= a && d <= b) return true;
-    return false;
+    return !!sp.openTo && sp.d < a && sp.openTo >= a;
   };
-  /** Whole riyals, "12.4k" from 10,000 up (a day column is narrow). */
-  X.amt = (h) => (h >= 1000000 ? U.mk(h / 100) : U.mw(h / 100));
 
-  X.tcell = (pid, i, sp, date, T, jc) => {
+  /** The mark: the invoice total in whole riyals, large. Its look carries the state: filled (job colour) = received and
+   *  paid · dashed and lighter = not received / performed yet · orange (owed colour) = money left to pay. pos: "s" / "e"
+   *  = anchored to the start / end of its cell (first / last column, so it never slides under the label column or off
+   *  the grid), else centred on its day. early: dated before the window (shown at its start, with its date). */
+  X.mark = (i, jc, pos, early) => {
+    const cls = ["ia-mk", "j" + jc];
+    if (!i.received) cls.push("nr");
+    if (i.due > 0) cls.push("ow");
+    if (pos) cls.push(pos);
+    return `<span class="${cls.join(" ")}" aria-hidden="true">${early ? "<small>‹ " + U.esc(U.dDM(i.u.date)) + "</small>" : ""}<b class="num">${U.mw(i.total / 100)}</b>` +
+      (i.up ? '<em class="au-due ia-up">↑</em>' : "") + "</span>";
+  };
+  /** What the mark says, for screen readers. */
+  X.markLabel = (i) => U.L("invoice ", "فاتورة ") + U.mw(i.total / 100) + " · " +
+    (i.received ? (i.u.kind === "service" ? U.L("performed", "تم التنفيذ") : U.L("received", "تم الاستلام")) : (i.u.kind === "service" ? U.L("not performed yet", "لم يُنفذ بعد") : U.L("not received yet", "لم يُستلم بعد"))) +
+    " · " + (i.due > 0 ? U.L("to pay ", "للدفع ") + U.mw(i.due / 100) : U.L("paid", "مسدد")) + (i.up ? U.L(" · price above usual", " · السعر أعلى من المعتاد") : "");
+
+  X.tcell = (pid, i, sp, date, T, jc, k, n) => {
     const cls = ["au-c"];
     if (!M.isWorkDay(pid, date)) cls.push("off-day");
     if (U.dow(date) === 6) cls.push("wk");
-    const onBar = date >= sp.from && date <= sp.end, paidHere = sp.paid.has(date);
+    const early = k === 0 && sp.d < date, here = date === sp.d || early, paidHere = sp.paid.has(date);
     let inner = "", label = U.dShort(date) + ": ";
-    if (onBar) {
-      const solid = sp.rec && date === sp.rec;
-      cls.push(solid ? "st-came" : "st-plan", "j" + jc);
-      if (date > sp.from) cls.push("cl");
-      if (date < sp.end) cls.push("cr");
-      if (date === sp.from) inner += '<b class="num">' + X.amt(i.total) + "</b>";
-      if (date === sp.from && i.up) inner += '<em class="au-due ia-up" aria-hidden="true">↑</em>';
-      label += solid ? U.L("received", "تم الاستلام") : U.L("ordered, not received yet", "مطلوب، لم يُستلم بعد");
-    } else if (sp.owedTo && date > sp.end && date <= sp.owedTo) {
-      inner += '<i class="ia-tail" aria-hidden="true"></i>';
-      label += U.L("received, still owed", "مستلم، وما زال مستحقاً");
+    if (here) {
+      inner += X.mark(i, jc, k === 0 ? "s" : k === n - 1 ? "e" : "", early);
+      label += (early ? U.L("dated ", "بتاريخ ") + U.dDM(sp.d) + " · " : "") + X.markLabel(i);
     } else label += "–";
     if (paidHere) { inner += '<i class="au-pd" aria-hidden="true">✓</i>'; label += U.L(" · paid this day", " · دُفع في هذا اليوم"); }
     return `<button type="button" class="${cls.join(" ")}" data-act="iaOpen" data-id="${U.esc(i.u.id)}"${ui.mo(i.u.key)} aria-label="${U.esc(label)}">${inner}</button>`;
@@ -10881,7 +10911,7 @@ window.SL = window.SL || {};
     for (const i of infos) { const sp = X.span(i, T); if (X.touches(sp, days)) rows.push({ i, sp }); }
     const key = (r) => (w.mode === "jobs" ? r.i.u.jobId || "" : r.i.u.doc.supplierId || U.slug(r.i.u.doc.supplier || ""));
     const groups = new Map();
-    for (const r of U.sortBy(rows, (r) => r.sp.from + ":" + String(r.i.u.doc.createdAt || 0).padStart(15, "0"))) { const k = key(r); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); }
+    for (const r of U.sortBy(rows, (r) => r.sp.d + ":" + String(r.i.u.doc.createdAt || 0).padStart(15, "0"))) { const k = key(r); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(r); }
     // newest activity first; "no job" last
     const order = [...groups.keys()].sort((a, b) => (a === "") - (b === "") || (U.maxDate(...groups.get(b).map((r) => r.sp.end)) > U.maxDate(...groups.get(a).map((r) => r.sp.end)) ? 1 : -1));
     let body = "";
@@ -10892,7 +10922,7 @@ window.SL = window.SL || {};
       const title = w.mode === "jobs" ? (k ? "<b>" + U.esc(M.jobCode(k)) + "</b> " + U.t(j ? U.nm(j) : k) : U.L("No job", "بدون بند")) : U.t(first.doc.supplier || U.L("Supplier", "المورد"));
       const tot = U.sum(list, (r) => r.i.total), due = U.sum(list, (r) => r.i.due);
       body += `<div class="au-grp ia-grp j${jc}"><span class="au-nm">${U.isAr() ? "<bdi>" + title + "</bdi>" : title} · <span class="num">${U.mw(tot / 100)}</span>${due ? ' · <span class="c-owed">' + U.L("owed ", "مستحق ") + U.mw(due / 100) + "</span>" : ""}</span></div>`;
-      for (const r of list) body += X.tlabel(r.i, w.mode) + days.map((d) => X.tcell(pid, r.i, r.sp, d, T, AU().jc(pid, r.i.u.jobId))).join("");
+      for (const r of list) { const rc = AU().jc(pid, r.i.u.jobId); body += X.tlabel(r.i, w.mode) + days.map((d, k) => X.tcell(pid, r.i, r.sp, d, T, rc, k, days.length)).join(""); }
     }
     if (!rows.length) body = `<div class="au-empty">${U.L("No invoice in these three weeks.", "لا فواتير في هذه الأسابيع الثلاثة.")}</div>`;
     else {
@@ -10908,12 +10938,12 @@ window.SL = window.SL || {};
   };
 
   X.legend = () => '<div class="au-leg t12">' +
-    `<span><i class="au-sw j1"></i>${U.L("received (colour = job)", "مستلم (اللون = البند)")}</span>` +
-    `<span><i class="au-sw plan"></i>${U.L("ordered, not received yet", "مطلوب، لم يُستلم بعد")}</span>` +
-    `<span><i class="ia-tail lg" aria-hidden="true"></i>${U.L("received, still owed", "مستلم، وما زال مستحقاً")}</span>` +
+    `<span><i class="ia-ms j1" aria-hidden="true"></i>${U.L("received and paid (colour = job)", "مستلم ومدفوع (اللون = البند)")}</span>` +
+    `<span><i class="ia-ms j1 nr" aria-hidden="true"></i>${U.L("not received yet", "لم يُستلم بعد")}</span>` +
+    `<span><i class="ia-ms ow" aria-hidden="true"></i>${U.L("to pay", "للدفع")}</span>` +
     `<span><i class="au-pd lg">✓</i>${U.L("paid that day", "دُفع في ذلك اليوم")}</span>` +
     `<span><b class="au-k c-stop">↑</b>${U.L("price above usual", "السعر أعلى من المعتاد")}</span>` +
-    `<span><i class="au-sw nowl"></i>${U.L("today", "اليوم")}</span><span class="muted">${U.L("number = invoice total", "الرقم = إجمالي الفاتورة")}</span></div>`;
+    `<span><i class="au-sw nowl"></i>${U.L("today", "اليوم")}</span><span class="muted">${U.L("number = invoice total, on the invoice date", "الرقم = إجمالي الفاتورة، في تاريخ الفاتورة")}</span></div>`;
 
   /** Filter chips with counts (and what is left to pay / not received). */
   X.fchips = (infos, w) => '<div class="chips ia-f">' + X.FILTERS.map(([k, l, ar]) => {
@@ -10947,8 +10977,8 @@ window.SL = window.SL || {};
         }
       } else {
         h += X.tchart(pid, w, list, T) + X.legend();
-        h += '<p class="t12 muted au-help">' + U.L("Each row is one invoice. The bar starts on the invoice date and turns solid the day it was received; an orange line after it means it is still owed. Tap a row or its bar for the items, prices and the received / paid switches.",
-          "كل صف فاتورة واحدة. يبدأ الشريط بتاريخ الفاتورة ويصبح ممتلئاً يوم الاستلام؛ الخط البرتقالي بعده يعني أنها ما زالت مستحقة. اضغط على الصف أو الشريط لرؤية الأصناف والأسعار ومفتاحي الاستلام والدفع.") + "</p>";
+        h += '<p class="t12 muted au-help">' + U.L("Each row is one invoice: its total sits on the invoice date. Filled = received and paid; dashed = not received yet; orange = still to pay; ✓ = a day it was paid. One dated before these weeks (still open, or paid in them) shows at the start, with its date. Tap a row or its amount for the items, prices and the received / paid switches.",
+          "كل صف فاتورة واحدة: إجماليها في تاريخ الفاتورة. ممتلئ = مستلمة ومدفوعة؛ متقطع = لم تُستلم بعد؛ برتقالي = ما زالت للدفع؛ ✓ = يوم دُفعت فيه. الفاتورة المؤرخة قبل هذه الأسابيع (ما زالت مفتوحة، أو دُفعت فيها) تظهر في البداية مع تاريخها. اضغط على الصف أو مبلغه لرؤية الأصناف والأسعار ومفتاحي الاستلام والدفع.") + "</p>";
       }
       h += X.watchBlock(pid, T);
       return h + "</div>";
