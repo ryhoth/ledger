@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Site Ledger</title>
+<title>Mimar</title>
 <meta name="theme-color" content="#1B2429">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -21,7 +21,7 @@ img{max-width:100%}[hidden]{display:none!important}
 <script src="supabase.js"></script>
 <script>window.__SL_WEB={"url": "https://uuknyarkqefebmjclddc.supabase.co", "anonKey": "sb_publishable_UaDiGhxKlF6cJSi6DPz4hQ_M8TJ7rEW"};</script>
 <script>
-/* Site Ledger standalone runtime: the same window.__SL_RUNTIME contract the app uses inside Claude
+/* Mimar standalone runtime: the same window.__SL_RUNTIME contract the app uses inside Claude
  * (db / assets / user / downloads / sample), backed by Supabase instead of the claude.ai artifact.
  *   db        → table public.docs (coll, id, data jsonb), live via Realtime; update() = server-side deep merge (rpc doc_update)
  *   assets    → private Storage bucket "receipts"; display URLs are signed and fed to U.assetUrl via window.__SL_DEV_BLOB
@@ -157,7 +157,7 @@ img{max-width:100%}[hidden]{display:none!important}
     });
   }
   function collection(coll) {
-    if (String(coll).includes("/")) throw new TypeError("nested collections are not used by Site Ledger: " + coll);
+    if (String(coll).includes("/")) throw new TypeError("nested collections are not used by Mimar: " + coll);
     return Object.freeze({
       path: coll,
       doc: (id) => docRef(coll + "/" + (id || hex(10))),
@@ -258,7 +258,7 @@ img{max-width:100%}[hidden]{display:none!important}
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   async function showSignIn(note, cls) {
     let lastEmail = ""; try { lastEmail = localStorage.getItem("sl.lastEmail") || ""; } catch (e) {}
-    await gate(`<h1>Site Ledger</h1><p>Sign in with your email. We'll send you a link. Open it on this device and you stay signed in.</p>
+    await gate(`<h1>Mimar</h1><p>Sign in with your email. We'll send you a link. Open it on this device and you stay signed in.</p>
       <form id="sl-auth-form" novalidate><input id="sl-auth-email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com" value="${esc(lastEmail)}" aria-label="Email" required>
       <div style="height:10px"></div><button type="submit" id="sl-auth-send">Email me a sign-in link</button></form>
       <div class="msg ${cls || ""}" id="sl-auth-msg" role="status">${note ? esc(note) : ""}</div>`);
@@ -276,7 +276,7 @@ img{max-width:100%}[hidden]{display:none!important}
     });
   }
   async function showNotMember(email) {
-    await gate(`<h1>Site Ledger</h1><p>You're signed in as <b>${esc(email)}</b>, but this email isn't on the ledger's access list.</p><p>Ask Ryan to add it, then reload this page.</p>
+    await gate(`<h1>Mimar</h1><p>You're signed in as <b>${esc(email)}</b>, but this email isn't on the ledger's access list.</p><p>Ask Ryan to add it, then reload this page.</p>
       <button class="sec" id="sl-auth-out" type="button">Sign out</button>`);
     gateEl.querySelector("#sl-auth-out").addEventListener("click", signOut);
   }
@@ -331,7 +331,7 @@ img{max-width:100%}[hidden]{display:none!important}
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@75..100,400..700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap">
 <style>
 /* ---- 00-tokens.css ---- */
-/* Site Ledger — design tokens (spec §3.1–3.3). Light on bare :root; dark redefined twice. */
+/* Mimar — design tokens (spec §3.1–3.3). Light on bare :root; dark redefined twice. */
 :root{
   --bg:#EEEFEB; --paper:#FAFAF7; --sunk:#E4E6E1; --line:#D5D7D1; --line-2:#B9BCB5;
   --ink:#1B2429; --ink-2:#56626A; --ink-3:#7C868C;
@@ -4885,13 +4885,13 @@ window.SL = window.SL || {};
     if (s.ready || s.noRuntime) view.removeAttribute("aria-busy"); else view.setAttribute("aria-busy", "true");
     chromeLabels();
     if (s.noRuntime) {
-      document.getElementById("hdr").innerHTML = '<span class="pname"><span>' + U.L("Site Ledger", "دفتر الموقع") + "</span></span>";
+      document.getElementById("hdr").innerHTML = '<span class="pname"><span>' + U.L("Mimar", "معمار") + "</span></span>";
       view.innerHTML = '<div class="fullpage"><div><div class="title">' + U.L("Open this ledger inside Claude to load and save entries.", "افتح هذا الدفتر داخل Claude لتحميل القيود وحفظها.") + '</div><p class="t12">' + U.L("The ledger lives in your claude.ai artifact. Opened as a plain file it has no data.", "الدفتر محفوظ في صفحتك على claude.ai. إذا فُتح كملف عادي فلا توجد فيه بيانات.") + "</p></div></div>";
       ["tabs", "strips", "rail", "rrail"].forEach((id) => (document.getElementById(id).innerHTML = ""));
       return;
     }
     if (!s.ready) {
-      document.getElementById("hdr").innerHTML = '<span class="pname"><span>' + U.L("Site Ledger", "دفتر الموقع") + "</span></span>";
+      document.getElementById("hdr").innerHTML = '<span class="pname"><span>' + U.L("Mimar", "معمار") + "</span></span>";
       view.innerHTML = Array.from({ length: 7 }, (_, i) => '<div class="skel" aria-hidden="true"' + (SL.motion && SL.motion.skel ? SL.motion.skel(i) : "") + "></div>").join("") + (Date.now() - (ui.bootAt || 0) > 800 ? '<p class="t12 muted">' + U.L("Loading ledger…", "جارٍ تحميل الدفتر…") + "</p>" : "");
       return;
     }
@@ -4911,7 +4911,7 @@ window.SL = window.SL || {};
     view.innerHTML = v.render(r, pid);
     if (v.after) v.after(view, r, pid);
     if (fid && !ui.sheets.length) { const f = document.getElementById(fid); if (f && f !== document.activeElement && view.contains(f)) { try { f.focus({ preventScroll: true }); if (s0 != null) f.setSelectionRange(s0, s1); } catch (e) {} } }
-    document.title = U.L("Site Ledger", "دفتر الموقع");
+    document.title = U.L("Mimar", "معمار");
   }
   /** Landmark names in index.html follow the language. */
   function chromeLabels() {
@@ -4924,7 +4924,7 @@ window.SL = window.SL || {};
 
   /* ================= chrome ================= */
   function headerRoot() {
-    return '<span class="pname"><span>' + U.L("Site Ledger", "دفتر الموقع") + '</span></span><span class="spacer"></span>' + ui.langBtn() + (ui.readOnlyUI() ? "" : '<button class="more" data-act="menu" aria-label="' + U.L("More", "المزيد") + '">⋯</button>');
+    return '<span class="pname"><span>' + U.L("Mimar", "معمار") + '</span></span><span class="spacer"></span>' + ui.langBtn() + (ui.readOnlyUI() ? "" : '<button class="more" data-act="menu" aria-label="' + U.L("More", "المزيد") + '">⋯</button>');
   }
   function header(pid) {
     const p = M.project(pid) || { name: U.L("Project", "المشروع") };
@@ -5001,7 +5001,7 @@ window.SL = window.SL || {};
     const L = U.L;
     const items = ro ? [["report", L("Report", "التقرير")], ["project", L("Jobs", "البنود")], ["timeline", L("Timeline", "الجدول الزمني")], ["ledger", L("Ledger", "الدفتر")]] :
       [["balances", L("Balances", "الأرصدة")], ["audit", L("Crews", "العمالة")], ["eqaudit", L("Equipment", "المعدات")], ["invaudit", L("Invoices", "الفواتير")], ["today", L("Today", "اليوم")], ["week", L("Week", "الأسبوع")], ["project", L("Project", "المشروع")], ["timeline", L("Timeline", "الجدول الزمني")], ["ledger", L("Ledger", "الدفتر")], ["pay", L("Pay", "الدفع")], ["inbox", L("Docs", "المستندات")], ["report", L("Report", "التقرير")], ["flags", L("Flags", "التنبيهات")], ["settings", L("Settings", "الإعدادات")]];
-    let h = '<div class="lbl" style="padding:4px 10px 8px">' + L("Site Ledger", "دفتر الموقع") + "</div>";
+    let h = '<div class="lbl" style="padding:4px 10px 8px">' + L("Mimar", "معمار") + "</div>";
     // general above specific: All projects, then each project
     h += `<button class="${name === "projects" ? "on" : ""}" data-go="#projects"><span>${L("All projects", "كل المشاريع")}</span></button>`;
     for (const p of M.projects()) if (p.status !== "done" || p.id === pid) h += `<button class="rail-p${p.id === pid && name !== "projects" ? " on" : ""}" data-go="#${p.id}~${name === "projects" ? "balances" : name}"><span>${U.t(U.nm(p))}</span></button>`;
@@ -8819,7 +8819,7 @@ window.SL = window.SL || {};
   A.csv = async () => {
     const pid = ui.pid(), D = ui.D();
     const csv = X.csvText(pid, D);
-    const name = "site-ledger-" + pid + "-" + D + ".csv";
+    const name = "mimar-" + pid + "-" + D + ".csv";
     const r = await SL.store.download(name, "﻿" + csv);
     if (r && r.ok) { ui.toast(U.L("Saved ", "تم حفظ ") + U.esc(name)); return; }
     const ad = SL._admin;
@@ -13760,7 +13760,7 @@ window.SL = window.SL || {};
       SCHEMA,
     ].join("\n");
   };
-  X.ccPrompt = (inb) => "Log the receipts in Site Ledger inbox" + (inb ? " (project " + (inb.projectId || "") + ", inbox item " + inb.id + ", file \"" + (inb.name || "photo") + "\", asset " + (inb.assetId || "") + ")" : "") + ".";
+  X.ccPrompt = (inb) => "Log the receipts in Mimar inbox" + (inb ? " (project " + (inb.projectId || "") + ", inbox item " + inb.id + ", file \"" + (inb.name || "photo") + "\", asset " + (inb.assetId || "") + ")" : "") + ".";
 })(window.SL);
 
 /* ---------- reading: images / PDF pages → sample.json → inbox.result ---------- */
@@ -13975,7 +13975,7 @@ window.SL = window.SL || {};
           `<p class="t12 muted">${U.L("Invoices, receipts, quotes · JPEG, PNG or PDF · several at once.", 'فواتير، سندات، عروض أسعار · <span lang="en">JPEG</span> أو <span lang="en">PNG</span> أو <span lang="en">PDF</span> · عدة ملفات معاً.')}</p>`
           : `<p class="notice t13 rd-noup" id="rd-noassets-sh">${X.noup()}</p>`;
         return `<div class="v-reader rd-pick">${pick}` +
-          (X.canRead() || !S().assets ? "" : `<p class="notice t12">${U.L("Reading needs Claude in this view. Photos wait in Docs › Inbox; ask Claude Code: ", 'القراءة تحتاج <span lang="en">Claude</span> في هذا العرض. تنتظر الصور في المستندات › الوارد؛ اطلب من <span lang="en">Claude Code</span>: ')}${X.enQ("Log the receipts in Site Ledger inbox")}.</p>`) +
+          (X.canRead() || !S().assets ? "" : `<p class="notice t12">${U.L("Reading needs Claude in this view. Photos wait in Docs › Inbox; ask Claude Code: ", 'القراءة تحتاج <span lang="en">Claude</span> في هذا العرض. تنتظر الصور في المستندات › الوارد؛ اطلب من <span lang="en">Claude Code</span>: ')}${X.enQ("Log the receipts in Mimar inbox")}.</p>`) +
           (items.length || X.up.length ? '<div class="rd-list">' + items.map((i) => X.qRow(i)).join("") + X.up.map(X.upRow).join("") + "</div>" : "") +
           (items.length ? `<p class="t12 muted">${U.L("You can leave. Unread photos stay in Docs › Inbox.", "يمكنك المغادرة. الصور غير المقروءة تبقى في المستندات › الوارد.")}</p>` : "") + "</div>";
       },
@@ -14420,7 +14420,7 @@ window.SL = window.SL || {};
   A.rdRead = (d) => { if (!X.canRead()) return A.rdCC(d); X.read(d.id); };
   A.rdReadAll = () => { const ids = X.pending(ui.pid()).filter((i) => i.state === "queued" || i.state === "reading" || (i.state === "failed" && !X.ccOnly(i.error))).map((i) => i.id); if (ids.length) X.readMany(ids); };
   A.rdCC = (d) => {
-    const inb = d && d.id ? S().inbox[d.id] : null, text = inb ? X.ccPrompt(inb) : "Log the receipts in Site Ledger inbox (project " + ui.pid() + ").";   // a prompt for Claude Code: stays English
+    const inb = d && d.id ? S().inbox[d.id] : null, text = inb ? X.ccPrompt(inb) : "Log the receipts in Mimar inbox (project " + ui.pid() + ").";   // a prompt for Claude Code: stays English
     ui.sheet({
       title: () => U.L("Read in Claude Code", "اقرأ في Claude Code"), state: {},
       body: () => `<div class="v-reader"><p class="t13">${U.L("Paste this in Claude Code. It reads the photo from the Inbox, files it the same way, and marks it “Added by Claude — check”.",
@@ -14496,7 +14496,7 @@ window.SL = window.SL || {};
         const act = ro ? "" : ready.length ? `<button class="btn sm act" data-act="review" data-id="${U.esc(ready[0].id)}">${U.L("Review", "مراجعة")} ${nDocs} ›</button>`
           : readable.length > 1 && X.canRead() ? `<button class="btn sm sec act" data-act="rdReadAll">${U.L("Read all " + readable.length, "اقرأ الكل (" + readable.length + ")")}</button>` : "";
         h += '<section class="sec">' + ui.sech(U.L("To read and review", "للقراءة والمراجعة"), items.length, act) + '<div class="rd-list">' + items.map((i) => X.qRow(i, { remove: true })).join("") + "</div>";
-        if (!X.canRead() && !ro && readable.length) h += `<p class="t12 muted">${U.L("Reading needs Claude in this view. Ask Claude Code: ", 'القراءة تحتاج <span lang="en">Claude</span> في هذا العرض. اطلب من <span lang="en">Claude Code</span>: ')}${X.enQ("Log the receipts in Site Ledger inbox")}.</p>`;
+        if (!X.canRead() && !ro && readable.length) h += `<p class="t12 muted">${U.L("Reading needs Claude in this view. Ask Claude Code: ", 'القراءة تحتاج <span lang="en">Claude</span> في هذا العرض. اطلب من <span lang="en">Claude Code</span>: ')}${X.enQ("Log the receipts in Mimar inbox")}.</p>`;
         h += "</section>";
       }
       if (unchecked.length) {
@@ -16519,9 +16519,9 @@ window.SL = window.SL || {};
   X.dlGone = false;
 
   A.backup = async () => {
-    const S = SL.S, out = { app: "site-ledger", schema: 2, exportedAt: new Date().toISOString(), config: S.config || {}, catalog: S.catalog || {} };
+    const S = SL.S, out = { app: "mimar", schema: 2, exportedAt: new Date().toISOString(), config: S.config || {}, catalog: S.catalog || {} };
     for (const c of ["projects", "wallets", "jobs", "timesheets", "costs", "cash", "quotes", "inbox", "reports", "archive"]) out[c] = S[c] || {};
-    const r = await SL.store.download("site-ledger-backup-" + U.today() + ".json", JSON.stringify(out, null, 1));
+    const r = await SL.store.download("mimar-backup-" + U.today() + ".json", JSON.stringify(out, null, 1));
     if (r && r.ok) { ui.toast(U.L("Backup ready · " + SL.store.docCount().toLocaleString("en-US") + " documents", "النسخة الاحتياطية جاهزة · المستندات: " + SL.store.docCount().toLocaleString("en-US"))); return; }
     const o = X.dlOutcome(r);
     if (o.gone && !X.dlGone) { X.dlGone = true; ui.render(); }
@@ -16609,7 +16609,7 @@ window.SL = window.SL || {};
     const n = pages.length, kids = pages.map((_, i) => 4 + 3 * i + " 0 R").join(" ");
     obj(1, "<< /Type /Catalog /Pages 2 0 R >>");
     obj(2, "<< /Type /Pages /Kids [" + kids + "] /Count " + n + " >>");
-    obj(3, "<< /Title " + pdfStr(info.title) + " /Author " + pdfStr(info.author) + " /Subject " + pdfStr(info.subject) + " /Producer (Site Ledger) /CreationDate (" + pdfDate(new Date()) + ") >>");
+    obj(3, "<< /Title " + pdfStr(info.title) + " /Author " + pdfStr(info.author) + " /Subject " + pdfStr(info.subject) + " /Producer (Mimar) /CreationDate (" + pdfDate(new Date()) + ") >>");
     pages.forEach((p, i) => {
       const pg = 4 + 3 * i, ct = pg + 1, im = pg + 2, W = (p.pw || X.PW).toFixed(2), H = (p.ph || X.PH).toFixed(2);
       obj(pg, "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 " + W + " " + H + "] /Resources << /XObject << /Im" + i + " " + im + " 0 R >> >> /Contents " + ct + " 0 R >>");
@@ -16747,7 +16747,7 @@ window.SL = window.SL || {};
   X.band = (pg) => {
     const d = pg.doc;
     X.rect(pg, 0, 0, X.PW, 5, C.float);
-    X.text(pg, U.L("SITE LEDGER · INVESTOR REPORT", "دفتر الموقع · تقرير المستثمرين"), X.MX, 22, { size: 7, weight: 700, color: C.ink3 });
+    X.text(pg, U.L("MIMAR · INVESTOR REPORT", "معمار · تقرير المستثمرين"), X.MX, 22, { size: 7, weight: 700, color: C.ink3 });
     X.text(pg, d.project + " · " + U.L("as of ", "حتى تاريخ ") + d.asOfTxt, X.PW - X.MX, 22, { size: 7, weight: 600, color: C.ink3, align: "end" });
     X.hline(pg, X.MX, 29, X.CW, C.line);
     pg.y = 30;
@@ -17323,7 +17323,7 @@ window.SL = window.SL || {};
   };
   /** "Tal Ryan investor report 2026-09-28.pdf" ("… (Arabic).pdf" in Arabic). */
   X.fileName = (pid, D) => {
-    const p = M.project(pid) || {}, base = String(p.name || "Site Ledger").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
+    const p = M.project(pid) || {}, base = String(p.name || "Mimar").replace(/[\\/:*?"<>|]+/g, " ").replace(/\s+/g, " ").trim();
     return base + " investor report " + D + (U.isAr() ? " (Arabic)" : "") + ".pdf";
   };
   let can = null;

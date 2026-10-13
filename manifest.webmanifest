@@ -1,6 +1,6 @@
 {
- "name": "Site Ledger",
- "short_name": "Ledger",
+ "name": "Mimar",
+ "short_name": "Mimar",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
