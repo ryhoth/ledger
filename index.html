@@ -12380,7 +12380,7 @@ window.SL = window.SL || {};
   /** "Submitted on" … per status, for the sheet's date field. */
   X.ON = () => ({ draft: U.L("Date", "التاريخ"), submitted: U.L("Submitted on", "قُدّم في"), approved: U.L("Approved on", "اعتُمد في"), rejected: U.L("Rejected on", "رُفض في"), superseded: U.L("Superseded on", "استُبدل في") });
   /** Disciplines a set may name (free text; these keys get a label, anything else shows as typed). */
-  X.DISC = () => ({ arch: U.L("Architectural", "معماري"), struct: U.L("Structural", "إنشائي"), elec: U.L("Electrical", "كهرباء"), mech: U.L("Mechanical", "ميكانيكا"), plumb: U.L("Plumbing", "سباكة"), mep: U.L("MEP", "ميكانيكا وكهرباء وسباكة"), civil: U.L("Civil", "مدني"), fire: U.L("Fire", "حريق"), landscape: U.L("Landscape", "تنسيق الموقع"), interior: U.L("Interior", "تصميم داخلي"), survey: U.L("Survey", "مساحة"), prelim: U.L("Preliminary", "أولي") });
+  X.DISC = () => ({ arch: U.L("Architectural", "معماري"), struct: U.L("Structural", "إنشائي"), elec: U.L("Electrical", "كهرباء"), mech: U.L("Mechanical", "ميكانيكا"), plumb: U.L("Plumbing", "سباكة"), mep: U.L("MEP", "ميكانيكا وكهرباء وسباكة"), civil: U.L("Civil", "مدني"), fire: U.L("Fire", "حريق"), landscape: U.L("Landscape", "تنسيق الموقع"), interior: U.L("Interior", "تصميم داخلي"), survey: U.L("Survey", "مساحة"), geotech: U.L("Soil", "تربة"), prelim: U.L("Preliminary", "أولي") });
   X.disc = (k) => { if (!k) return ""; const D = X.DISC(), key = String(k).trim().toLowerCase(); return D[key] || U.t(key.length <= 4 && !U.hasAr(key) ? key.toUpperCase() : String(k).trim()); };
   const fileId = (f) => (typeof f === "string" ? f : (f && (f.id || f.assetId)) || "");
   X.fileId = fileId;
@@ -12418,6 +12418,26 @@ window.SL = window.SL || {};
     if (U.num(o.floors) > 0) out.push([U.L("Floors", "الأدوار"), String(U.num(o.floors))]);
     if (o.use) out.push([U.L("Use", "الاستخدام"), X.use(o.use)]);
     if (o.consultant || o.office || o.designer) out.push([U.L("Consultant", "المكتب الاستشاري"), U.t(o.consultant || o.office || o.designer)]);
+    return out;
+  };
+  /** The project summary Claude writes on the project doc (projects.summary = {en, ar}, a few plain sentences), shown first. */
+  X.summary = (p) => {
+    const s = p && p.summary && typeof p.summary === "object" ? p.summary : null;
+    const txt = s ? (U.isAr() ? s.ar || s.en : s.en || s.ar) : "";
+    if (!txt) return "";
+    return `<div class="sec ds-sum">${ui.sech(U.L("In short", "باختصار"))}<p class="prose">${U.esc(txt).replace(/\n+/g, "<br>")}</p></div>`;
+  };
+  /** Ground facts from the soil report (projects.geotech = {bearingKPa, waterM, boreholes, depthM, strata, foundation, reportNo, by, date}). */
+  X.groundFacts = (g) => {
+    if (!g || typeof g !== "object") return [];
+    const out = [], parts = [];
+    if (U.num(g.bearingKPa) > 0) parts.push(U.L("bearing " + U.mw(U.num(g.bearingKPa)) + " kPa", "تحمّل " + U.mw(U.num(g.bearingKPa)) + " كيلوباسكال"));
+    if (g.waterM != null && g.waterM !== "") parts.push(U.L("water at " + U.t(g.waterM) + " m", "مياه على عمق " + U.t(g.waterM) + " م"));
+    if (U.num(g.boreholes) > 0) parts.push(U.L(U.num(g.boreholes) + " boreholes" + (U.num(g.depthM) > 0 ? " to " + U.t(g.depthM) + " m" : ""), U.plAr(U.num(g.boreholes), "جسة واحدة", "جستان", "جسات", "جسة") + (U.num(g.depthM) > 0 ? " حتى " + U.t(g.depthM) + " م" : "")));
+    if (parts.length) out.push([U.L("Ground", "التربة"), parts.join(" · ")]);
+    if (g.strata) out.push([U.L("Layers", "الطبقات"), U.t(U.isAr() ? g.strataAr || g.strata : g.strata)]);
+    if (g.foundation) out.push([U.L("Foundation", "الأساسات"), U.t(U.isAr() ? g.foundationAr || g.foundation : g.foundation)]);
+    if (g.reportNo || g.by) out.push([U.L("Soil report", "تقرير التربة"), U.t([g.reportNo, g.by, g.date ? U.dShort(g.date) : ""].filter(Boolean).join(" · "))]);
     return out;
   };
   /** An area schedule ({a_gf:{name, ar, m2}} or {name: m2}) as "Ground floor 520 · Roof 200". */
@@ -12479,6 +12499,7 @@ window.SL = window.SL || {};
       const D = ui.D(), ro = ui.readOnlyUI(), t = M.projectTotals(pid, D);
       const sets = X.sets(pid), land = (SL._admin && SL._admin.landOf ? SL._admin.landOf(p) : { name: "" });
       let h = `<div class="v-design"><div class="hrow"><h2 class="t20">${U.L("Design", "التصميم")}</h2><span class="spacer"></span>${ui.asOfChip()}</div>`;
+      h += X.summary(p);
       h += X.milestoneStrip(pid, D, ro);
       // drawings: one row per set; the sets still on the project doc come last (their status tap files them as a record)
       const rows = sets.map((s) => X.drawingRow(s, p, ro)).join("");
@@ -12492,6 +12513,7 @@ window.SL = window.SL || {};
       for (const f of X.facts(Object.assign({ plotM2: land.areaM2 }, design))) add(f);
       const areas = X.areas((sets.find((s) => s.doc && s.doc.areas && Object.keys(s.doc.areas).length) || { doc: { areas: design.areas } }).doc.areas);
       if (areas) add([U.L("By floor", "حسب الدور"), areas]);
+      for (const f of X.groundFacts(p.geotech)) add(f);
       const ref = (sets.find((s) => s.ref) || {}).ref || design.reference || design.ref || muni.reference || "";
       if (ref) add([U.L("Municipality ref", "مرجع البلدية"), U.t(ref)]);
       const sub = design.submitted || design.designSubmitted || muni.designSubmitted || "";
